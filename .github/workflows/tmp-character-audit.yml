@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Apply audited character patch
-        run: python scripts/_tmp_character_audit_runner2.py
+        run: python scripts/_tmp_character_audit_runner3.py
       - name: Compile
         run: python -m compileall -q crown_mast_engine tests scripts
       - name: Full regression suite
@@ -29,7 +29,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm scripts/_tmp_character_audit_patch.py scripts/_tmp_character_audit_finalize.py scripts/_tmp_character_audit_runner.py scripts/_tmp_character_audit_runner2.py .github/workflows/tmp-character-audit.yml
+          git rm scripts/_tmp_character_audit_patch.py scripts/_tmp_character_audit_finalize.py scripts/_tmp_character_audit_runner.py scripts/_tmp_character_audit_runner2.py scripts/_tmp_character_audit_runner3.py .github/workflows/tmp-character-audit.yml
           git add -A
           git commit -m "Add Rapi B1 and audit character mechanics"
           git push origin HEAD:tmp/rapi-b1-added-character-audit
