@@ -18,6 +18,7 @@ class DamageTraits:
     full_burst_eligible: bool = True
     range_eligible: bool = True
     core_eligible: bool = True
+    forced_core: bool = False
     element_eligible: bool = True
 
 

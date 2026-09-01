@@ -2,6 +2,10 @@
 
 NIKKE의 Crown + Mast: Romantic Maid 운용을 비교하기 위한 개인 연구용 시뮬레이션 엔진입니다.
 
+## 출처 검증 정책
+
+현행 규칙은 `docs/SOURCE_VALIDATION_POLICY.md`를 따른다. 캐릭터/기믹 구현은 **Moris 계산기와 NIKKE.gg를 우선 참조하고 외부 교차검증을 필수로 수행**한다. 직접 인게임/공식 근거가 있으면 이를 최우선 증거로 사용한다. `nikke-sim`은 datamine/구조화 데이터/참조 구현을 위한 보조 출처이며 단독으로 메커니즘을 확정하지 않는다.
+
 ## 현재 연구 기준
 
 2026-09-01부터 실전 연구의 기본 시간축은 `RAID14_TIMELINE`입니다.
@@ -57,9 +61,13 @@ c1 Full Burst 종료          12.32 s
 
 17.26초 이후 0.06초는 Crown S1의 Burst-caster 대상 caster-ATK가 B2가 아니라 Full Burst 진입 시점부터 시작하기 때문에 남습니다.
 
-현재 기본 Liter / Crown / Mast / Rapi: Red Hood / Helm 사례에서는 M1 선진입이 영향구간 총딜 기준 `+1.7108%` 우세합니다. 그러나 이 규칙은 보편적이지 않습니다. Scarlet: Black Shadow를 메인 B3로 둔 현재 엔진 사례에서는 M1 선진입이 `-0.3610%`, 즉 Crown 선진입이 근소하게 우세합니다.
+현재 기본 Liter / Crown / Mast / Rapi: Red Hood / Helm 사례에서는 M1 선진입이 감사 후 영향구간 총딜 기준 약 `+1.9009%` 우세합니다. 그러나 이 규칙은 보편적이지 않습니다. Scarlet: Black Shadow를 메인 B3로 둔 현재 엔진 사례에서는 M1 선진입이 `-0.3610%`, 즉 Crown 선진입이 근소하게 우세합니다.
 
 따라서 **Crown 선진입과 M1 선진입을 항상 독립적으로 비교**합니다.
+
+## 2026-09-02 감사 이후 상태
+
+2026-09-02 character/mechanics audit에서 결과를 움직일 수 있는 공통 규칙을 교정했다. 따라서 아래에 남아 있는 기존 RAID14 대표 수치와 64-point 결과 문서는 **pre-audit 역사적 checkpoint**로만 취급한다. 새 aggregate 연구값은 사용자가 연구 배치 재실행을 승인하기 전까지 갱신하지 않는다.
 
 ## 현재 RAID14 대표 결과
 
@@ -115,13 +123,12 @@ custom = build_uniform_burst_timeline(
 2026-09-01 전체 회귀검증을 모듈별로 수행했습니다.
 
 ```text
-테스트 모듈  22
-테스트 수    209
-통과         209 / 209
-compileall   PASS
+2026-09-02 character/mechanics audit
+full unittest discovery  279 tests
+compileall               PASS
 ```
 
-전체 209개를 한 프로세스로 실행하면 이 환경의 실행 제한을 넘기지만, 모듈별 분할 실행에서는 전부 통과했습니다. 검증 중 발견된 유일한 실패는 14사이클 정책으로 바뀐 뒤에도 12사이클 튜플을 기대하던 오래된 테스트 기대값이었으며 현재 정책에 맞게 수정 후 통과했습니다.
+이 수치는 캐릭터 감사 교정본의 전체 discovery 회귀검증 기준이다. 연구/benchmark 배치는 이 검증에 포함하지 않는다.
 
 개인 연구용이므로 현 단계에서는 실행 속도 최적화보다 계산 규칙의 명시성·재현성·회귀검증을 우선합니다.
 

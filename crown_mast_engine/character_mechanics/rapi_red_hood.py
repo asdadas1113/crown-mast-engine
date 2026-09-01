@@ -10,11 +10,25 @@ from ..models import BattleEvent, DamageCategory, EventType
 
 
 class RapiRedHoodSkillHook(SkillHookBase):
+    """Formation-branched Rapi: Red Hood implementation.
+
+    Moris parsed skills and NIKKE.gg are the primary cross-checks here; the
+    pinned nikke-sim snapshot is secondary structured provenance only.
+    When Rapi occupies the B1 slot herself, Combat Assist is active: she supplies
+    the B1 cast and the team Full-Burst Attack-Damage buff instead of the 95.04%
+    self-ATK Full-Burst buff. Her 7.48s team CDR and 20s self B1 CDR are real kit
+    lines, but this Crown-Mast study intentionally keeps its externally measured
+    RAID14 timestamps fixed, so those two timing effects do not move the timeline.
+    """
+
+    COMBAT_ASSIST_TEAM_CDR_SEC = 7.48
+    COMBAT_ASSIST_ATTACK_DAMAGE_PCT = 8.02
+    B1_SELF_CDR_SEC = 20.0
+    B1_CASTER_ATK_PCT = 18.01
+    COMBAT_ASSIST_DURATION_SEC = 10.0
+
     def __init__(self, context: SkillHookContext) -> None:
-        if not context.roster.b1 or context.roster.b1 == context.actor:
-            raise NotImplementedError(
-                "Rapi: Red Hood Combat Assist mode without a separate B1 is not implemented"
-            )
+        self._combat_assist = context.roster.b1 == context.actor
         self._pulls = 0
         self._rocket_meter = 0
         self._stored_rockets = 0
@@ -31,8 +45,7 @@ class RapiRedHoodSkillHook(SkillHookBase):
                 skill="skill2_passive",
                 stat="projectile_attachment_pct",
                 value=context.definition.skill_value(
-                    "skill2",
-                    "projectile_attachment_pct",
+                    "skill2", "projectile_attachment_pct"
                 ),
                 target=context.actor,
                 start=0.0,
@@ -43,28 +56,63 @@ class RapiRedHoodSkillHook(SkillHookBase):
                 skill="skill2_passive",
                 stat="projectile_explosion_pct",
                 value=context.definition.skill_value(
-                    "skill2",
-                    "projectile_explosion_pct",
+                    "skill2", "projectile_explosion_pct"
                 ),
                 target=context.actor,
                 start=0.0,
                 end=inf,
             ),
         ]
+        targets = tuple(dict.fromkeys(context.roster.members))
         for event in events:
-            if event.event_type == EventType.FULL_BURST_ENTER:
-                buffs.append(
-                    BuffWindow(
-                        source=context.actor,
-                        skill="skill1_full_burst",
-                        stat="atk_pct",
-                        value=context.definition.skill_value("skill1", "atk_pct"),
-                        target=context.actor,
-                        start=event.time,
-                        end=event.time
-                        + context.definition.skill_value("skill1", "duration_sec"),
+            if (
+                event.event_type == EventType.B1_CAST
+                and event.actor == context.actor
+                and self._combat_assist
+            ):
+                for target in targets:
+                    buffs.append(
+                        BuffWindow(
+                            source=context.actor,
+                            skill="burst_stage1",
+                            stat="caster_atk_pct",
+                            value=self.B1_CASTER_ATK_PCT,
+                            target=target,
+                            start=event.time,
+                            end=event.time + self.COMBAT_ASSIST_DURATION_SEC,
+                            caster=context.actor,
+                            snapshot=True,
+                        )
                     )
-                )
+                continue
+
+            if event.event_type == EventType.FULL_BURST_ENTER:
+                if self._combat_assist:
+                    for target in targets:
+                        buffs.append(
+                            BuffWindow(
+                                source=context.actor,
+                                skill="skill1_combat_assist",
+                                stat="attack_damage_pct",
+                                value=self.COMBAT_ASSIST_ATTACK_DAMAGE_PCT,
+                                target=target,
+                                start=event.time,
+                                end=event.time + self.COMBAT_ASSIST_DURATION_SEC,
+                            )
+                        )
+                else:
+                    buffs.append(
+                        BuffWindow(
+                            source=context.actor,
+                            skill="skill1_full_burst",
+                            stat="atk_pct",
+                            value=context.definition.skill_value("skill1", "atk_pct"),
+                            target=context.actor,
+                            start=event.time,
+                            end=event.time
+                            + context.definition.skill_value("skill1", "duration_sec"),
+                        )
+                    )
             elif (
                 event.event_type == EventType.B3_STAGE_ENTER
                 and event.actor == context.actor
@@ -75,8 +123,7 @@ class RapiRedHoodSkillHook(SkillHookBase):
                         skill="burst_stage3",
                         stat="projectile_attachment_pct",
                         value=context.definition.skill_value(
-                            "burst",
-                            "projectile_attachment_pct",
+                            "burst", "projectile_attachment_pct"
                         ),
                         target=context.actor,
                         start=event.time,
@@ -96,13 +143,9 @@ class RapiRedHoodSkillHook(SkillHookBase):
             and event.actor == context.actor
         ):
             self._own_stage3_until = event.time + context.definition.skill_value(
-                "burst",
-                "duration_sec",
+                "burst", "duration_sec"
             )
-            if self._pulls < context.definition.skill_value(
-                "burst",
-                "required_pulls",
-            ):
+            if self._pulls < context.definition.skill_value("burst", "required_pulls"):
                 return ()
             return (
                 DamageRequest(
@@ -114,10 +157,7 @@ class RapiRedHoodSkillHook(SkillHookBase):
                     actor=context.actor,
                     source="burst_stage3_missile",
                     category=DamageCategory.BURST,
-                    coefficient_pct=context.definition.skill_value(
-                        "burst",
-                        "damage_pct",
-                    ),
+                    coefficient_pct=context.definition.skill_value("burst", "damage_pct"),
                     traits=DamageTraits(
                         category=DamageCategory.BURST,
                         core_eligible=False,
@@ -161,8 +201,7 @@ class RapiRedHoodSkillHook(SkillHookBase):
                     source="skill2_rocket_attachment",
                     category=DamageCategory.SKILL,
                     coefficient_pct=context.definition.skill_value(
-                        "skill2",
-                        "attachment_damage_pct",
+                        "skill2", "attachment_damage_pct"
                     ),
                     traits=DamageTraits(
                         category=DamageCategory.SKILL,

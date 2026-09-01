@@ -35,6 +35,7 @@ class EpinelSkillHook(SkillHookBase):
                 traits=DamageTraits(
                     category=DamageCategory.BURST,
                     core_eligible=False,
+                    full_burst_eligible=False,
                     range_eligible=False,
                 ),
             ),

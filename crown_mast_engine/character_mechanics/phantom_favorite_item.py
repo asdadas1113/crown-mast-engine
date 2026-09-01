@@ -84,6 +84,7 @@ class PhantomFavoriteItemSkillHook(SkillHookBase):
                     category=DamageCategory.BURST,
                     distributed=True,
                     core_eligible=False,
+                    full_burst_eligible=False,
                     range_eligible=False,
                 ),
             ),

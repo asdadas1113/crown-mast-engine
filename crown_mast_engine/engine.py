@@ -636,7 +636,11 @@ class CrownMastEngine:
         crit_bonus_pct = crit_rate_pct * (
             definition.base_crit_damage_pct + buffs.crit_damage_pct - 100
         ) / 100
-        core_bonus_pct = self.combat_settings.core_hit_rate_pct * (
+        core_rate_pct = (
+            100.0 if request.traits.forced_core
+            else self.combat_settings.core_hit_rate_pct
+        )
+        core_bonus_pct = core_rate_pct * (
             definition.weapon.core_attack_pct
             - 100
             + result.collection_weapon_effect(
@@ -646,6 +650,12 @@ class CrownMastEngine:
             + buffs.core_damage_pct
         ) / 100
         coefficient_pct = request.coefficient_pct
+        if request.coefficient_multiplier_stat is not None:
+            coefficient_pct *= result.buff_total(
+                request.time,
+                request.actor,
+                request.coefficient_multiplier_stat,
+            )
         if request.category == DamageCategory.NORMAL:
             coefficient_pct *= max(
                 0.0,
@@ -724,7 +734,7 @@ class CrownMastEngine:
             actor=request.actor,
             source=request.source,
             category=request.category,
-            coefficient_pct=request.coefficient_pct,
+            coefficient_pct=coefficient_pct,
             traits=request.traits,
             breakdown=breakdown,
             shot_index=request.shot_index,

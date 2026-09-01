@@ -218,6 +218,7 @@ class DamageRequest:
     projectile_explosion_pct: float = 0.0
     sequential_damage_pct: float = 0.0
     sequential_multiplier: float = 1.0
+    coefficient_multiplier_stat: str | None = None
 
 
 def js_round(value: float) -> int:

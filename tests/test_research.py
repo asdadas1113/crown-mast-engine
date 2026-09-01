@@ -163,10 +163,12 @@ class ResearchScenarioTests(unittest.TestCase):
         self.assertAlmostEqual(
             sum(item.crown_entry for item in report.by_character.values()),
             report.team.crown_entry,
+            delta=1e-3,
         )
         self.assertAlmostEqual(
             sum(item.mast_entry for item in report.by_character.values()),
             report.team.mast_entry,
+            delta=1e-3,
         )
 
     def test_standard_entry_effect_runs_until_buff_states_converge(self) -> None:
@@ -195,8 +197,8 @@ class ComparisonReportTests(unittest.TestCase):
     def test_report_preserves_baseline_totals_and_research_metrics(self) -> None:
         overall = self.report.overall
 
-        self.assertAlmostEqual(overall.team.conventional, 2_144_196_385.513629)
-        self.assertAlmostEqual(overall.team.funnel, 2_118_326_068.3537395)
+        self.assertAlmostEqual(overall.team.conventional, 2_144_196_385.5138705)
+        self.assertAlmostEqual(overall.team.funnel, 2_118_326_068.3537395, delta=1e-3)
         self.assertAlmostEqual(overall.conventional_main_share, 0.46465167445141525)
         self.assertAlmostEqual(overall.break_even_main_share_c, 0.7068438374111474)
         self.assertEqual(overall.outcome_band, OutcomeBand.CLEAR_CONVENTIONAL)

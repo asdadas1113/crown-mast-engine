@@ -171,7 +171,7 @@ class InterfaceTests(unittest.TestCase):
             first["window_semantics"],
             "b1_activation_inclusive_to_entry_buff_state_convergence_exclusive",
         )
-        self.assertEqual(first["window_end"], 20.1)
+        self.assertEqual(first["window_end"], 17.32)
         self.assertNotEqual(
             first["team"]["crown_entry"],
             first["team"]["mast_entry"],

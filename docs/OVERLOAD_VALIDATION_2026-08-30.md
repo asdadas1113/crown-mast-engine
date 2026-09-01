@@ -1,4 +1,7 @@
 # 크라운-메스트 연구: 오버로드 계산식 교차검증
+
+> **Source-policy note (2026-09-02):** any `nikke-sim` reference below is provenance/secondary-reference only, not the authority priority. Current mechanics work must prefer Moris calculator / NIKKE.gg (and direct evidence when available) and must be independently cross-validated. See `docs/SOURCE_VALIDATION_POLICY.md`.
+
 작성일: 2026-08-30
 
 ## 1. 검증 범위와 자료

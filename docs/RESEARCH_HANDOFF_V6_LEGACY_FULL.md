@@ -1,4 +1,7 @@
 # v6 크라운–메스트 운용 연구
+
+> **Source-policy note (2026-09-02):** any `nikke-sim` reference below is provenance/secondary-reference only, not the authority priority. Current mechanics work must prefer Moris calculator / NIKKE.gg (and direct evidence when available) and must be independently cross-validated. See `docs/SOURCE_VALIDATION_POLICY.md`.
+
 ## 손익분기 연구 복원·검산용 마스터 노트
 
 - 작성 기준: **2026-08-29 (v6 정리)**
