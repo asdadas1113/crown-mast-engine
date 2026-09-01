@@ -24,6 +24,25 @@ class DamageFormulaTests(unittest.TestCase):
         self.assertEqual(sequential.damage_up, 1.75)
         self.assertEqual(ordinary.damage_up, 1.5)
 
+    def test_sustained_damage_shares_damage_up_bucket_but_is_flavor_scoped(self) -> None:
+        context = DamageContext(
+            static_atk=1000,
+            coefficient_pct=100,
+            boss_def=0,
+            attack_damage_pct=20,
+            sustained_damage_pct=30,
+        )
+        sustained = calculate_damage(
+            context,
+            DamageTraits(category=DamageCategory.SKILL, sustained=True),
+        )
+        ordinary = calculate_damage(
+            context,
+            DamageTraits(category=DamageCategory.SKILL),
+        )
+        self.assertEqual(sustained.damage_up, 1.5)
+        self.assertEqual(ordinary.damage_up, 1.2)
+
     def test_boss_def_is_subtracted_before_multipliers(self) -> None:
         result = calculate_damage(
             DamageContext(static_atk=1_000, boss_def=100, coefficient_pct=200),
