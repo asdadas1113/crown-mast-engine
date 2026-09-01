@@ -1,6 +1,8 @@
 import unittest
+from dataclasses import replace
 
 from crown_mast_engine import simulate_rotation
+from crown_mast_engine.combat import STANDARD_COMBAT_SETTINGS
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
 
@@ -54,6 +56,23 @@ class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
             self.result.resolved_offensive_buffs(1.0, self.actor).core_damage_pct,
             26.0,
         )
+
+    def test_pinpoint_reaches_core_damage_major_bucket(self) -> None:
+        core_result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=CCW_ROSTER,
+            combat_settings=replace(STANDARD_COMBAT_SETTINGS, core_hit_rate_pct=100.0),
+        )
+        normal = next(
+            event
+            for event in core_result.damage_events_for(
+                actor=self.actor,
+                category=DamageCategory.NORMAL,
+            )
+            if event.traits.core_eligible and not event.full_burst
+        )
+        # 7.5% expected crit major + 100% base core bonus + 26% Pinpoint.
+        self.assertAlmostEqual(normal.breakdown.major, 2.335)
 
     def test_every_five_seconds_emits_900_percent_packet(self) -> None:
         packets = tuple(
