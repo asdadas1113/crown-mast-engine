@@ -33,6 +33,7 @@ jobs:
           tests.test_phantom_favorite_item
           tests.test_milk_blooming_bunny
           tests.test_quency_escape_queen
+          tests.test_scarlet_black_shadow
           tests.test_characters
           tests.test_b1_characters
           tests.test_buffs
