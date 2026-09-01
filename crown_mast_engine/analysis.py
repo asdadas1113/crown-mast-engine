@@ -13,7 +13,13 @@ from .equipment import BuildProfile
 from .mechanics import SkillHookRegistry
 from .character_mechanics import STANDARD_SKILL_HOOKS
 from .models import DamageCategory, TeamRoster
-from .rotations import CROWN_CROWN_MAST, SUSTAINED_FUNNEL, RotationPolicy
+from .rotations import (
+    CROWN_CROWN_MAST,
+    OPENING_MAST_CROWN_MAST,
+    OPENING_MAST_SUSTAINED_FUNNEL,
+    SUSTAINED_FUNNEL,
+    RotationPolicy,
+)
 from .timeline import STANDARD_TIMELINE, BurstCycle
 
 
@@ -499,6 +505,7 @@ def analyze_rotations(
     skill_hooks: SkillHookRegistry = STANDARD_SKILL_HOOKS,
     main_actor: str | None = None,
     conventional_policy: RotationPolicy = CROWN_CROWN_MAST,
+    funnel_policy: RotationPolicy | None = None,
 ) -> RotationComparison:
     common = {
         "roster": roster,
@@ -509,7 +516,13 @@ def analyze_rotations(
         "skill_hooks": skill_hooks,
     }
     conventional = simulate_rotation(conventional_policy, **common)
-    funnel = simulate_rotation(SUSTAINED_FUNNEL, **common)
+    if funnel_policy is None:
+        funnel_policy = (
+            OPENING_MAST_SUSTAINED_FUNNEL
+            if conventional_policy.name == OPENING_MAST_CROWN_MAST.name
+            else SUSTAINED_FUNNEL
+        )
+    funnel = simulate_rotation(funnel_policy, **common)
     return compare_rotation_results(
         conventional,
         funnel,
