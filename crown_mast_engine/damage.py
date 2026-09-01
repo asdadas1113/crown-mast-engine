@@ -13,6 +13,7 @@ class DamageTraits:
     projectile_explosion: bool = False
     charged: bool = False
     sequential: bool = False
+    sustained: bool = False
     crit_eligible: bool = True
     full_burst_eligible: bool = True
     range_eligible: bool = True
@@ -39,6 +40,7 @@ class DamageContext:
     projectile_attachment_pct: float = 0.0
     projectile_explosion_pct: float = 0.0
     sequential_damage_pct: float = 0.0
+    sustained_damage_pct: float = 0.0
     sequential_multiplier: float = 1.0
     boss_damage_taken_pct: float = 0.0
     boss_distributed_taken_pct: float = 0.0
@@ -89,6 +91,8 @@ def calculate_damage(context: DamageContext, traits: DamageTraits) -> DamageBrea
         damage_up_pct += context.projectile_explosion_pct
     if traits.sequential:
         damage_up_pct += context.sequential_damage_pct
+    if traits.sustained:
+        damage_up_pct += context.sustained_damage_pct
     damage_up = 1 + damage_up_pct / 100
 
     sequential = context.sequential_multiplier if traits.sequential else 1.0
