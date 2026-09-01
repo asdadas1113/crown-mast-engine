@@ -9,6 +9,7 @@ from .liter import LiterSkillHook
 from .moran_favorite_item import MoranFavoriteItemSkillHook
 from .neon_vision_eye import NeonVisionEyeSkillHook
 from .rapi_red_hood import RapiRedHoodSkillHook
+from .raven import RavenSkillHook
 from .scarlet_black_shadow import ScarletBlackShadowSkillHook
 from .snow_white_heavy_arms import SnowWhiteHeavyArmsSkillHook
 from ..mechanics import SkillHookRegistry
@@ -22,6 +23,7 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "helm": HelmSkillHook,
         "liberalio": LiberalioSkillHook,
         "liter": LiterSkillHook,
+        "raven": RavenSkillHook,
         "scarlet-black-shadow": ScarletBlackShadowSkillHook,
         "anis-star": AnisStarSkillHook,
         "moran-favorite-item": MoranFavoriteItemSkillHook,
@@ -30,7 +32,7 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "epinel": EpinelSkillHook,
         "neon-vision-eye": NeonVisionEyeSkillHook,
     },
-    revision="standard-hooks-r8",
+    revision="standard-hooks-r9",
 )
 
 
@@ -46,6 +48,7 @@ __all__ = [
     "MoranFavoriteItemSkillHook",
     "NeonVisionEyeSkillHook",
     "RapiRedHoodSkillHook",
+    "RavenSkillHook",
     "ScarletBlackShadowSkillHook",
     "SnowWhiteHeavyArmsSkillHook",
     "STANDARD_SKILL_HOOKS",
