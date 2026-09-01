@@ -1,6 +1,6 @@
 import unittest
 
-from crown_mast_engine import simulate_rotation
+from crown_mast_engine import CombatSettings, simulate_rotation
 from crown_mast_engine.equipment import standard_build_for_actor
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
@@ -86,6 +86,37 @@ class PhantomFavoriteItemMechanicsTests(unittest.TestCase):
         )
         self.assertEqual(tuple(window.start for window in ammo_windows), burst_times)
         self.assertTrue(all(window.value == 50 for window in ammo_windows))
+
+    def test_fire_boss_activates_team_vulnerability(self) -> None:
+        fire = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=PHANTOM_ROSTER,
+            combat_settings=CombatSettings(boss_element="Fire"),
+        )
+        first_burst = next(
+            event.time for event in fire.events
+            if event.event_type == EventType.B3_STAGE_ENTER
+            and event.actor == self.actor
+        )
+        for member in dict.fromkeys(fire.roster.members):
+            self.assertEqual(
+                fire.buff_total(first_burst + 0.001, member, "damage_taken_pct"),
+                18,
+            )
+
+    def test_non_fire_boss_does_not_activate_vulnerability(self) -> None:
+        neutral = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=PHANTOM_ROSTER,
+            combat_settings=CombatSettings(boss_element="Iron"),
+        )
+        self.assertFalse(
+            any(
+                window.source == self.actor
+                and window.skill == "burst_fire_vulnerability"
+                for window in neutral.buffs.windows
+            )
+        )
 
 
 if __name__ == "__main__":

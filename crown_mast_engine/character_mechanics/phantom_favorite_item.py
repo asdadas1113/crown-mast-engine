@@ -18,10 +18,8 @@ class PhantomFavoriteItemSkillHook(SkillHookBase):
     permanent 12.86% distributed-amplification stack, and removes Calling
     Card. Hit Rate is omitted because this study fixes core-hit rate externally.
 
-    The favorite-item Fire-only 18% enemy vulnerability is retained in data but
-    intentionally inactive here: the current character hook context has no boss
-    element. That conditional team-debuff is outside this distributed-structure
-    sample until boss state is exposed to character hooks.
+    The favorite-item Fire-only 18% enemy vulnerability is applied to the
+    whole roster when the configured boss element is Fire.
     """
 
     def __init__(self, context: SkillHookContext) -> None:
@@ -73,7 +71,7 @@ class PhantomFavoriteItemSkillHook(SkillHookBase):
         # removal still occurs before any subsequent weapon shot.
         reset_time = event.time + 1e-6
         self._dist_amp_stacks = 0
-        return (
+        effects: list[SkillEffect] = [
             DamageRequest(
                 time=event.time,
                 actor=context.actor,
@@ -98,7 +96,26 @@ class PhantomFavoriteItemSkillHook(SkillHookBase):
                 start=reset_time,
                 end=inf,
             ),
-        )
+        ]
+        if context.combat_settings.boss_element == "Fire":
+            duration = context.definition.skill_value(
+                "burst", "fire_damage_taken_duration_sec"
+            )
+            for target in dict.fromkeys(context.roster.members):
+                effects.append(
+                    BuffWindow(
+                        source=context.actor,
+                        skill="burst_fire_vulnerability",
+                        stat="damage_taken_pct",
+                        value=context.definition.skill_value(
+                            "burst", "fire_damage_taken_pct"
+                        ),
+                        target=target,
+                        start=event.time,
+                        end=event.time + duration,
+                    )
+                )
+        return tuple(effects)
 
     def on_weapon_shot(
         self,
