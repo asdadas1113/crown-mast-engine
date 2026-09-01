@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "level": 400,
+    "gear": "Base-5",
+    "core": 7,
+    "skill_levels": [10, 10, 10],
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:quency-escape-queen"
+  },
+  "characters": [
+    {
+      "slug": "quency-escape-queen",
+      "name": "Quency: Escape Queen",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Water",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SMG",
+        "normal_attack_pct": 10.12,
+        "core_attack_pct": 250.0,
+        "ammo": 120,
+        "reload_frames": 81,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 2,
+        "burst_gauge_per_shot": 0.074
+      },
+      "skills": {
+        "skill1": {
+          "distributed_damage_pct": 49.58,
+          "core_damage_pct": 25.25,
+          "crit_rate_pct": 16.73
+        },
+        "skill2": {
+          "normal_attacks_per_trigger": 2.0,
+          "stage1_atk_pct_per_stack": 2.45,
+          "stage1_max_stacks": 10.0,
+          "stage1_duration_sec": 2.0,
+          "stage2_atk_pct_per_stack": 4.9,
+          "stage2_max_stacks": 10.0,
+          "stage2_duration_sec": 1.0,
+          "stage3_atk_pct_per_stack": 7.36,
+          "stage3_max_stacks": 5.0,
+          "stage3_duration_sec": 0.5
+        },
+        "burst": {
+          "attack_damage_pct": 57.08,
+          "reload_speed_pct": 25.87,
+          "damage_pct": 1736.31,
+          "duration_sec": 10.0
+        }
+      }
+    }
+  ]
+}

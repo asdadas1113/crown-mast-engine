@@ -241,7 +241,7 @@ HIGH_OL5_BUILD = BuildProfile.uniform(
 )
 
 
-FAVORITE_ITEM_ACTORS = frozenset({"helm", "moran-favorite-item"})
+FAVORITE_ITEM_ACTORS = frozenset({"helm", "moran-favorite-item", "phantom"})
 
 
 def standard_build_for_actor(actor: str) -> BuildProfile:

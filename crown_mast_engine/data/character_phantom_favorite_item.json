@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "level": 400,
+    "gear": "Base-5",
+    "core": 7,
+    "skill_levels": [10, 10, 10],
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:phantom-treasure"
+  },
+  "characters": [
+    {
+      "slug": "phantom",
+      "name": "Phantom (Favorite Item)",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Water",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "AR",
+        "normal_attack_pct": 15.78,
+        "core_attack_pct": 200.0,
+        "ammo": 60,
+        "reload_frames": 141,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.25
+      },
+      "skills": {
+        "skill1": {
+          "calling_card_duration_sec": 5.0,
+          "calling_card_def_down_pct": 32.19,
+          "dagger_hit_rate_pct": 25.75,
+          "dagger_max_stacks": 3.0,
+          "dagger_duration_sec": 5.0,
+          "calling_card_attack_damage_pct": 75.17,
+          "treasure_dagger_every_hits": 30.0
+        },
+        "skill2": {
+          "max_stack_additional_damage_pct": 84.33,
+          "max_stack_distributed_damage_pct": 250.0,
+          "distributed_stack_pct": 12.86,
+          "distributed_stack_max": 3.0,
+          "normal_hits_trigger": 10.0,
+          "atk_pct": 85.12,
+          "atk_duration_sec": 5.0,
+          "distributed_damage_pct": 31.92,
+          "distributed_duration_sec": 10.0
+        },
+        "burst": {
+          "damage_pct": 1457.28,
+          "fire_damage_taken_pct": 18.0,
+          "fire_damage_taken_duration_sec": 30.0,
+          "max_ammo_pct": 50.0,
+          "duration_sec": 10.0
+        }
+      }
+    }
+  ]
+}

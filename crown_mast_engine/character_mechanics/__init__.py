@@ -7,8 +7,11 @@ from .helm import HelmSkillHook
 from .liberalio import LiberalioSkillHook
 from .little_mermaid import LittleMermaidSkillHook
 from .liter import LiterSkillHook
+from .milk_blooming_bunny import MilkBloomingBunnySkillHook
 from .moran_favorite_item import MoranFavoriteItemSkillHook
 from .neon_vision_eye import NeonVisionEyeSkillHook
+from .phantom_favorite_item import PhantomFavoriteItemSkillHook
+from .quency_escape_queen import QuencyEscapeQueenSkillHook
 from .rapi_red_hood import RapiRedHoodSkillHook
 from .raven import RavenSkillHook
 from .scarlet_black_shadow import ScarletBlackShadowSkillHook
@@ -25,6 +28,9 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "helm": HelmSkillHook,
         "liberalio": LiberalioSkillHook,
         "liter": LiterSkillHook,
+        "milk-blooming-bunny": MilkBloomingBunnySkillHook,
+        "phantom": PhantomFavoriteItemSkillHook,
+        "quency-escape-queen": QuencyEscapeQueenSkillHook,
         "raven": RavenSkillHook,
         "scarlet-black-shadow": ScarletBlackShadowSkillHook,
         "anis-star": AnisStarSkillHook,
@@ -34,7 +40,7 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "epinel": EpinelSkillHook,
         "neon-vision-eye": NeonVisionEyeSkillHook,
     },
-    revision="standard-hooks-r10",
+    revision="standard-hooks-r11",
 )
 
 
@@ -48,8 +54,11 @@ __all__ = [
     "LiberalioSkillHook",
     "LittleMermaidSkillHook",
     "LiterSkillHook",
+    "MilkBloomingBunnySkillHook",
     "MoranFavoriteItemSkillHook",
     "NeonVisionEyeSkillHook",
+    "PhantomFavoriteItemSkillHook",
+    "QuencyEscapeQueenSkillHook",
     "RapiRedHoodSkillHook",
     "RavenSkillHook",
     "ScarletBlackShadowSkillHook",
