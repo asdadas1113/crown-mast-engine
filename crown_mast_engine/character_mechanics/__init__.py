@@ -1,5 +1,6 @@
 from .anis_star import AnisStarSkillHook
 from .bready import BreadySkillHook
+from .cinderella_crystal_wave import CinderellaCrystalWaveSkillHook
 from .crown import CrownSkillHook
 from .epinel import EpinelSkillHook
 from .helm import HelmSkillHook
@@ -18,6 +19,7 @@ from ..mechanics import SkillHookRegistry
 STANDARD_SKILL_HOOKS = SkillHookRegistry(
     {
         "bready": BreadySkillHook,
+        "cinderella-crystal-wave": CinderellaCrystalWaveSkillHook,
         "crown": CrownSkillHook,
         "rapi-red-hood": RapiRedHoodSkillHook,
         "helm": HelmSkillHook,
@@ -32,13 +34,14 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "epinel": EpinelSkillHook,
         "neon-vision-eye": NeonVisionEyeSkillHook,
     },
-    revision="standard-hooks-r9",
+    revision="standard-hooks-r10",
 )
 
 
 __all__ = [
     "AnisStarSkillHook",
     "BreadySkillHook",
+    "CinderellaCrystalWaveSkillHook",
     "CrownSkillHook",
     "EpinelSkillHook",
     "HelmSkillHook",
