@@ -25,9 +25,12 @@ jobs:
           python -m unittest -v
           tests.test_bready
           tests.test_liberalio
+          tests.test_raven
+          tests.test_cinderella_crystal_wave
           tests.test_characters
           tests.test_b1_characters
           tests.test_buffs
+          tests.test_damage
           tests.test_combat
           tests.test_engine
           tests.test_helm
