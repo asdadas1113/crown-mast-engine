@@ -30,6 +30,13 @@ class TeamRoster:
     main_b3: str = "rapi-red-hood"
     secondary_b3: str = "helm"
 
+    def __post_init__(self) -> None:
+        members = self.members
+        if any(not isinstance(actor, str) or not actor for actor in members):
+            raise TypeError("team roster members must be non-empty strings")
+        if len(set(members)) != len(members):
+            raise ValueError("team roster cannot assign the same character to multiple roles")
+
     @property
     def members(self) -> tuple[str, ...]:
         return (self.b1, self.crown, self.mast, self.main_b3, self.secondary_b3)
