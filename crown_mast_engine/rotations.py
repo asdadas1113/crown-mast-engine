@@ -45,28 +45,32 @@ _FUNNEL_PATTERN = (
     "crown",
 )
 
+# The normal 180 s raid model is explicitly capped at 14 burst cycles.
+# After c12 reaches Drunken 3 and resets at full-burst end, c13 builds stack 1
+# and c14 builds stack 2. There is no time to reach another 3-stack Mast, so the
+# practical terminal action is a 2-stack Mast on c14. A 15-burst run is treated
+# as a separate extreme-input scenario and must opt into a custom policy.
+_CCM_RAID14 = _CCM_PATTERN * 4 + ("crown", "mast")
+_FUNNEL_RAID14 = _FUNNEL_PATTERN * 2 + ("crown", "mast")
+
 CROWN_CROWN_MAST = RotationPolicy(
     name="crown_crown_mast",
-    b2_slot_by_cycle=_CCM_PATTERN * 4,
-    repeat_pattern=_CCM_PATTERN,
+    b2_slot_by_cycle=_CCM_RAID14,
 )
 
 OPENING_MAST_CROWN_MAST = RotationPolicy(
     name="opening_mast_crown_mast",
-    b2_slot_by_cycle=("mast", "crown", "mast") + _CCM_PATTERN * 3,
-    repeat_pattern=_CCM_PATTERN,
+    b2_slot_by_cycle=("mast", "crown", "mast") + _CCM_PATTERN * 3 + ("crown", "mast"),
 )
 
 SUSTAINED_FUNNEL = RotationPolicy(
     name="sustained_funnel",
-    b2_slot_by_cycle=_FUNNEL_PATTERN * 2,
-    repeat_pattern=_FUNNEL_PATTERN,
+    b2_slot_by_cycle=_FUNNEL_RAID14,
 )
 
 OPENING_MAST_SUSTAINED_FUNNEL = RotationPolicy(
     name="opening_mast_sustained_funnel",
-    b2_slot_by_cycle=("mast",) + SUSTAINED_FUNNEL.b2_slot_by_cycle[1:],
-    repeat_pattern=_FUNNEL_PATTERN,
+    b2_slot_by_cycle=("mast",) + _FUNNEL_RAID14[1:],
 )
 
 BASELINE_ROTATIONS = MappingProxyType(

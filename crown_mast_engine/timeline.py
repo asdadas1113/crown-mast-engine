@@ -73,3 +73,36 @@ def build_uniform_burst_timeline(
         )
         for index in range(cycle_count)
     )
+
+
+# Practical 180 s raid baseline derived from the 2026-09-01 shooting-range run.
+# The cycle interval is intentionally rounded slightly conservatively to 12.70 s.
+# Manual B1->B2 and B2->B3 transitions clustered near 0.06 s each; 0.06 s is
+# therefore used as the stage-input model. The first B1 is anchored at t=2.20 s
+# so a theoretical c15 B1 would become ready at exactly t=180.00 s. c15 is not
+# part of the normal model.
+RAID14_CYCLE_COUNT = 14
+RAID14_INTERVAL_SEC = 12.70
+RAID14_FIRST_B1_TIME = 2.20
+RAID14_STAGE_INPUT_GAP_SEC = 0.06
+RAID14_FULL_BURST_DURATION_SEC = 10.0
+
+RAID14_FIRST_CYCLE = BurstCycle(
+    cycle=1,
+    b1_time=RAID14_FIRST_B1_TIME,
+    b2_time=RAID14_FIRST_B1_TIME + RAID14_STAGE_INPUT_GAP_SEC,
+    b3_time=RAID14_FIRST_B1_TIME + RAID14_STAGE_INPUT_GAP_SEC * 2,
+    full_burst_start=RAID14_FIRST_B1_TIME + RAID14_STAGE_INPUT_GAP_SEC * 2,
+    full_burst_end=(
+        RAID14_FIRST_B1_TIME
+        + RAID14_STAGE_INPUT_GAP_SEC * 2
+        + RAID14_FULL_BURST_DURATION_SEC
+    ),
+    b3_slot="main_b3",
+)
+
+RAID14_TIMELINE: tuple[BurstCycle, ...] = build_uniform_burst_timeline(
+    cycle_count=RAID14_CYCLE_COUNT,
+    interval_sec=RAID14_INTERVAL_SEC,
+    first_cycle=RAID14_FIRST_CYCLE,
+)

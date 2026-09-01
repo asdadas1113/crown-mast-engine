@@ -3,6 +3,9 @@ import unittest
 from crown_mast_engine import (
     CROWN_CROWN_MAST,
     CUSTOM_ROTATION,
+    RAID14_FIRST_B1_TIME,
+    RAID14_INTERVAL_SEC,
+    RAID14_TIMELINE,
     ResearchScenario,
     SUSTAINED_FUNNEL,
     build_uniform_burst_timeline,
@@ -28,13 +31,37 @@ class UniformBurstTimelineTests(unittest.TestCase):
             self.assertAlmostEqual(cycle.full_burst_start - cycle.b1_time, 1.2)
             self.assertAlmostEqual(cycle.full_burst_end - cycle.full_burst_start, 10.0)
 
-    def test_baseline_rotations_continue_beyond_cycle_12(self) -> None:
+    def test_raid14_timeline_matches_practical_baseline(self) -> None:
+        self.assertEqual(len(RAID14_TIMELINE), 14)
+        self.assertAlmostEqual(RAID14_TIMELINE[0].b1_time, 2.20)
+        self.assertAlmostEqual(RAID14_TIMELINE[0].b2_time, 2.26)
+        self.assertAlmostEqual(RAID14_TIMELINE[0].b3_time, 2.32)
+        self.assertAlmostEqual(RAID14_TIMELINE[0].full_burst_start, 2.32)
+        self.assertAlmostEqual(RAID14_TIMELINE[0].full_burst_end, 12.32)
+        self.assertAlmostEqual(RAID14_TIMELINE[-1].b1_time, 167.30)
+        self.assertAlmostEqual(RAID14_TIMELINE[-1].full_burst_end, 177.42)
+        self.assertAlmostEqual(
+            RAID14_FIRST_B1_TIME + RAID14_INTERVAL_SEC * 14,
+            180.0,
+        )
+
+    def test_raid14_baselines_finish_with_two_stack_mast(self) -> None:
         self.assertEqual(CROWN_CROWN_MAST.b2_slot(13), "crown")
-        self.assertEqual(CROWN_CROWN_MAST.b2_slot(14), "crown")
-        self.assertEqual(CROWN_CROWN_MAST.b2_slot(15), "mast")
+        self.assertEqual(CROWN_CROWN_MAST.b2_slot(14), "mast")
         self.assertEqual(SUSTAINED_FUNNEL.b2_slot(13), "crown")
-        self.assertEqual(SUSTAINED_FUNNEL.b2_slot(14), "crown")
-        self.assertEqual(SUSTAINED_FUNNEL.b2_slot(15), "mast")
+        self.assertEqual(SUSTAINED_FUNNEL.b2_slot(14), "mast")
+        with self.assertRaises(ValueError):
+            CROWN_CROWN_MAST.b2_slot(15)
+        with self.assertRaises(ValueError):
+            SUSTAINED_FUNNEL.b2_slot(15)
+
+        conventional = simulate_rotation(CROWN_CROWN_MAST, timeline=RAID14_TIMELINE)
+        funnel = simulate_rotation(SUSTAINED_FUNNEL, timeline=RAID14_TIMELINE)
+        for result in (conventional, funnel):
+            final = result.snapshots[-1]
+            self.assertEqual(final.cycle, 14)
+            self.assertEqual(final.b2_actor, result.roster.mast)
+            self.assertEqual(final.mast_stack_at_b2, 2)
 
     def test_custom_rotation_accepts_any_contiguous_cycle_count(self) -> None:
         policy = CUSTOM_ROTATION(
@@ -48,13 +75,12 @@ class UniformBurstTimelineTests(unittest.TestCase):
             policy.b2_slot(15)
 
     def test_fourteen_cycle_timeline_runs_through_engine_and_scenario_validation(self) -> None:
-        timeline = build_uniform_burst_timeline(cycle_count=14, interval_sec=12.0)
-        result = simulate_rotation(CROWN_CROWN_MAST, timeline=timeline)
-        scenario = replace(ResearchScenario.standard(), timeline=timeline)
+        result = simulate_rotation(CROWN_CROWN_MAST, timeline=RAID14_TIMELINE)
+        scenario = replace(ResearchScenario.standard(), timeline=RAID14_TIMELINE)
 
         self.assertEqual(len(result.snapshots), 14)
         self.assertEqual(result.snapshots[-1].cycle, 14)
-        self.assertEqual(result.macro_cycle_at(timeline[-1].b1_time), 5)
+        self.assertEqual(result.macro_cycle_at(RAID14_TIMELINE[-1].b1_time), 5)
         self.assertEqual(len(scenario.timeline), 14)
 
     def test_invalid_builder_inputs_fail_fast(self) -> None:

@@ -109,7 +109,18 @@ from .samples import (
     SampleResult,
     run_sample_batch,
 )
-from .timeline import STANDARD_TIMELINE, BurstCycle, build_uniform_burst_timeline
+from .timeline import (
+    RAID14_CYCLE_COUNT,
+    RAID14_FIRST_B1_TIME,
+    RAID14_FIRST_CYCLE,
+    RAID14_FULL_BURST_DURATION_SEC,
+    RAID14_INTERVAL_SEC,
+    RAID14_STAGE_INPUT_GAP_SEC,
+    RAID14_TIMELINE,
+    STANDARD_TIMELINE,
+    BurstCycle,
+    build_uniform_burst_timeline,
+)
 
 __all__ = [
     "AmmoChargeEffect",
@@ -162,6 +173,13 @@ __all__ = [
     "OPENING_MAST_CROWN_MAST",
     "OPENING_MAST_SUSTAINED_FUNNEL",
     "OverloadProfile",
+    "RAID14_CYCLE_COUNT",
+    "RAID14_FIRST_B1_TIME",
+    "RAID14_FIRST_CYCLE",
+    "RAID14_FULL_BURST_DURATION_SEC",
+    "RAID14_INTERVAL_SEC",
+    "RAID14_STAGE_INPUT_GAP_SEC",
+    "RAID14_TIMELINE",
     "SR15_COLLECTION",
     "OutcomeBand",
     "OutcomeThresholds",
