@@ -1,0 +1,33 @@
+name: Epinel secondary 64-point study
+
+on:
+  pull_request:
+    branches:
+      - research/14-burst-baseline
+
+jobs:
+  study:
+    if: github.head_ref == 'research/64point-secondary-epinel'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        b1:
+          - liter
+          - anis-star
+        main:
+          - rapi-red-hood
+          - scarlet-black-shadow
+          - snow-white-heavy-arms
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run Epinel secondary study
+        run: >-
+          python scripts/run_checkpoint_v3_epinel_secondary.py
+          --b1 ${{ matrix.b1 }}
+          --main ${{ matrix.main }}
+          --workers 4
