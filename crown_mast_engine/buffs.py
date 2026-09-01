@@ -39,6 +39,7 @@ class ResolvedOffensiveBuffs:
     distributed_damage_pct: float
     projectile_attachment_pct: float
     projectile_explosion_pct: float
+    sustained_damage_pct: float
     damage_taken_pct: float
     charge_time_fixed_frames: float
 
@@ -149,6 +150,7 @@ class BuffBook:
             distributed_damage_pct=totals.get("distributed_damage_pct", 0.0),
             projectile_attachment_pct=totals.get("projectile_attachment_pct", 0.0),
             projectile_explosion_pct=totals.get("projectile_explosion_pct", 0.0),
+            sustained_damage_pct=totals.get("sustained_damage_pct", 0.0),
             damage_taken_pct=totals.get("damage_taken_pct", 0.0),
             charge_time_fixed_frames=totals.get("charge_time_fixed_frames", 0.0),
         )
