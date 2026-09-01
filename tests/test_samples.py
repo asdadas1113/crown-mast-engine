@@ -1,6 +1,7 @@
 import json
 import unittest
 from dataclasses import replace
+from unittest.mock import patch
 
 from crown_mast_engine import (
     SAMPLE_BATCH_SCHEMA_VERSION,
@@ -70,8 +71,86 @@ class SampleBatchTests(unittest.TestCase):
                 (
                     SampleCase("default", self.short_scenario),
                     SampleCase("opening", opening),
-                )
+                ),
+                workers=2,
             )
+
+    def test_parallel_results_match_serial_results_exactly(self) -> None:
+        cases = (
+            SampleCase(
+                "first",
+                self.short_scenario,
+                {"panel": "serial-parallel"},
+            ),
+            SampleCase(
+                "second",
+                self.short_scenario,
+                {"panel": "serial-parallel"},
+            ),
+        )
+
+        serial = run_sample_batch(cases, workers=1)
+        parallel = run_sample_batch(cases, workers=2)
+
+        self.assertEqual(serial.to_dict(), parallel.to_dict())
+        self.assertEqual(
+            serial.to_json(indent=None),
+            parallel.to_json(indent=None),
+        )
+
+    def test_workers_one_uses_serial_fallback(self) -> None:
+        cases = (
+            SampleCase("first", self.short_scenario),
+            SampleCase("second", self.short_scenario),
+        )
+
+        with patch(
+            "crown_mast_engine.samples.ProcessPoolExecutor",
+            side_effect=AssertionError("process pool should not be constructed"),
+        ):
+            batch = run_sample_batch(cases, workers=1)
+
+        self.assertEqual(
+            tuple(result.case_id for result in batch.results),
+            ("first", "second"),
+        )
+
+    def test_parallel_results_preserve_input_order(self) -> None:
+        cases = tuple(
+            SampleCase(case_id, self.short_scenario)
+            for case_id in ("third", "first", "second")
+        )
+
+        batch = run_sample_batch(cases, workers=2)
+
+        self.assertEqual(
+            tuple(result.case_id for result in batch.results),
+            ("third", "first", "second"),
+        )
+
+    def test_parallel_worker_exception_propagates(self) -> None:
+        invalid = replace(
+            self.short_scenario,
+            expected_engine_rule_revision="test-invalid-revision",
+        )
+        cases = (
+            SampleCase("valid", self.short_scenario),
+            SampleCase("invalid", invalid),
+        )
+
+        with self.assertRaisesRegex(ValueError, "engine revision"):
+            run_sample_batch(cases, workers=2)
+
+    def test_invalid_workers_are_rejected(self) -> None:
+        cases = (SampleCase("valid", self.short_scenario),)
+        for workers in (0, -1):
+            with self.subTest(workers=workers):
+                with self.assertRaisesRegex(ValueError, "at least 1"):
+                    run_sample_batch(cases, workers=workers)
+        for workers in (True, 1.5, "2"):
+            with self.subTest(workers=workers):
+                with self.assertRaisesRegex(TypeError, "integer or None"):
+                    run_sample_batch(cases, workers=workers)
 
 
 if __name__ == "__main__":
