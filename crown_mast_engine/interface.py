@@ -31,6 +31,7 @@ from .research import (
 )
 from .rotations import BASELINE_ROTATIONS, CROWN_CROWN_MAST
 from .samples import SampleCase, run_sample_batch
+from .timeline import RAID14_TIMELINE
 
 
 WEB_ROOT = Path(__file__).with_name("web")
@@ -40,12 +41,12 @@ BASELINE_ROTATION_DEFINITIONS = (
     {
         "id": CROWN_CROWN_MAST.name,
         "label": "크크메",
-        "sequence": "Crown-Crown-Mast × 4",
+        "sequence": "Crown-Crown-Mast × 4 → Crown-Mast2",
     },
     {
         "id": "opening_mast_crown_mast",
         "label": "진입 메크메",
-        "sequence": "Mast-Crown-Mast → Crown-Crown-Mast × 3",
+        "sequence": "Mast-Crown-Mast → Crown-Crown-Mast × 3 → Crown-Mast2",
     },
 )
 
@@ -192,6 +193,7 @@ def calculate_interface_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         combat_settings=combat_settings,
         main_actor=roster.main_b3,
         baseline_rotation=CROWN_CROWN_MAST.name,
+        timeline=RAID14_TIMELINE,
     )
     variants = analyze_entry_variants(scenario)
     crown_report = ComparisonReport.from_comparison(
@@ -324,6 +326,7 @@ def build_checkpoint_cases(payload: Mapping[str, Any]) -> tuple[SampleCase, ...]
                         combat_settings=combat_settings,
                         main_actor=roster.main_b3,
                         baseline_rotation=baseline,
+                        timeline=RAID14_TIMELINE,
                     ),
                     labels={
                         "b1_profile": b1_profile["id"],
