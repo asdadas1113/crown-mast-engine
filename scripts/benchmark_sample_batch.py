@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
+from pathlib import Path
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from crown_mast_engine.interface import build_checkpoint_cases
 from crown_mast_engine.samples import run_sample_batch
@@ -36,9 +43,12 @@ def main() -> None:
     if serial.to_dict() != parallel.to_dict():
         raise AssertionError("serial and parallel sample batches differ")
 
+    cpu_count = os.cpu_count() or 1
+    parallel_workers = min(cpu_count, len(cases))
     speedup = serial_sec / parallel_sec if parallel_sec else float("inf")
-    print(f"cpu_count={os.cpu_count() or 1}")
+    print(f"cpu_count={cpu_count}")
     print(f"case_count={len(cases)}")
+    print(f"parallel_workers={parallel_workers}")
     print(f"serial_seconds={serial_sec:.6f}")
     print(f"parallel_seconds={parallel_sec:.6f}")
     print(f"speedup={speedup:.4f}x")
