@@ -24,6 +24,7 @@ jobs:
         run: >-
           python -m unittest -v
           tests.test_bready
+          tests.test_liberalio
           tests.test_characters
           tests.test_b1_characters
           tests.test_buffs
