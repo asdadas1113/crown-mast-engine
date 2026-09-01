@@ -115,7 +115,7 @@
     <section class="results-panel" aria-live="polite">
       <div id="loading-state" class="loading-state" hidden>
         <div class="loading-line"></div>
-        <p>12버스트 구간을 계산하고 있습니다.</p>
+        <p>14버스트 RAID14 구간을 계산하고 있습니다.</p>
       </div>
 
       <div id="error-state" class="error-state" hidden>
@@ -126,7 +126,7 @@
       <div id="results" hidden>
         <div class="result-toolbar">
           <div>
-            <p class="result-eyebrow">180초 · 12버스트 이론 비교</p>
+            <p class="result-eyebrow">180초 · 14버스트 RAID14 이론 비교</p>
             <h2 id="result-title">결과</h2>
           </div>
           <button id="download-button" class="secondary-button" type="button">JSON 저장</button>
@@ -134,7 +134,7 @@
 
         <section class="rotation-overview">
           <div class="report-section-heading">
-            <div><span>12버스트 총합</span><h3>네 운용 결과</h3></div>
+            <div><span>14버스트 총합</span><h3>네 운용 결과</h3></div>
             <span>동일 편성 · 동일 시간축</span>
           </div>
           <div class="rotation-grid">
@@ -163,7 +163,7 @@
 
         <section class="entry-effect-section">
           <div class="report-section-heading">
-            <div><span>12버스트 총합</span><h3>진입 메스트 효과</h3></div>
+            <div><span>14버스트 총합</span><h3>진입 메스트 효과</h3></div>
             <span>Mast 진입 - Crown 진입</span>
           </div>
           <div class="entry-effect-grid">
@@ -192,7 +192,7 @@
         </section>
 
         <section class="four-character-section">
-          <div class="report-section-heading"><div><span>12버스트 총합</span><h3>캐릭터별 피해와 비중</h3></div></div>
+          <div class="report-section-heading"><div><span>14버스트 총합</span><h3>캐릭터별 피해와 비중</h3></div></div>
           <div class="table-wrap four-character-table">
             <table>
               <thead><tr><th>캐릭터</th><th>크크메</th><th>진입 메크메</th><th>기본 몰아주기</th><th>진입 메스트 몰아주기</th></tr></thead>
@@ -202,7 +202,7 @@
         </section>
 
         <section class="macro-comparison-section">
-          <div class="report-section-heading"><div><span>3버스트 × 4구간</span><h3>매크로 사이클별 손익</h3></div></div>
+          <div class="report-section-heading"><div><span>3버스트 × 4 + 종결 2버스트</span><h3>매크로 사이클별 손익</h3></div></div>
           <div class="macro-comparison-grid">
             <div class="table-wrap"><table><caption>첫 B2 Crown</caption><thead><tr><th>구간</th><th>크크메</th><th>몰아주기</th><th>증감</th></tr></thead><tbody id="crown-cycle-body"></tbody></table></div>
             <div class="table-wrap"><table><caption>첫 B2 Mast</caption><thead><tr><th>구간</th><th>진입 메크메</th><th>진입 몰아주기</th><th>증감</th></tr></thead><tbody id="mast-cycle-body"></tbody></table></div>
@@ -377,7 +377,7 @@
 
         <section class="methodology-note">
           <strong>해석 범위</strong>
-          <p>이 보고서는 동일한 180초·12버스트 시간축에서 지정한 편성과 보스 조건을 비교한 이론값이다. 12점은 통계 표본이 아니라 사전에 정한 육성 기준점이며, 평균은 각 점에 같은 가중치를 둔 산술평균이다. 보스 패턴·조작·리트라이는 포함하지 않는다. 손익분기 비중과 lambda*는 현재 피해 사건을 고정한 국소 스케일링 진단값이므로 캐릭터 스펙을 그 배수로 바꾼 실제 재계산과 동일하지 않다.</p>
+          <p>이 보고서는 동일한 180초·14버스트 RAID14 시간축에서 지정한 편성과 보스 조건을 비교한 이론값이다. 12점은 통계 표본이 아니라 사전에 정한 육성 기준점이며, 평균은 각 점에 같은 가중치를 둔 산술평균이다. 보스 패턴·조작·리트라이는 포함하지 않는다. 손익분기 비중과 lambda*는 현재 피해 사건을 고정한 국소 스케일링 진단값이므로 캐릭터 스펙을 그 배수로 바꾼 실제 재계산과 동일하지 않다.</p>
         </section>
       </div>
     </section>
