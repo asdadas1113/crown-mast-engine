@@ -142,7 +142,8 @@ class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
         self.assertEqual(tuple(window.start for window in atk), burst_times)
         self.assertTrue(all(window.value == 92 for window in attack_damage))
         self.assertTrue(all(window.value == 65 for window in atk))
-        self.assertTrue(all(window.end - window.start == 10 for window in burst_windows))
+        for window in burst_windows:
+            self.assertAlmostEqual(window.end - window.start, 10.0)
 
     def test_mg_only_scope_never_emits_snipe_sources(self) -> None:
         self.assertFalse(
