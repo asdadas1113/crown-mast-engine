@@ -63,7 +63,11 @@ Every case explicitly uses `RAID14_TIMELINE`.
 - opening baseline selection is preserved
 - favorite-item B1 keeps SR15
 
-The existing sample-batch multiprocessing regression tests also remain 9/9 PASS.
+Results on GitHub Actions:
+
+- checkpoint-v2 structural tests: 8/8 PASS
+- existing sample-batch multiprocessing tests: 9/9 PASS
+- `compileall`: PASS
 
 ## Crown-entry 36-point study
 
@@ -104,23 +108,65 @@ Epinel breakdown:
 | Snow White: Heavy Arms | -1.8533 ~ -1.5710% | 37.19 ~ 43.71% | 77.83 ~ 81.16% | +0.86 ~ +0.92% | 3.20 ~ 3.74% | 36/36 conventional |
 | Epinel | -3.3268 ~ -2.8294% | 10.90 ~ 14.35% | none | -0.405 ~ -0.274% | 3.20 ~ 3.74% | 36/36 conventional_dominates |
 
-## Crown-entry interpretation
-
 Across `2 B1 × 4 Main × 36 points = 288` controlled Crown-entry comparisons, sustained funnel wins **0/288**.
+
+## Mast-M1-entry 36-point study
+
+The first-B2 entry choice remains an independent variable, so the same 36-point grid was repeated with `opening_mast_crown_mast` as the baseline.
+
+### Liter
+
+| Main B3 | Funnel change | Main share | Break-even | g | l | Outcome |
+|---|---:|---:|---:|---:|---:|---|
+| Rapi: Red Hood | -1.5730 ~ -1.2362% | 39.51 ~ 44.57% | 60.43 ~ 63.97% | +2.56 ~ +2.78% | 4.25 ~ 4.55% | 36/36 conventional |
+| Scarlet: Black Shadow | -1.9556 ~ -1.7742% | 45.31 ~ 50.07% | 81.43 ~ 85.01% | +0.80 ~ +0.97% | 4.25 ~ 4.55% | 36/36 conventional |
+| Snow White: Heavy Arms | -1.9145 ~ -1.7329% | 45.79 ~ 50.33% | 79.35 ~ 82.96% | +0.94 ~ +1.10% | 4.25 ~ 4.55% | 36/36 conventional |
+| Epinel | -3.8415 ~ -3.5274% | 14.78 ~ 17.99% | ~99.61 ~ 99.64% where finite | -0.089 ~ +0.016% | 4.25 ~ 4.55% | 36/36 conventional; 24 dominate |
+
+### Anis: Star
+
+| Main B3 | Funnel change | Main share | Break-even | g | l | Outcome |
+|---|---:|---:|---:|---:|---:|---|
+| Rapi: Red Hood | -1.6416 ~ -1.2802% | 31.68 ~ 37.91% | 56.34 ~ 67.63% | +1.78 ~ +2.48% | 3.19 ~ 3.73% | 36/36 conventional |
+| Scarlet: Black Shadow | -1.6942 ~ -1.4524% | 37.78 ~ 44.26% | 72.90 ~ 77.56% | +1.07 ~ +1.20% | 3.19 ~ 3.73% | 36/36 conventional |
+| Snow White: Heavy Arms | -1.8450 ~ -1.5641% | 37.28 ~ 43.80% | 77.91 ~ 81.22% | +0.86 ~ +0.91% | 3.19 ~ 3.73% | 36/36 conventional |
+| Epinel | -3.3165 ~ -2.8211% | 10.91 ~ 14.35% | none | -0.403 ~ -0.273% | 3.19 ~ 3.73% | 36/36 conventional_dominates |
+
+Across the additional 288 Mast-entry comparisons, sustained funnel also wins **0/288**. Entry choice moves the numerical ranges slightly but does not change the long-horizon policy classification in any v2 checkpoint.
+
+## Combined interpretation
+
+Across both opener states, the v2 study contains `576` controlled long-horizon comparisons and produces **0 sustained-funnel wins**.
 
 The important result of v2 is not a dramatic widening of the numerical ranges. Most extrema closely reproduce the legacy 12-point study. Instead, v2 removes dealer-axis confounding and shows that the same conclusion survives a fully crossed Main/Secondary design.
 
 There are small extensions that demonstrate the added combinations are not perfectly redundant:
 
-- Liter + SBS break-even upper edge moves from about 84.87% to about 85.01%.
-- Anis + SBS upper edge moves from about 77.45% to about 77.56%.
-- Anis + Rapi upper edge moves from about 67.43% to about 67.57%.
-- Rapi also finds a slightly less-negative Liter funnel extreme (`-1.2388%`) than the old 12-point grid (`-1.2550%`).
+- Liter + SBS Crown-entry break-even upper edge moves from about 84.87% to about 85.01%.
+- Anis + SBS Crown-entry upper edge moves from about 77.45% to about 77.56%.
+- Anis + Rapi Crown-entry upper edge moves from about 67.43% to about 67.57%.
+- Liter + Rapi Crown-entry finds a slightly less-negative funnel extreme (`-1.2388%`) than the old 12-point grid (`-1.2550%`).
 
 So the 36-point grid gives more defensible coverage while preserving the original direction of the result.
 
-## Pending in this checkpoint
+## Multiprocessing benchmark
 
-- Mast-entry 36-point study is run separately because first-B2 entry choice is an independent variable.
-- 36-point serial vs multiprocessing benchmark is recorded after the verification runner finishes.
-- The legacy web checkpoint route is not replaced until the v2 study is accepted.
+Measured on a GitHub Ubuntu runner reporting 4 CPUs. Serial and parallel payloads were exactly identical in both benchmarks.
+
+| Grid | Serial | Parallel | Effective workers | Speedup |
+|---|---:|---:|---:|---:|
+| legacy 12-point | 54.666 s | 21.680 s | 4 | 2.52× |
+| v2 36-point | 151.931 s | 64.595 s | 4 | 2.35× |
+
+The 36-point batch therefore costs about 65 seconds on this 4-CPU runner instead of about 152 seconds serially. This is practical enough for routine controlled studies and confirms the reason for parallelizing before expanding the grid.
+
+## Research-baseline decision
+
+`raid14-36point-v2` is adopted as the **primary controlled checkpoint grid for new research**.
+
+The legacy 12-point grid remains preserved for:
+
+- regression comparison with earlier documents
+- compatibility with the existing web checkpoint route until the interface is explicitly versioned
+
+There is no reason to inflate the grid to 48 points merely to increase sample count. Further expansion should add a genuinely independent research axis, such as elemental matchup or another clearly defined build dimension.
