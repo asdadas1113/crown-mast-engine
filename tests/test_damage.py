@@ -82,9 +82,26 @@ class DamageFormulaTests(unittest.TestCase):
             context,
             DamageTraits(category=DamageCategory.SKILL, distributed=True),
         )
+        self.assertEqual(normal.taken, 1)
         self.assertEqual(normal.distributed, 1)
-        self.assertAlmostEqual(distributed.distributed, 1.4509)
+        self.assertAlmostEqual(distributed.taken, 1.4509)
+        self.assertEqual(distributed.distributed, 1)
         self.assertAlmostEqual(distributed.total / normal.total, 1.4509)
+
+    def test_damage_taken_and_distributed_buff_share_additive_taken_bucket(self) -> None:
+        result = calculate_damage(
+            DamageContext(
+                static_atk=1_000,
+                boss_def=0,
+                coefficient_pct=100,
+                boss_damage_taken_pct=40,
+                ally_distributed_damage_pct=40,
+            ),
+            DamageTraits(category=DamageCategory.SKILL, distributed=True),
+        )
+        self.assertAlmostEqual(result.taken, 1.8)
+        self.assertEqual(result.distributed, 1)
+        self.assertAlmostEqual(result.total, 1_800)
 
     def test_boss_distributed_taken_requires_damage_taken_in_runtime_profile(self) -> None:
         traits = DamageTraits(category=DamageCategory.SKILL, distributed=True)
