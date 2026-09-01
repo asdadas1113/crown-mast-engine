@@ -97,13 +97,27 @@ def calculate_damage(context: DamageContext, traits: DamageTraits) -> DamageBrea
     damage_up = 1 + damage_up_pct / 100
 
     sequential = context.sequential_multiplier if traits.sequential else 1.0
+
+    # Moris calculator and NIKKE.gg both place Distributed Damage in the same
+    # Damage Taken multiplier as ordinary enemy Damage Taken.  Therefore an
+    # ally-side Distributed Damage buff must add into this bucket rather than
+    # multiply as an independent layer.  Enemy-side distributed-taken remains
+    # conditionally enabled by the runtime profile represented here.
     distributed_taken_pct = 0.0
     if traits.distributed and context.boss_damage_taken_pct > 0:
         distributed_taken_pct = context.boss_distributed_taken_pct
-    taken = 1 + (context.boss_damage_taken_pct + distributed_taken_pct) / 100
-    distributed = (
-        1 + context.ally_distributed_damage_pct / 100 if traits.distributed else 1.0
+    ally_distributed_pct = (
+        context.ally_distributed_damage_pct if traits.distributed else 0.0
     )
+    taken = 1 + (
+        context.boss_damage_taken_pct
+        + distributed_taken_pct
+        + ally_distributed_pct
+    ) / 100
+
+    # Retained for report-schema compatibility.  The distributed contribution
+    # now lives inside `taken`, so there is no second multiplicative layer.
+    distributed = 1.0
     coefficient = context.coefficient_pct / 100
 
     total = (
