@@ -99,8 +99,10 @@ class ScarletBlackShadowMechanicsTests(unittest.TestCase):
             and event.source == "skill1_phase2"
             and 19.3 <= event.time < 29.3
         )
+        self.assertEqual(phase1.breakdown.taken, 1)
         self.assertEqual(phase1.breakdown.distributed, 1)
-        self.assertAlmostEqual(phase2.breakdown.distributed, 1.3006)
+        self.assertAlmostEqual(phase2.breakdown.taken, 1.3006)
+        self.assertEqual(phase2.breakdown.distributed, 1)
 
 
 class ScarletBlackShadowAnalysisTests(unittest.TestCase):
