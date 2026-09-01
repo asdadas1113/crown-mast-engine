@@ -76,6 +76,17 @@ A one-off full `unittest discover` run executed 214 tests and reported 6 failure
 
 Those stale/tolerance-sensitive assertions are separate regression-test maintenance work and were not changed as part of the batch-parallelization task.
 
+## Checkpoint-v2 follow-up
+
+The next controlled grid is implemented separately from the legacy 12-point web checkpoint route as `raid14-36point-v2`. It uses a fully crossed design:
+
+- B1 development: 4 levels
+- Main build: 3 levels (`O5 bare`, `O5 ATK3`, `O5 Ammo2`)
+- Secondary gear: 3 levels (`O5`, `O0`, `B5`)
+- total: 36 points
+
+The legacy 12-point interface remains available as a regression/reference path until the v2 grid is measured and accepted.
+
 ## Conclusion
 
-Case-level multiprocessing is validated for the intended research batch path. The next research step can be checkpoint-grid redesign/expansion rather than deeper engine-internal optimization.
+Case-level multiprocessing is validated for the intended research batch path. The next research step is validating the 36-point checkpoint-v2 grid and then using it for broader Crown/Mast studies rather than deeper engine-internal optimization.
