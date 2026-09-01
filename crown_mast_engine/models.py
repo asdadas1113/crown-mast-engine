@@ -35,7 +35,7 @@ class TeamRoster:
         if any(not isinstance(actor, str) or not actor for actor in members):
             raise TypeError("team roster members must be non-empty strings")
         if len(set(members)) != len(members):
-            raise ValueError("team roster cannot assign the same character to multiple roles")
+            raise ValueError("파티에는 같은 캐릭터를 두 번 편성할 수 없습니다.")
 
     @property
     def members(self) -> tuple[str, ...]:
