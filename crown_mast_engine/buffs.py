@@ -31,6 +31,7 @@ class ResolvedOffensiveBuffs:
     crit_rate_pct: float
     crit_rate_normal_pct: float
     crit_damage_pct: float
+    core_damage_pct: float
     normal_attack_pct: float
     reload_speed_pct: float
     charge_speed_pct: float
@@ -142,6 +143,7 @@ class BuffBook:
             crit_rate_pct=totals.get("crit_rate_pct", 0.0),
             crit_rate_normal_pct=totals.get("crit_rate_normal_pct", 0.0),
             crit_damage_pct=totals.get("crit_damage_pct", 0.0),
+            core_damage_pct=totals.get("core_damage_pct", 0.0),
             normal_attack_pct=totals.get("normal_attack_pct", 0.0),
             reload_speed_pct=totals.get("reload_speed_pct", 0.0),
             charge_speed_pct=totals.get("charge_speed_pct", 0.0),
