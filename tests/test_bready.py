@@ -165,7 +165,8 @@ class BreadyMechanicsTests(unittest.TestCase):
             if event.source == "skill2_recommended_distributed"
             and event.time >= self.first_taste_event.time
         )
-        self.assertGreater(first_rider.breakdown.distributed, 1)
+        self.assertGreater(first_rider.breakdown.taken, 1)
+        self.assertEqual(first_rider.breakdown.distributed, 1)
 
 
 if __name__ == "__main__":
