@@ -37,21 +37,35 @@ class LiberalioMechanicsTests(unittest.TestCase):
             for event in self.result.events
             if event.event_type == EventType.FULL_BURST_ENTER
         )
-        self.assertEqual(
-            self.result.buff_total(first_fb + 0.001, self.actor, "atk_pct"),
-            160,
+        self_atk = next(
+            window
+            for window in self.result.buffs.windows
+            if window.source == self.actor
+            and window.skill == "skill1_full_burst"
+            and window.stat == "atk_pct"
+            and window.start == first_fb
         )
-        self.assertEqual(
-            self.result.buff_total(
-                first_fb + 0.001,
-                LIBERALIO_ROSTER.secondary_b3,
-                "charge_speed_pct",
-            ),
-            12.74,
+        other_b3_charge = next(
+            window
+            for window in self.result.buffs.windows
+            if window.source == self.actor
+            and window.skill == "skill1_other_b3_charge_speed"
+            and window.stat == "charge_speed_pct"
+            and window.start == first_fb
         )
-        self.assertEqual(
-            self.result.buff_total(first_fb + 0.001, self.actor, "charge_speed_pct"),
-            0,
+        self.assertEqual(self_atk.target, self.actor)
+        self.assertEqual(self_atk.value, 160)
+        self.assertAlmostEqual(self_atk.end - self_atk.start, 3)
+        self.assertEqual(other_b3_charge.target, LIBERALIO_ROSTER.secondary_b3)
+        self.assertEqual(other_b3_charge.value, 12.74)
+        self.assertAlmostEqual(other_b3_charge.end - other_b3_charge.start, 10)
+        self.assertFalse(
+            any(
+                window.source == self.actor
+                and window.skill == "skill1_other_b3_charge_speed"
+                and window.target == self.actor
+                for window in self.result.buffs.windows
+            )
         )
 
     def test_raging_current_is_earned_after_the_first_full_charge(self) -> None:
@@ -69,22 +83,9 @@ class LiberalioMechanicsTests(unittest.TestCase):
         self.assertTrue(windows)
         expected_start = round(first_normal.time + 1 / FPS, 6)
         self.assertEqual(windows[0].start, expected_start)
-        self.assertEqual(
-            self.result.buff_total(
-                first_normal.time,
-                self.actor,
-                "attack_damage_pct",
-            ),
-            0,
-        )
-        self.assertEqual(
-            self.result.buff_total(
-                expected_start + 0.001,
-                self.actor,
-                "attack_damage_pct",
-            ),
-            231,
-        )
+        self.assertEqual(windows[0].value, 231)
+        self.assertFalse(windows[0].active_at(first_normal.time))
+        self.assertTrue(windows[0].active_at(expected_start + 0.001))
 
     def test_every_full_charge_emits_five_hit_aggregate_rider(self) -> None:
         normals = self.result.damage_events_for(
