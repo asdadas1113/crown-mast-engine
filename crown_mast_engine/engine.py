@@ -642,6 +642,7 @@ class CrownMastEngine:
                 request.actor,
                 "core_damage_pct",
             )
+            + buffs.core_damage_pct
         ) / 100
         coefficient_pct = request.coefficient_pct
         if request.category == DamageCategory.NORMAL:
