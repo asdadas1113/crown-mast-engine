@@ -1,0 +1,28 @@
+name: Sample batch parallel verification
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+    paths:
+      - crown_mast_engine/samples.py
+      - tests/test_samples.py
+      - scripts/benchmark_sample_batch.py
+      - .github/workflows/sample-batch-parallel.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m compileall -q crown_mast_engine tests scripts
+      - name: Sample batch regression tests
+        run: python -m unittest discover -s tests -p 'test_samples.py' -v
+      - name: RAID14 12-point serial versus parallel benchmark
+        env:
+          PYTHONPATH: .
+        run: python scripts/benchmark_sample_batch.py
