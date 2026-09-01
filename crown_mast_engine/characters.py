@@ -112,49 +112,88 @@ class CharacterCatalog:
         return CharacterCatalog(definitions, self.scope)
 
 
-def load_character_catalog() -> CharacterCatalog:
-    path = files("crown_mast_engine").joinpath("data", "characters.json")
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("schema_version") != 1:
-        raise ValueError(f"unsupported character schema: {payload.get('schema_version')}")
+def _scope_signature(scope_data: Mapping[str, object]) -> tuple[object, ...]:
+    return (
+        scope_data["level"],
+        scope_data["gear"],
+        scope_data["core"],
+        tuple(scope_data["skill_levels"]),
+    )
 
-    scope_data = payload["scope"]
+
+def load_character_catalog() -> CharacterCatalog:
+    data_dir = files("crown_mast_engine").joinpath("data")
+    base_path = data_dir.joinpath("characters.json")
+    extra_paths = tuple(
+        sorted(
+            (
+                path
+                for path in data_dir.iterdir()
+                if path.name.startswith("character_") and path.name.endswith(".json")
+            ),
+            key=lambda path: path.name,
+        )
+    )
+    payloads = tuple(
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in (base_path, *extra_paths)
+    )
+    for payload in payloads:
+        if payload.get("schema_version") != 1:
+            raise ValueError(
+                f"unsupported character schema: {payload.get('schema_version')}"
+            )
+
+    base_scope_data = payloads[0]["scope"]
+    base_scope_signature = _scope_signature(base_scope_data)
+    for payload in payloads[1:]:
+        if _scope_signature(payload["scope"]) != base_scope_signature:
+            raise ValueError("modular character data scope does not match base scope")
+
+    source_revisions = tuple(
+        str(payload["scope"]["source_revision"])
+        for payload in payloads
+        if payload["scope"].get("source_revision")
+    )
     scope = CharacterDataScope(
-        level=int(scope_data["level"]),
-        gear=str(scope_data["gear"]),
-        core=int(scope_data["core"]),
-        skill_levels=tuple(int(value) for value in scope_data["skill_levels"]),
-        source_revision=str(scope_data["source_revision"]),
+        level=int(base_scope_data["level"]),
+        gear=str(base_scope_data["gear"]),
+        core=int(base_scope_data["core"]),
+        skill_levels=tuple(int(value) for value in base_scope_data["skill_levels"]),
+        source_revision="; ".join(dict.fromkeys(source_revisions)),
     )
 
     definitions: list[CharacterDefinition] = []
-    for item in payload["characters"]:
-        weapon = WeaponProfile(**item["weapon"])
-        skills = MappingProxyType(
-            {
-                skill: MappingProxyType({key: float(value) for key, value in values.items()})
-                for skill, values in item["skills"].items()
-            }
-        )
-        definitions.append(
-            CharacterDefinition(
-                slug=str(item["slug"]),
-                name=str(item["name"]),
-                unit_class=str(item["unit_class"]),
-                burst_stage=str(item["burst_stage"]),
-                burst_cooldown_sec=float(item["burst_cooldown_sec"]),
-                element=str(item["element"]),
-                progression_atk=float(item["progression_atk"]),
-                base_crit_rate_pct=float(item["base_crit_rate_pct"]),
-                base_crit_damage_pct=float(item["base_crit_damage_pct"]),
-                weapon=weapon,
-                skills=skills,
-                extra_advantage_against=tuple(
-                    str(value)
-                    for value in item.get("extra_advantage_against", ())
-                ),
+    for payload in payloads:
+        for item in payload["characters"]:
+            weapon = WeaponProfile(**item["weapon"])
+            skills = MappingProxyType(
+                {
+                    skill: MappingProxyType(
+                        {key: float(value) for key, value in values.items()}
+                    )
+                    for skill, values in item["skills"].items()
+                }
             )
-        )
+            definitions.append(
+                CharacterDefinition(
+                    slug=str(item["slug"]),
+                    name=str(item["name"]),
+                    unit_class=str(item["unit_class"]),
+                    burst_stage=str(item["burst_stage"]),
+                    burst_cooldown_sec=float(item["burst_cooldown_sec"]),
+                    element=str(item["element"]),
+                    progression_atk=float(item["progression_atk"]),
+                    base_crit_rate_pct=float(item["base_crit_rate_pct"]),
+                    base_crit_damage_pct=float(item["base_crit_damage_pct"]),
+                    weapon=weapon,
+                    skills=skills,
+                    extra_advantage_against=tuple(
+                        str(value)
+                        for value in item.get("extra_advantage_against", ())
+                    ),
+                )
+            )
     return CharacterCatalog(tuple(definitions), scope)
 
 
