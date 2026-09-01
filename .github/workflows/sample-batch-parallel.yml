@@ -21,11 +21,41 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_samples.py' -v
       - name: Checkpoint v2 structure tests
         run: python -m unittest discover -s tests -p 'test_checkpoints_v2.py' -v
+      - name: Checkpoint v3 structure tests
+        run: python -m unittest discover -s tests -p 'test_checkpoints_v3.py' -v
+
+  study64:
+    if: github.event_name == 'pull_request' && github.head_ref == 'research/64point-realistic-grid'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        b1:
+          - liter
+          - anis-star
+        main:
+          - rapi-red-hood
+          - scarlet-black-shadow
+          - snow-white-heavy-arms
+          - epinel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run 64-point neutral + main-advantage study
+        run: >-
+          python scripts/run_checkpoint_v3_study.py
+          --b1 ${{ matrix.b1 }}
+          --main ${{ matrix.main }}
+          --boss-mode both
+          --workers 4
 
   benchmark:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,3 +65,5 @@ jobs:
         run: python scripts/benchmark_sample_batch.py
       - name: RAID14 36-point serial versus parallel benchmark
         run: python scripts/benchmark_checkpoint_v2.py
+      - name: RAID14 64-point serial versus parallel benchmark
+        run: python scripts/benchmark_checkpoint_v3.py
