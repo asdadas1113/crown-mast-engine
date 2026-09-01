@@ -33,7 +33,9 @@ class CrownMastEngineTests(unittest.TestCase):
     def test_opening_mast_crown_mast_only_changes_first_macro_cycle(self) -> None:
         self.assertEqual(
             OPENING_MAST_CROWN_MAST.b2_slot_by_cycle,
-            ("mast", "crown", "mast") + ("crown", "crown", "mast") * 3,
+            ("mast", "crown", "mast")
+            + ("crown", "crown", "mast") * 3
+            + ("crown", "mast"),
         )
         result = simulate_rotation(OPENING_MAST_CROWN_MAST)
         mast_casts = [snapshot for snapshot in result.snapshots if snapshot.b2_actor == result.roster.mast]
