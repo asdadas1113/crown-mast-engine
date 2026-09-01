@@ -106,6 +106,7 @@ class CinderellaCrystalWaveSkillHook(SkillHookBase):
                         traits=DamageTraits(
                             category=DamageCategory.SKILL,
                             core_eligible=True,
+                            forced_core=True,
                             range_eligible=False,
                         ),
                     )
@@ -146,6 +147,7 @@ class CinderellaCrystalWaveSkillHook(SkillHookBase):
                         traits=DamageTraits(
                             category=DamageCategory.BURST,
                             core_eligible=False,
+                    full_burst_eligible=False,
                             range_eligible=False,
                         ),
                     ),

@@ -1,21 +1,29 @@
 from __future__ import annotations
 
-from math import inf
-
 from ..buffs import BuffWindow
-from ..combat import DamageRequest, WeaponShot
+from ..combat import FPS, DamageRequest, WeaponShot
 from ..damage import DamageTraits
 from ..mechanics import SkillEffect, SkillHookBase, SkillHookContext
 from ..models import BattleEvent, DamageCategory, EventType
 
 
 class QuencyEscapeQueenSkillHook(SkillHookBase):
-    """Single-boss implementation of Quency: Escape Queen's route stages."""
+    """Single-boss implementation of Quency: Escape Queen's Explore Route.
+
+    Quency fires two hits per SMG pull. Her `after 2 normal attacks` data trigger is
+    therefore one engine pull. Stage 2 unlocks only after Stage 1 reaches 10, and
+    Stage 3 only after Stage 2 reaches 10. The 2s/1s/0.5s stack durations are live:
+    Stage 1 survives the normal reload while Stages 2/3 lapse and rebuild.
+    """
 
     def __init__(self, context: SkillHookContext) -> None:
+        self._hit_meter = 0
         self._stage1 = 0
         self._stage2 = 0
         self._stage3 = 0
+        self._stage1_until = 0.0
+        self._stage2_until = 0.0
+        self._stage3_until = 0.0
 
     def scheduled_buffs(
         self,
@@ -25,18 +33,13 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
         buffs: list[BuffWindow] = []
         duration = context.definition.skill_value("burst", "duration_sec")
         for event in events:
-            if (
-                event.event_type == EventType.B3_STAGE_ENTER
-                and event.actor == context.actor
-            ):
+            if event.event_type == EventType.B3_STAGE_ENTER and event.actor == context.actor:
                 buffs.append(
                     BuffWindow(
                         source=context.actor,
                         skill="burst_reload",
                         stat="reload_speed_pct",
-                        value=context.definition.skill_value(
-                            "burst", "reload_speed_pct"
-                        ),
+                        value=context.definition.skill_value("burst", "reload_speed_pct"),
                         target=context.actor,
                         start=event.time,
                         end=event.time + duration,
@@ -49,10 +52,7 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
         event: BattleEvent,
         context: SkillHookContext,
     ) -> tuple[SkillEffect, ...]:
-        if (
-            event.event_type != EventType.B3_STAGE_ENTER
-            or event.actor != context.actor
-        ):
+        if event.event_type != EventType.B3_STAGE_ENTER or event.actor != context.actor:
             return ()
 
         duration = context.definition.skill_value("burst", "duration_sec")
@@ -61,9 +61,7 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
                 source=context.actor,
                 skill="burst",
                 stat="attack_damage_pct",
-                value=context.definition.skill_value(
-                    "burst", "attack_damage_pct"
-                ),
+                value=context.definition.skill_value("burst", "attack_damage_pct"),
                 target=context.actor,
                 start=event.time,
                 end=event.time + duration,
@@ -73,17 +71,29 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
                 actor=context.actor,
                 source="burst_distributed",
                 category=DamageCategory.BURST,
-                coefficient_pct=context.definition.skill_value(
-                    "burst", "damage_pct"
-                ),
+                coefficient_pct=context.definition.skill_value("burst", "damage_pct"),
                 traits=DamageTraits(
                     category=DamageCategory.BURST,
                     distributed=True,
                     core_eligible=False,
+                    full_burst_eligible=False,
                     range_eligible=False,
                 ),
             ),
         )
+
+    def _expire_route(self, time: float) -> None:
+        if self._stage1 and time >= self._stage1_until:
+            self._stage1 = self._stage2 = self._stage3 = 0
+            self._stage1_until = self._stage2_until = self._stage3_until = 0.0
+            return
+        if self._stage2 and time >= self._stage2_until:
+            self._stage2 = self._stage3 = 0
+            self._stage2_until = self._stage3_until = 0.0
+            return
+        if self._stage3 and time >= self._stage3_until:
+            self._stage3 = 0
+            self._stage3_until = 0.0
 
     def on_weapon_shot(
         self,
@@ -93,27 +103,40 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
         if shot.actor != context.actor:
             return ()
 
-        trigger_every = int(
+        self._hit_meter += context.definition.weapon.hits_per_shot
+        trigger_hits = int(
             context.definition.skill_value("skill2", "normal_attacks_per_trigger")
         )
-        if (shot.shot_index + 1) % trigger_every:
+        if self._hit_meter < trigger_hits:
             return ()
+        self._hit_meter -= trigger_hits
+        self._expire_route(shot.time)
 
-        effects: list[SkillEffect] = []
-        if self._stage1 < int(
-            context.definition.skill_value("skill2", "stage1_max_stacks")
-        ):
+        stage1_max = int(context.definition.skill_value("skill2", "stage1_max_stacks"))
+        stage2_max = int(context.definition.skill_value("skill2", "stage2_max_stacks"))
+        stage3_max = int(context.definition.skill_value("skill2", "stage3_max_stacks"))
+
+        if self._stage1 < stage1_max:
             self._stage1 += 1
-        elif self._stage2 < int(
-            context.definition.skill_value("skill2", "stage2_max_stacks")
-        ):
+        elif self._stage2 < stage2_max:
             self._stage2 += 1
-        elif self._stage3 < int(
-            context.definition.skill_value("skill2", "stage3_max_stacks")
-        ):
+        elif self._stage3 < stage3_max:
             self._stage3 += 1
 
-        effects.append(
+        after_hit = round(shot.time + 1 / FPS, 6)
+        self._stage1_until = after_hit + context.definition.skill_value(
+            "skill2", "stage1_duration_sec"
+        )
+        if self._stage2:
+            self._stage2_until = after_hit + context.definition.skill_value(
+                "skill2", "stage2_duration_sec"
+            )
+        if self._stage3:
+            self._stage3_until = after_hit + context.definition.skill_value(
+                "skill2", "stage3_duration_sec"
+            )
+
+        effects: list[SkillEffect] = [
             BuffWindow(
                 source=context.actor,
                 skill="skill2_stage1",
@@ -122,29 +145,20 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
                     "skill2", "stage1_atk_pct_per_stack"
                 ) * self._stage1,
                 target=context.actor,
-                start=shot.time,
-                end=shot.time
-                + context.definition.skill_value(
-                    "skill2", "stage1_duration_sec"
-                ),
+                start=after_hit,
+                end=self._stage1_until,
             )
-        )
-
-        stage1_max = self._stage1 >= int(
-            context.definition.skill_value("skill2", "stage1_max_stacks")
-        )
-        if stage1_max:
+        ]
+        if self._stage1 >= stage1_max:
             effects.append(
                 BuffWindow(
                     source=context.actor,
                     skill="skill1_stage1_max",
                     stat="distributed_damage_pct",
-                    value=context.definition.skill_value(
-                        "skill1", "distributed_damage_pct"
-                    ),
+                    value=context.definition.skill_value("skill1", "distributed_damage_pct"),
                     target=context.actor,
-                    start=shot.time,
-                    end=inf,
+                    start=after_hit,
+                    end=self._stage1_until,
                 )
             )
 
@@ -158,31 +172,22 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
                         "skill2", "stage2_atk_pct_per_stack"
                     ) * self._stage2,
                     target=context.actor,
-                    start=shot.time,
-                    end=shot.time
-                    + context.definition.skill_value(
-                        "skill2", "stage2_duration_sec"
-                    ),
+                    start=after_hit,
+                    end=self._stage2_until,
                 )
             )
-
-        stage2_max = self._stage2 >= int(
-            context.definition.skill_value("skill2", "stage2_max_stacks")
-        )
-        if stage2_max:
-            effects.append(
-                BuffWindow(
-                    source=context.actor,
-                    skill="skill1_stage2_max",
-                    stat="core_damage_pct",
-                    value=context.definition.skill_value(
-                        "skill1", "core_damage_pct"
-                    ),
-                    target=context.actor,
-                    start=shot.time,
-                    end=inf,
+            if self._stage2 >= stage2_max:
+                effects.append(
+                    BuffWindow(
+                        source=context.actor,
+                        skill="skill1_stage2_max",
+                        stat="core_damage_pct",
+                        value=context.definition.skill_value("skill1", "core_damage_pct"),
+                        target=context.actor,
+                        start=after_hit,
+                        end=self._stage2_until,
+                    )
                 )
-            )
 
         if self._stage3:
             effects.append(
@@ -194,29 +199,21 @@ class QuencyEscapeQueenSkillHook(SkillHookBase):
                         "skill2", "stage3_atk_pct_per_stack"
                     ) * self._stage3,
                     target=context.actor,
-                    start=shot.time,
-                    end=shot.time
-                    + context.definition.skill_value(
-                        "skill2", "stage3_duration_sec"
-                    ),
+                    start=after_hit,
+                    end=self._stage3_until,
                 )
             )
+            if self._stage3 >= stage3_max:
+                effects.append(
+                    BuffWindow(
+                        source=context.actor,
+                        skill="skill1_stage3_max",
+                        stat="crit_rate_pct",
+                        value=context.definition.skill_value("skill1", "crit_rate_pct"),
+                        target=context.actor,
+                        start=after_hit,
+                        end=self._stage3_until,
+                    )
+                )
 
-        stage3_max = self._stage3 >= int(
-            context.definition.skill_value("skill2", "stage3_max_stacks")
-        )
-        if stage3_max:
-            effects.append(
-                BuffWindow(
-                    source=context.actor,
-                    skill="skill1_stage3_max",
-                    stat="crit_rate_pct",
-                    value=context.definition.skill_value(
-                        "skill1", "crit_rate_pct"
-                    ),
-                    target=context.actor,
-                    start=shot.time,
-                    end=inf,
-                )
-            )
         return tuple(effects)

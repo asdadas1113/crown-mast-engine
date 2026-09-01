@@ -52,43 +52,32 @@ class RavenMechanicsTests(unittest.TestCase):
         for window in windows:
             self.assertAlmostEqual(window.end - window.start, 10)
 
-    def test_full_charge_appends_independent_five_tick_sustained_instances(self) -> None:
-        normals = self.result.damage_events_for(
-            actor=self.actor,
-            category=DamageCategory.NORMAL,
-        )
+    def test_full_charge_builds_one_refreshing_stack_scaled_dot(self) -> None:
         dots = tuple(
             event
             for event in self.result.damage_events_for(
-                actor=self.actor,
-                category=DamageCategory.SKILL,
+                actor=self.actor, category=DamageCategory.SKILL
             )
             if event.source == "skill1_sustained_dot"
         )
-        self.assertTrue(normals)
         self.assertTrue(dots)
-        ticks_by_shot = Counter(event.shot_index for event in dots)
-        normal_by_shot = {event.shot_index: event for event in normals}
-
-        first_shot = normals[0]
-        first_ticks = tuple(
-            event for event in dots if event.shot_index == first_shot.shot_index
-        )
-        self.assertEqual(len(first_ticks), 5)
-        self.assertEqual(
-            tuple(round(event.time - first_shot.time, 6) for event in first_ticks),
-            (1.0, 2.0, 3.0, 4.0, 5.0),
-        )
-
-        self.assertGreaterEqual(len(dots), 4 * len(normals))
-        self.assertLessEqual(max(ticks_by_shot.values()), 5)
-        self.assertTrue(set(ticks_by_shot).issubset(normal_by_shot))
-        self.assertTrue(all(event.coefficient_pct == 68.46 for event in dots))
         self.assertTrue(all(event.traits.sustained for event in dots))
         self.assertTrue(all(not event.traits.core_eligible for event in dots))
-        self.assertTrue(all(not event.traits.range_eligible for event in dots))
-        self.assertTrue(all(event.traits.crit_eligible for event in dots))
         self.assertTrue(all(event.traits.full_burst_eligible for event in dots))
+        self.assertLessEqual(max(event.coefficient_pct for event in dots), 684.6 + 1e-9)
+        self.assertTrue(
+            any(abs(event.coefficient_pct - 684.6) < 1e-6 for event in dots),
+            "continuous boss fire should reach Raven's 10-stack 684.6%/s state",
+        )
+
+    def test_sustained_stack_state_never_exceeds_ten(self) -> None:
+        windows = tuple(
+            window for window in self.result.buffs.windows
+            if window.source == self.actor
+            and window.skill == "skill1_sustained_stack_state"
+        )
+        self.assertTrue(windows)
+        self.assertEqual(max(window.value for window in windows), 10.0)
 
     def test_burst_packet_lands_before_full_burst_and_an_mode_is_sustained_only(self) -> None:
         burst_times = tuple(

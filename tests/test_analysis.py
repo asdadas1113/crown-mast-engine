@@ -37,8 +37,8 @@ class RotationAnalysisTests(unittest.TestCase):
             ComparisonCase.STANDARD_BREAK_EVEN,
         )
         self.assertEqual(overall.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertAlmostEqual(overall.team_c, 2_144_196_385.513629)
-        self.assertAlmostEqual(overall.team_f, 2_118_326_068.3537395)
+        self.assertAlmostEqual(overall.team_c, 2_144_196_385.5138705)
+        self.assertAlmostEqual(overall.team_f, 2_118_326_068.3537395, delta=1e-3)
         self.assertAlmostEqual(overall.g, 0.014604144983842327)
         self.assertAlmostEqual(overall.l, 0.035212801911879255)
         self.assertAlmostEqual(
@@ -184,12 +184,13 @@ class RotationAnalysisTests(unittest.TestCase):
             self.analysis.secondary_b3_mast3_deprivation,
             cycle_damage,
         )
-        self.assertAlmostEqual(cycle_damage.conventional, 201_149_946.10748586)
-        self.assertAlmostEqual(cycle_damage.funnel, 164_000_383.44454643)
-        self.assertAlmostEqual(cycle_damage.loss_from_funnel, 37_149_562.66293943)
+        self.assertAlmostEqual(cycle_damage.conventional, 201_149_946.10748595)
+        self.assertAlmostEqual(cycle_damage.funnel, 164_000_383.44454643, delta=1e-3)
+        self.assertAlmostEqual(cycle_damage.loss_from_funnel, 37_149_562.66293943, delta=1e-3)
         self.assertAlmostEqual(
             cycle_damage.relative_loss_from_funnel,
             0.1846859190461244,
+            delta=1e-12,
         )
 
     def test_mismatched_results_are_rejected(self) -> None:

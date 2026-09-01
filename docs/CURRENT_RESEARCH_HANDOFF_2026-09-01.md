@@ -25,6 +25,10 @@ docs/RESEARCH_HANDOFF_V6_LEGACY_FULL.md
 
 `RESEARCH_HANDOFF_V6_LEGACY_FULL.md`는 12버스트 시절 역사와 시행착오를 보존한 legacy 문서다. 그 안의 옛 수치나 §25 설계를 현재 최종값으로 복구하지 않는다.
 
+# 0.1. 출처 검증 정책
+
+`docs/SOURCE_VALIDATION_POLICY.md`가 현행 최상위 규칙이다. **Moris 계산기와 NIKKE.gg를 우선 참조하고, 타 사이트/직접 근거와의 교차검증을 필수로 한다.** `nikke-sim`은 pinned datamine/구조화 데이터/참조 구현을 위한 secondary source이며 단독 확정 근거로 사용하지 않는다. timing/trigger/bucket처럼 연구 결과를 바꿀 수 있는 항목은 두 독립 근거 또는 직접 인게임 검증 없이는 새 semantic rule로 확정하지 않는다.
+
 ---
 
 # 1. 저장소 / 브랜치
@@ -114,7 +118,10 @@ s^*=\frac{l}{g+l}
 
 ---
 
-# 5. 64-point realistic v3 — 현재 primary 결과
+# 5. 64-point realistic v3 — pre-audit historical checkpoint
+
+> **2026-09-02 mechanics audit:** cast-instant Burst 피해의 Full Burst +50% 오적용, Raven DoT stack 구조, Quency route cadence/expiry 등을 교정했다. 아래 1,024-point 수치는 교정 전 역사적 checkpoint이며 현재 publication 결과로 인용하지 않는다. 연구 배치는 사용자가 다시 승인한 뒤 재실행한다.
+
 
 각 B1 / Main B3 / Secondary B3 성장축에 네 현실적 성장상태를 사용한다.
 
@@ -277,7 +284,7 @@ Damage Taken = 1 + ordinary Damage Taken + Distributed Damage
 현재 spot-check:
 
 ```text
-Liter / Rapi / Helm: M1 opener about +1.71%
+Liter / Rapi / Helm: audited M1 opener about +1.90%
 SBS case: M1 about -0.36%, Crown opener slightly better
 ```
 
@@ -388,9 +395,7 @@ L^*=\frac{C_0-P_0}{C_w-P_w}
 최근 전체 검증 상태:
 
 ```text
-22 test modules
-209 tests
-209 / 209 pass
+2026-09-02 audited full discovery: 279 tests / 279 pass
 compileall PASS
 ```
 

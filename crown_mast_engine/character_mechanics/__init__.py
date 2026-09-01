@@ -40,7 +40,7 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "epinel": EpinelSkillHook,
         "neon-vision-eye": NeonVisionEyeSkillHook,
     },
-    revision="standard-hooks-r11",
+    revision="standard-hooks-r12-audited",
 )
 
 
