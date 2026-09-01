@@ -174,9 +174,11 @@ class BurstCastTimingAuditTests(unittest.TestCase):
         zero_fb = replace(STANDARD_COMBAT_SETTINGS, full_burst_bonus_pct=0.0)
         for actor, source in self.CASES:
             with self.subTest(actor=actor):
-                roster = TeamRoster(main_b3=actor)
-                if actor == "helm":
-                    roster = TeamRoster(main_b3="rapi-red-hood", secondary_b3="helm")
+                roster = (
+                    TeamRoster(main_b3="rapi-red-hood", secondary_b3="helm")
+                    if actor == "helm"
+                    else TeamRoster(main_b3=actor)
+                )
                 base = simulate_rotation(
                     CROWN_CROWN_MAST,
                     roster=roster,
