@@ -27,6 +27,8 @@ jobs:
           tests.test_liberalio
           tests.test_raven
           tests.test_cinderella_crystal_wave
+          tests.test_rapi_red_hood
+          tests.test_character_audit
           tests.test_phantom_favorite_item
           tests.test_milk_blooming_bunny
           tests.test_quency_escape_queen
