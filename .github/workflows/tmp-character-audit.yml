@@ -25,11 +25,13 @@ jobs:
         run: python -m compileall -q crown_mast_engine tests scripts
       - name: Full regression suite
         run: python -m unittest discover -v tests
-      - name: Commit verified patch and remove temporary files
+      - name: Commit verified clean source patch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm scripts/_tmp_character_audit_patch.py scripts/_tmp_character_audit_finalize.py scripts/_tmp_character_audit_runner.py scripts/_tmp_character_audit_runner2.py scripts/_tmp_character_audit_runner3.py scripts/_tmp_character_audit_runner4.py .github/workflows/tmp-character-audit.yml
+          git restore .github/workflows/sample-batch-parallel.yml
+          find crown_mast_engine scripts tests -type d -name __pycache__ -prune -exec rm -rf {} +
+          find crown_mast_engine scripts tests -name '*.pyc' -delete
           git add -A
           git commit -m "Add Rapi B1 and audit character mechanics"
           git push origin HEAD:tmp/rapi-b1-added-character-audit
