@@ -73,7 +73,8 @@ class BreadyMechanicsTests(unittest.TestCase):
         self.assertEqual(tuple(window.start for window in windows), full_burst_starts)
         self.assertTrue(windows)
         self.assertTrue(all(window.value == 70.01 for window in windows))
-        self.assertTrue(all(window.end - window.start == 10 for window in windows))
+        for window in windows:
+            self.assertAlmostEqual(window.end - window.start, 10)
 
     def test_own_burst_gets_unconditional_and_recommended_buffs(self) -> None:
         burst_time = next(
@@ -100,8 +101,11 @@ class BreadyMechanicsTests(unittest.TestCase):
         )
         self.assertEqual(burst_attack.value, 60.19)
         self.assertEqual(burst_recommended.value, 70.09)
-        self.assertEqual(burst_attack.end - burst_attack.start, 10)
-        self.assertEqual(burst_recommended.end - burst_recommended.start, 10)
+        self.assertAlmostEqual(burst_attack.end - burst_attack.start, 10)
+        self.assertAlmostEqual(
+            burst_recommended.end - burst_recommended.start,
+            10,
+        )
 
     def test_every_recommended_full_charge_emits_distributed_rider(self) -> None:
         start = self.first_taste_event.time
@@ -146,7 +150,13 @@ class BreadyMechanicsTests(unittest.TestCase):
         )
         self.assertEqual(len(windows), len(riders))
         self.assertTrue(all(window.value == 60.01 for window in windows))
-        self.assertTrue(all(window.end - window.start == 5 for window in windows))
+        self.assertEqual(
+            tuple(window.start for window in windows),
+            tuple(event.time for event in riders),
+        )
+        for current, following in zip(windows, windows[1:]):
+            self.assertEqual(current.end, following.start)
+        self.assertAlmostEqual(windows[-1].end - windows[-1].start, 5)
 
     def test_mast_distributed_amp_applies_to_recommended_rider(self) -> None:
         first_rider = next(
