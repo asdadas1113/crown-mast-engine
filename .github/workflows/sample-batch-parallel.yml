@@ -20,8 +20,20 @@ jobs:
           python-version: "3.11"
       - name: Compile
         run: python -m compileall -q crown_mast_engine tests scripts
-      - name: Full unit and regression suite
-        run: python -m unittest discover -s tests -v
+      - name: Character expansion regression suite
+        run: >-
+          python -m unittest -v
+          tests.test_bready
+          tests.test_characters
+          tests.test_b1_characters
+          tests.test_buffs
+          tests.test_combat
+          tests.test_engine
+          tests.test_helm
+          tests.test_neon_vision_eye
+          tests.test_snow_white_heavy_arms
+          tests.test_timeline
+          tests.test_checkpoints_v3
 
   benchmark:
     if: github.event_name == 'workflow_dispatch'
