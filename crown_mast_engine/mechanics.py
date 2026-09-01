@@ -6,7 +6,12 @@ from typing import Callable, Iterable, Mapping, Protocol, TypeAlias
 
 from .buffs import BuffWindow
 from .characters import CharacterDefinition, WeaponProfile
-from .combat import DamageRequest, WeaponShot
+from .combat import (
+    STANDARD_COMBAT_SETTINGS,
+    CombatSettings,
+    DamageRequest,
+    WeaponShot,
+)
 from .models import BattleEvent, TeamRoster
 from .timeline import BurstCycle
 
@@ -80,6 +85,7 @@ class SkillHookContext:
     roster: TeamRoster
     timeline: tuple[BurstCycle, ...]
     duration_sec: float
+    combat_settings: CombatSettings = STANDARD_COMBAT_SETTINGS
 
 
 class CharacterSkillHook(Protocol):

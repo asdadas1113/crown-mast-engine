@@ -386,6 +386,7 @@ class CrownMastEngine:
                     roster=self.roster,
                     timeline=self.timeline,
                     duration_sec=duration,
+                    combat_settings=self.combat_settings,
                 )
             )
         return tuple(contexts)
