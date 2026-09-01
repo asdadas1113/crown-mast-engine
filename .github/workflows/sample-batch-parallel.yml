@@ -39,5 +39,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run Crown-opener 36-point study
-        run: python scripts/run_checkpoint_v2_study.py --b1 '${{ matrix.b1 }}' --main '${{ matrix.main }}'
+      - name: Run Mast-opener 36-point study
+        run: python scripts/run_checkpoint_v2_study.py --b1 '${{ matrix.b1 }}' --main '${{ matrix.main }}' --baseline opening_mast_crown_mast
