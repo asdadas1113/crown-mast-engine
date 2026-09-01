@@ -115,6 +115,39 @@ class SampleBatchTests(unittest.TestCase):
             ("first", "second"),
         )
 
+    def test_default_workers_use_spawn_process_pool(self) -> None:
+        cases = (
+            SampleCase("first", self.short_scenario),
+            SampleCase("second", self.short_scenario),
+        )
+        captured = {}
+
+        class ImmediateExecutor:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def map(self, function, payloads):
+                return tuple(function(payload) for payload in payloads)
+
+        with patch("crown_mast_engine.samples.os.cpu_count", return_value=8), patch(
+            "crown_mast_engine.samples.ProcessPoolExecutor",
+            ImmediateExecutor,
+        ):
+            batch = run_sample_batch(cases)
+
+        self.assertEqual(captured["max_workers"], 2)
+        self.assertEqual(captured["mp_context"].get_start_method(), "spawn")
+        self.assertEqual(
+            tuple(result.case_id for result in batch.results),
+            ("first", "second"),
+        )
+
     def test_parallel_results_preserve_input_order(self) -> None:
         cases = tuple(
             SampleCase(case_id, self.short_scenario)
