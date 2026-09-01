@@ -23,6 +23,9 @@ class LiberalioSkillHook(SkillHookBase):
     pinned project source rather than introducing an unverified delay.
     """
 
+    def __init__(self, context: SkillHookContext) -> None:
+        pass
+
     def scheduled_buffs(
         self,
         events: tuple[BattleEvent, ...],
