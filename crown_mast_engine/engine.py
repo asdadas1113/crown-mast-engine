@@ -707,6 +707,7 @@ class CrownMastEngine:
                     + request.projectile_explosion_pct
                 ),
                 sequential_damage_pct=request.sequential_damage_pct,
+                sustained_damage_pct=buffs.sustained_damage_pct,
                 sequential_multiplier=request.sequential_multiplier,
                 boss_damage_taken_pct=(
                     self.combat_settings.boss_damage_taken_pct
