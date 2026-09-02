@@ -34,6 +34,20 @@ COLLECTION_ATK: dict[str, tuple[int, ...]] = {
     ),
 }
 
+# Collection HP values are needed for characters whose offensive stats scale
+# from final Max HP (currently original Cinderella).  These are the same pinned
+# R/SR collection stages used by COLLECTION_ATK.
+COLLECTION_HP: dict[str, tuple[int, ...]] = {
+    "R": (
+        19400, 24750, 30050, 35400, 40700, 48700, 56700, 64700,
+        72700, 80650, 91350, 102000, 112650, 123300, 133950, 147250,
+    ),
+    "SR": (
+        94000, 104650, 115300, 125950, 136600, 149950, 163250, 176600,
+        189900, 203200, 219200, 235200, 251150, 267150, 283150, 301800,
+    ),
+}
+
 COLLECTION_WEAPON_EFFECTS: dict[str, tuple[str, dict[str, tuple[float, ...]]]] = {
     "AR": (
         "core_damage_pct",
@@ -82,6 +96,18 @@ GEAR_ATK_BY_CLASS: dict[str, dict[GearState, tuple[float, float, float, float]]]
     },
 }
 
+# Slot order mirrors GEAR_ATK_BY_CLASS: head, arm, body, leg.  Only Defender
+# HP is needed by the current research catalog.  Base-5 is the maxed ordinary
+# T9 reference used by the existing BASE5 ATK profile; OL0/OL5 are the pinned
+# overload values.
+GEAR_HP_BY_CLASS: dict[str, dict[GearState, tuple[float, float, float, float]]] = {
+    "Defender": {
+        GearState.BASE5: (48477.0, 0.0, 157551.0, 36359.0),
+        GearState.OL0: (60111.0, 0.0, 195360.0, 45084.0),
+        GearState.OL5: (90167.0, 0.0, 293040.0, 67626.0),
+    },
+}
+
 
 @dataclass(frozen=True)
 class GearPiece:
@@ -125,6 +151,16 @@ class EquipmentLoadout:
         except KeyError as exc:
             raise ValueError(f"unsupported unit class: {unit_class}") from exc
 
+        total = 0.0
+        for piece in self.pieces:
+            slot_index = GEAR_SLOTS.index(piece.slot)
+            total += table[piece.state][slot_index]
+        return total
+
+    def gear_hp(self, unit_class: str) -> float:
+        table = GEAR_HP_BY_CLASS.get(unit_class)
+        if table is None:
+            return 0.0
         total = 0.0
         for piece in self.pieces:
             slot_index = GEAR_SLOTS.index(piece.slot)
@@ -190,6 +226,12 @@ class CollectionProfile:
         grade = self.grade
         level = self.level
         return 0.0 if grade is None or level is None else float(COLLECTION_ATK[grade][level])
+
+    @property
+    def flat_hp(self) -> float:
+        grade = self.grade
+        level = self.level
+        return 0.0 if grade is None or level is None else float(COLLECTION_HP[grade][level])
 
     @property
     def skill_level(self) -> int:
