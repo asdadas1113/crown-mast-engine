@@ -96,6 +96,30 @@ jobs:
           --main quency-escape-queen
           --main-profile ${{ matrix.main_profile }}
 
+  distributed-source-diagnostic:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[distributed-source]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        main:
+          - scarlet-black-shadow
+          - bready
+          - quency-escape-queen
+          - phantom
+          - milk-blooming-bunny
+          - rapi-red-hood
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile source diagnostic
+        run: python -m compileall -q crown_mast_engine scripts/run_distributed_source_diagnostic.py
+      - name: Source-level distributed Main diagnostic
+        run: python scripts/run_distributed_source_diagnostic.py --main ${{ matrix.main }}
+
   benchmark:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
