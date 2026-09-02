@@ -46,8 +46,19 @@ jobs:
           tests.test_timeline
           tests.test_checkpoints_v3
           tests.test_official_study
+
+  distributed-pretest:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[distributed-pretest]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile pretest
+        run: python -m compileall -q crown_mast_engine scripts/run_distributed_pretest.py
       - name: Distributed Main isolation pretest
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[distributed-pretest]')
         run: python scripts/run_distributed_pretest.py
 
   benchmark:
