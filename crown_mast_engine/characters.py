@@ -20,6 +20,9 @@ class WeaponProfile:
     hits_per_shot: int
     burst_gauge_per_shot: float
     charge_release_recovery_frames: int = 22
+    full_charge_trigger_charge_speed_pct: float = 0.0
+    full_charge_trigger_resets_on_reload: bool = False
+    charge_cycle_floor_frames: int = 1
 
 
 @dataclass(frozen=True)
@@ -35,6 +38,7 @@ class CharacterDefinition:
     base_crit_damage_pct: float
     weapon: WeaponProfile
     skills: Mapping[str, Mapping[str, float]]
+    progression_hp: float = 0.0
     extra_advantage_against: tuple[str, ...] = ()
 
     def skill_value(self, skill: str, key: str) -> float:
@@ -188,6 +192,7 @@ def load_character_catalog() -> CharacterCatalog:
                     base_crit_damage_pct=float(item["base_crit_damage_pct"]),
                     weapon=weapon,
                     skills=skills,
+                    progression_hp=float(item.get("progression_hp", 0.0)),
                     extra_advantage_against=tuple(
                         str(value)
                         for value in item.get("extra_advantage_against", ())
