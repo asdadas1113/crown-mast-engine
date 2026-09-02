@@ -19,6 +19,7 @@ from .characters import (
 from .character_mechanics import (
     AnisStarSkillHook,
     BreadySkillHook,
+    CinderellaSkillHook,
     CinderellaCrystalWaveSkillHook,
     CrownSkillHook,
     EpinelSkillHook,
@@ -130,6 +131,7 @@ __all__ = [
     "AmmoChargeEffect",
     "AnisStarSkillHook",
     "BreadySkillHook",
+    "CinderellaSkillHook",
     "CinderellaCrystalWaveSkillHook",
     "BARE_OL0_BUILD",
     "BARE_OL5_BUILD",
