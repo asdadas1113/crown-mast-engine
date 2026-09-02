@@ -27,6 +27,8 @@ class BuffWindow:
 class ResolvedOffensiveBuffs:
     atk_pct: float
     caster_atk_flat: float
+    max_hp_pct: float
+    max_hp_to_atk_pct: float
     attack_damage_pct: float
     crit_rate_pct: float
     crit_rate_normal_pct: float
@@ -139,6 +141,8 @@ class BuffBook:
         return ResolvedOffensiveBuffs(
             atk_pct=totals.get("atk_pct", 0.0),
             caster_atk_flat=caster_atk_flat,
+            max_hp_pct=totals.get("max_hp_pct", 0.0),
+            max_hp_to_atk_pct=totals.get("max_hp_to_atk_pct", 0.0),
             attack_damage_pct=totals.get("attack_damage_pct", 0.0),
             crit_rate_pct=totals.get("crit_rate_pct", 0.0),
             crit_rate_normal_pct=totals.get("crit_rate_normal_pct", 0.0),
