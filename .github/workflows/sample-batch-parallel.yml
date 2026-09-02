@@ -94,6 +94,32 @@ jobs:
           --b1 little-mermaid
           --main ${{ matrix.main }}
 
+  b1-sensitivity-quency-shard:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[b1-sensitivity-quency]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        main_profile:
+          - g1-base5-none
+          - g2-ol0-sr5
+          - g3-ol0-sr15-e3-a3
+          - g4-ol5-sr15-e4-a4-ammo3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile Quency B1 sensitivity shard
+        run: python -m compileall -q crown_mast_engine scripts/run_distributed_pretest.py
+      - name: Little Mermaid Quency B1 sensitivity shard
+        run: >-
+          python scripts/run_distributed_pretest.py
+          --b1 little-mermaid
+          --main quency-escape-queen
+          --main-profile ${{ matrix.main_profile }}
+
   quency-pretest:
     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[quency-pretest]')
     runs-on: ubuntu-latest
