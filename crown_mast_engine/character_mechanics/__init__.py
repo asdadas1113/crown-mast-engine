@@ -1,5 +1,6 @@
 from .anis_star import AnisStarSkillHook
 from .bready import BreadySkillHook
+from .cinderella import CinderellaSkillHook
 from .cinderella_crystal_wave import CinderellaCrystalWaveSkillHook
 from .crown import CrownSkillHook
 from .epinel import EpinelSkillHook
@@ -16,12 +17,21 @@ from .rapi_red_hood import RapiRedHoodSkillHook
 from .raven import RavenSkillHook
 from .scarlet_black_shadow import ScarletBlackShadowSkillHook
 from .snow_white_heavy_arms import SnowWhiteHeavyArmsSkillHook
+from .. import combat as _combat
 from ..mechanics import SkillHookRegistry
+from ..weapon_cadence import generate_weapon_shots as _generate_weapon_shots
+
+
+# Engine imports the combat generator after loading this registry. Install the
+# audited triggered-charge extension here so existing ordinary weapons retain the
+# baseline generator while original Cinderella can use her reload-reset cadence.
+_combat.generate_weapon_shots = _generate_weapon_shots
 
 
 STANDARD_SKILL_HOOKS = SkillHookRegistry(
     {
         "bready": BreadySkillHook,
+        "cinderella": CinderellaSkillHook,
         "cinderella-crystal-wave": CinderellaCrystalWaveSkillHook,
         "crown": CrownSkillHook,
         "rapi-red-hood": RapiRedHoodSkillHook,
@@ -40,13 +50,14 @@ STANDARD_SKILL_HOOKS = SkillHookRegistry(
         "epinel": EpinelSkillHook,
         "neon-vision-eye": NeonVisionEyeSkillHook,
     },
-    revision="standard-hooks-r12-audited",
+    revision="standard-hooks-r13-audited-cinderella",
 )
 
 
 __all__ = [
     "AnisStarSkillHook",
     "BreadySkillHook",
+    "CinderellaSkillHook",
     "CinderellaCrystalWaveSkillHook",
     "CrownSkillHook",
     "EpinelSkillHook",
