@@ -26,6 +26,7 @@ jobs:
           tests.test_bready
           tests.test_liberalio
           tests.test_raven
+          tests.test_cinderella
           tests.test_cinderella_crystal_wave
           tests.test_rapi_red_hood
           tests.test_character_audit
