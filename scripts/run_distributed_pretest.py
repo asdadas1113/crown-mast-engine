@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -101,7 +102,7 @@ def summarize(batch):
     }
 
 
-def main() -> None:
+def run_main(main_actor: str):
     # Isolation pass: neutral boss, no core, no range bonus. This deliberately
     # removes axes that can favor ordinary weapon packets and asks whether the
     # weak-funnel pattern is shared across distinct distributed-damage structures.
@@ -111,6 +112,27 @@ def main() -> None:
         core_hit_rate_pct=0.0,
         range_bonus_pct=0.0,
     )
+    roster = TeamRoster(
+        b1="liter",
+        main_b3=main_actor,
+        secondary_b3="helm",
+    )
+    cases = build_checkpoint_v3_cases(
+        roster=roster,
+        combat_settings=combat,
+        condition_id="distributed-pretest-neutral-core0",
+    )
+    batch = run_sample_batch(cases)
+    return summarize(batch)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run distributed Main isolation pretest"
+    )
+    parser.add_argument("--main", choices=ALL_MAINS, default=None)
+    args = parser.parse_args()
+    selected = ALL_MAINS if args.main is None else (args.main,)
 
     payload = {
         "study": "distributed-main-isolation-pretest-v1",
@@ -130,23 +152,8 @@ def main() -> None:
         },
         "distributed_mains": list(DISTRIBUTED_MAINS),
         "control_mains": list(CONTROL_MAINS),
-        "results": {},
+        "results": {main_actor: run_main(main_actor) for main_actor in selected},
     }
-
-    for main_actor in ALL_MAINS:
-        roster = TeamRoster(
-            b1="liter",
-            main_b3=main_actor,
-            secondary_b3="helm",
-        )
-        cases = build_checkpoint_v3_cases(
-            roster=roster,
-            combat_settings=combat,
-            condition_id="distributed-pretest-neutral-core0",
-        )
-        batch = run_sample_batch(cases)
-        payload["results"][main_actor] = summarize(batch)
-
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
 
 
