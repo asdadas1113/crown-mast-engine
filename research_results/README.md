@@ -37,8 +37,111 @@
 
 정확한 보편 임계값을 추정하는 것이 주목적은 아니다.
 
-## 현재 초안
+## 공식 v1 sample space
 
-- Secondary B3 experimental anchors: `Epinel / Helm / Snow White: Heavy Arms`
-- 상세 취지: `SECONDARY_B3_ANCHORS_DRAFT.md`
-- 공식 결과: 아직 없음
+상세 설계:
+
+```text
+research_results/OFFICIAL_STUDY_DESIGN_V1.md
+```
+
+Study id:
+
+```text
+crown-mast-secondary-opportunity-v1
+```
+
+Final B1 sample:
+
+```text
+Liter
+Anis: Star
+Moran (Favorite Item)
+Little Mermaid
+Rapi: Red Hood — B1 Combat Assist
+```
+
+Final Main B3 sample:
+
+```text
+Rapi: Red Hood
+Scarlet: Black Shadow
+Bready
+Cinderella: Crystal Wave
+Liberalio
+Milk: Blooming Bunny
+Phantom (Favorite Item)
+Quency: Escape Queen
+Raven
+```
+
+Secondary B3 anchors:
+
+```text
+Epinel                  -> low-end positive control
+Helm                    -> practical middle anchor
+Snow White: Heavy Arms  -> high-contribution anchor
+```
+
+The Main list deliberately excludes the three Secondary anchors so Main/Secondary axes remain independent.
+
+Rapi RH is the only character shared by the B1 and Main candidate lists. `Rapi B1 + Rapi Main` is excluded during candidate generation before `TeamRoster` construction.
+
+Canonical v1 count:
+
+```text
+raw rosters:     5 x 9 x 3 = 135
+Rapi duplicates:             - 3
+valid rosters:                132
+per roster:      64 x 2 x 2 = 256 scenarios
+total:           132 x 256 = 33,792 scenarios
+```
+
+Environment axes:
+
+```text
+Core: off=0% / on=100% eligible core-hit rate
+Main advantage: off / on using the real boss element naturally beaten by Main
+```
+
+Main advantage is not isolated to the Main actor; same-element teammates receive normal advantage under the selected boss element.
+
+## 실행/저장 구조
+
+Official execution is sharded by valid roster:
+
+```text
+1 roster shard = 256 scenarios
+132 roster shards total
+```
+
+When the official run is authorized, use:
+
+```text
+research_results/runs/<run_id>/
+  manifest.json
+  raw/<roster_id>.jsonl
+  tables/scenarios.csv
+  tables/rosters.csv
+  analysis/
+```
+
+Raw JSONL should store compact scenario-level records needed for Secondary opportunity-cost analysis. Do not store every verbose cycle/source report for all 33,792 points by default; selected full reports can be deterministically reproduced from the manifest.
+
+## 현재 구현
+
+```text
+crown_mast_engine/official_study.py
+tests/test_official_study.py
+```
+
+The generator freezes the candidate lists, pre-excludes duplicate actors, reports the canonical arithmetic, and builds one 256-scenario roster shard without executing research simulations.
+
+## 현재 상태
+
+- Secondary 3-anchor 선정: **v1 확정**
+- B1 5명 / Main B3 9명 표본: **v1 확정**
+- canonical scenario count: **33,792**
+- 실행/저장 구조: **v1 설계 완료**
+- 공식 research batch: **아직 실행하지 않음**
+- 공식 결과 파일: **아직 없음**
