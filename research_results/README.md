@@ -1,10 +1,23 @@
 # Crown–Mast Research Results
 
-이 디렉터리는 **공식 연구 결과를 수집·보존하는 전용 공간**이다.
+이 디렉터리는 **공식 연구 결과와 별도로 보존할 가치가 있는 독립 진단 연구 결과를 함께 수집하는 공간**이다.
+
+두 종류는 반드시 구분한다.
+
+```text
+Official study results
+-> frozen official design에 따라 생성된 publication-facing 결과
+
+Independent diagnostic / case studies
+-> 공식 batch 이전·중간에 발견한 메커니즘, 이상치, 원인분석 등
+-> 정보 소득은 보존하되 official result count에는 포함하지 않음
+```
 
 ## 목적
 
-기존 `docs/RAID14_CHECKPOINT_*` 문서와 개발 중 실험값은 엔진 검증·탐색·회귀 확인을 위한 역사적 checkpoint다. 이 디렉터리의 자료와 섞지 않는다.
+기존 `docs/RAID14_CHECKPOINT_*` 문서와 개발 중 실험값은 엔진 검증·탐색·회귀 확인을 위한 역사적 checkpoint다. 단순 checkpoint 숫자를 공식 결과로 승격하지 않는다.
+
+다만 검증 과정에서 **독립적으로 해석 가치가 있는 발견**이 생기면, 재현 조건·가설검증·원인분석이 충분한 경우 `research_results/` 아래에 별도 case study로 보존할 수 있다. 이러한 문서는 공식 v1 batch와 명확히 분리한다.
 
 공식 연구 결과는 연구 설계가 확정된 뒤 현행 검증 엔진으로 새로 수집한다.
 
@@ -26,6 +39,30 @@
 5. 원자료와 요약/해석을 분리한다.
 6. 승패 빈도만 보지 않고 **효과크기와 역전 조건의 구조**를 함께 기록한다.
 7. 각 grid point는 확률 표본이 아니라 통제된 결정론적 scenario다. 승리 비율을 실전 발생확률로 해석하지 않는다.
+8. 독립 diagnostic/case study는 제목과 본문에 **not official batch result** 상태를 명시하고 official result count에 포함하지 않는다.
+
+## Independent diagnostic / case studies
+
+### Scarlet: Black Shadow Funnel Response Case Study — 2026-09-02
+
+```text
+research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
+```
+
+공식 batch 이전에 흑련이 다른 Main 후보보다 유독 낮은 Funnel `g`를 보인 원인을 조사한 독립 연구다.
+
+핵심 정보:
+
+- distributed damage 버킷 오류 가설: 기각
+- distributed Main 전체가 Funnel에 약하다는 가설: 기각
+- Liter B1 특이성 가설: 기각
+- 가장 잘 지지되는 원인: **흑련의 가치 있는 딜이 자기 B3에 충분히 집중되지 않고 다음 cycle에도 크게 남아 있어, Main cycle의 Mast 이득이 adjacent-cycle M3 손실로 크게 상쇄됨**
+- Liter 64점 평균 SBS Main `g`: +0.918%
+- Little Mermaid 64점 평균 SBS Main `g`: +1.068%
+- 비교군 Quency: +3.707% / +3.332%
+- 대표점 cycle 5/6/11/12에서 `+10% -> -21%`, `+10% -> -17%` 형태의 직접적인 cancellation 확인
+
+이 문서는 **독립 연구 성과**로 보존하지만 공식 33,792-scenario 결과에는 포함하지 않는다.
 
 ## 현재 연구 질문
 
@@ -143,5 +180,6 @@ The generator freezes the candidate lists, pre-excludes duplicate actors, report
 - B1 5명 / Main B3 9명 표본: **v1 확정**
 - canonical scenario count: **33,792**
 - 실행/저장 구조: **v1 설계 완료**
+- independent diagnostic case study: **SBS Funnel response 1건 보존**
 - 공식 research batch: **아직 실행하지 않음**
 - 공식 결과 파일: **아직 없음**
