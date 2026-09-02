@@ -1,401 +1,413 @@
-# Scarlet: Black Shadow Funnel Response Case Study — 2026-09-02
+# 흑련 몰아주기 반응 케이스 스터디 — 2026-09-02
 
-Status: **independent diagnostic research result / not part of the official 33,792-scenario v1 batch**
+상태: **독립 진단 연구 결과 / 공식 33,792 시나리오 v1 배치에는 포함하지 않음**
 
-This document preserves an anomalous but informative result discovered while validating the Crown–Mast study before the official batch. Scarlet: Black Shadow (SBS, 흑련) showed a much weaker Main-dealer response to sustained Mast funneling than several other Main B3 candidates. The behavior was investigated separately because it could have indicated a distributed-damage implementation problem, a specific B1 interaction, or a character-specific timing structure.
+이 문서는 공식 배치 실행 전 Crown–Mast 연구를 검증하는 과정에서 발견된, 특이하지만 정보 가치가 높은 흑련(Scarlet: Black Shadow, SBS)의 결과를 별도 연구로 보존하기 위한 문서다.
 
-The conclusion is that SBS is a **real character/timing outlier in this model**, not a broken distributed-damage case. Her own Burst III window becomes substantially stronger under Funnel, but she continues to deal a large amount of valuable Skill 1 damage outside her own B3 window. The Conventional route therefore gives up less Main damage than expected when it keeps a stronger Mast stack for the following Secondary-B3 cycle. In SBS's case, the gain in the Main-targeted cycle is heavily cancelled by the loss in the adjacent cycle.
+흑련은 여러 메인 B3 후보와 비교했을 때 메스트 몰아주기로 얻는 메인 본인 딜 증가율 `g`가 유독 낮았다. 처음에는 분배 대미지 구현 문제, 특정 B1과의 상호작용, 혹은 캐릭터 고유의 시간축 구조 중 하나가 원인일 가능성을 의심했다.
 
-This finding is useful information in its own right, but it must remain separate from the official v1 publication result because the tests below were purpose-built diagnostics rather than the frozen 33,792-scenario research design.
+진단 결과, 흑련은 **이 모델에서 실제로 존재하는 캐릭터/시간축 특이 사례**이며 분배 대미지 구현 오류가 아니다. 자기 B3 구간에서는 몰아주기로 분명히 강해지지만, 자기 B3 밖에서도 가치가 큰 스킬 1 대미지를 지속적으로 내기 때문에 다음 사이클에서 잃는 M3의 가치도 크다. 결국 메인 B3 사이클에서 얻은 이득 상당 부분이 바로 다음 사이클 손실로 상쇄된다.
+
+이 결과는 그 자체로 연구 가치가 있지만, 아래 테스트들은 동결된 33,792 시나리오 공식 설계가 아니라 원인 규명을 위해 따로 수행한 진단 실험이므로 공식 v1 결과와는 분리한다.
 
 ---
 
-## 1. Why this case was investigated
+## 1. 왜 이 사례를 조사했는가
 
-During the distributed-Main pretest, SBS showed unusually low Main gain `g` under Funnel.
+분배딜 메인 사전검증에서 흑련은 몰아주기 기준 메인 증가율 `g`가 유독 낮았다.
 
-`g` is defined as:
+`g`의 정의는 다음과 같다.
 
 ```text
 g = Main_funnel / Main_conventional - 1
 ```
 
-It measures how much the **Main actor's own total damage** changes when moving from Conventional Crown/Mast usage to sustained Mast Funnel usage.
+즉, 기존 운용에서 몰아주기 운용으로 바꿨을 때 **메인 캐릭터 본인의 3분 총딜이 얼마나 변하는지**를 뜻한다.
 
-Under the first isolation test:
+첫 격리 테스트 조건은 다음과 같다.
 
 ```text
-B1: Liter
-Secondary B3: Helm
-Boss DEF: 140
-Boss element: neutral
-Core hit rate: 0%
-Range bonus: 0%
-Growth grid: checkpoint-v3 4 x 4 x 4 = 64 per Main
+B1: 리타
+Secondary B3: 헬름
+보스 방어력: 140
+보스 속성: 중립
+코어 적중률: 0%
+거리 보너스: 0%
+성장 격자: checkpoint-v3 4 x 4 x 4 = 메인당 64점
 ```
 
-64-point average Main `g` was:
+64점 평균 메인 `g`는 다음과 같았다.
 
-| Main | Structure | Avg Main `g` |
+| 메인 | 구조 | 평균 메인 `g` |
 |---|---|---:|
-| Quency: Escape Queen | distributed burst + normal | **+3.707%** |
-| Rapi: Red Hood | non-distributed control | +2.311% |
-| Milk: Blooming Bunny | distributed skill route | +2.151% |
-| Phantom (Favorite Item) | mixed distributed/plain | +1.162% |
-| **Scarlet: Black Shadow** | cyclic distributed/plain | **+0.918%** |
-| Bready | Mast-triggered mechanic edge case | -0.050% |
+| 퀀시: 이스케이프 퀸 | 분배 버스트 + 평타 | **+3.707%** |
+| 라피: 레드 후드 | 비분배 대조군 | +2.311% |
+| 밀크: 블루밍 바니 | 분배 스킬 중심 | +2.151% |
+| 팬텀(애장품) | 분배/일반 혼합 | +1.162% |
+| **흑련** | 순환형 분배/일반 혼합 | **+0.918%** |
+| 브레디 | 메스트 버프가 자체 상태를 건드리는 기믹 예외 | -0.050% |
 
-Bready is numerically lower, but it is not the same kind of case: Mast's distributed-damage buff itself changes Bready's Recommended Taste state. Bready is therefore a mechanic-specific edge case. SBS was the more important anomaly for the general Crown/Mast question because her low `g` appeared without such a direct state trigger.
+브레디는 수치상 흑련보다도 낮지만 같은 종류의 사례가 아니다. 메스트의 분배 대미지 버프 자체가 브레디의 `Recommended Taste` 상태 변화에 관여하기 때문에, 별도의 기믹 상호작용 사례로 봐야 한다.
 
-The first suspicion was that SBS's distributed Skill 1 packets might be interacting incorrectly with Mast's distributed-damage buff.
+반면 흑련은 이런 직접 상태 트리거가 없는데도 `g`가 낮았기 때문에 Crown–Mast의 일반적인 몰아주기 판단과 연결되는 더 중요한 이상치였다.
 
----
-
-## 2. SBS mechanic structure relevant to the anomaly
-
-The audited engine definition for SBS uses the following Skill 1 cadence:
-
-```text
-outside own B3 window:  3 full-charge shots per Skill 1 phase advance
-inside own B3 window:   1 full-charge shot per Skill 1 phase advance
-
-phase 1: 283.03% plain damage
-phase 2: 565.00% distributed damage
-phase 3: 848.03% distributed damage
-```
-
-Her own Burst III lasts 10 seconds and also grants strong self ATK and charge-damage bonuses. Thus her B3 window is unquestionably stronger than her normal state.
-
-However, an important feature is that **Skill 1 does not stop outside her B3**. The phase cycle continues at the slower 3-full-charge cadence, and phases 2 and 3 remain high-coefficient distributed attacks. SBS therefore retains meaningful sustained damage in the cycle immediately after her own B3.
-
-This distinction is central to the result: she is burst-enhanced, but not a character whose valuable damage is almost entirely confined to her own B3 window.
+첫 번째 의심은 흑련의 분배형 스킬 1 패킷이 메스트의 분배 대미지 버프를 잘못 받고 있는 것이었다.
 
 ---
 
-## 3. Rotation-level reason the Funnel trade is unfavorable for SBS
+## 2. 이상치와 관련된 흑련의 메커니즘 구조
 
-The meaningful difference between the two studied rotations occurs around the Main-B3 / Secondary-B3 pair.
-
-Conceptually:
+검증된 엔진 정의에서 흑련의 스킬 1은 다음 주기로 진행된다.
 
 ```text
-Conventional
-Main cycle:      Crown + Main B3
-following cycle: Mast 3-stack + Secondary B3
+자기 B3 밖: 완충 사격 3회마다 스킬 1 단계 진행
+자기 B3 안: 완충 사격 1회마다 스킬 1 단계 진행
 
-Sustained Funnel
-Main cycle:      Mast 2-stack + Main B3
-following cycle: Crown + Secondary B3
+1단계: 283.03% 일반 대미지
+2단계: 565.00% 분배 대미지
+3단계: 848.03% 분배 대미지
 ```
 
-For the Main actor, Funnel is therefore not a free Mast buff. It is a **timing trade**:
+자기 B3는 10초 동안 지속되며 강한 공격력 증가와 차지 대미지 증가도 제공한다. 따라서 흑련의 B3 구간이 평상시보다 강하다는 점 자체에는 의문이 없다.
 
-> move Mast value forward into the Main's own B3 cycle, while giving up the stronger Mast value the Main would also have received during the following cycle.
+하지만 중요한 점은 **스킬 1이 자기 B3 밖에서도 계속 돈다**는 것이다. 자기 B3 밖에서는 진행 속도가 완충 3회당 1단계로 느려질 뿐, 2단계와 3단계의 높은 계수 분배 대미지는 계속 발생한다.
 
-For a burst-concentrated Main, this can be favorable because the Main gains much more in its own B3 than it loses afterward.
+즉 흑련은 분명 버스트 강화형 캐릭터이지만, 가치 있는 딜 대부분이 자기 B3 10초에만 몰리는 전형적인 폭딜형은 아니다.
 
-For SBS, the following cycle still contains substantial normal attack + Skill 1 damage, so the lost M3 value is expensive.
+이 점이 이번 결과의 핵심이다.
 
 ---
 
-## 4. Representative source-level diagnostic
+## 3. 로테이션 차원에서 흑련에게 몰아주기 교환이 불리한 이유
 
-A representative middle-growth point was selected:
+두 운용의 의미 있는 차이는 메인 B3 사이클과 바로 다음 Secondary B3 사이클의 한 쌍에서 발생한다.
 
-```text
-B1: Liter
-Main: Scarlet: Black Shadow
-Secondary: Helm
-B1 growth: g3-ol0-sr15-e3-a3
-Main growth: g3-ol0-sr15-e3-a3
-Secondary growth: g3-ol0-sr15-e3-a3
-Boss: neutral
-Core: 0%
-Range bonus: 0%
-```
-
-### 4.1 Total SBS result
+개념적으로 정리하면 다음과 같다.
 
 ```text
-Conventional SBS damage: 1,761,817,101.47
-Funnel SBS damage:       1,777,635,586.33
-Absolute gain:             +15,818,484.86
-Main g:                         +0.89785%
+기존 운용
+메인 사이클:       크라운 + 메인 B3
+다음 사이클:       메스트 3스택 + Secondary B3
+
+지속 몰아주기
+메인 사이클:       메스트 2스택 + 메인 B3
+다음 사이클:       크라운 + Secondary B3
 ```
 
-The result is positive, but far smaller than one would expect if the Main-targeted Mast window were simply being added on top of otherwise unchanged SBS damage.
+따라서 메인 캐릭터 입장에서 몰아주기는 단순히 메스트 버프를 하나 더 얹는 방식이 아니다.
 
-### 4.2 Damage-source response
+**다음 사이클에서 받던 더 강한 M3의 가치를 포기하고, 그 가치를 앞의 자기 B3 사이클로 당겨오는 시간축 교환**이다.
 
-| SBS damage source | Share of Conventional SBS damage | Funnel change |
+자기 B3에 딜이 매우 강하게 집중되는 캐릭터라면 자기 B3에서 얻는 이득이 다음 사이클 손실보다 커질 수 있다.
+
+반대로 흑련은 바로 다음 사이클에서도 평타와 스킬 1로 상당한 딜을 계속 낸다. 따라서 기존 운용에서 받을 수 있었던 M3를 잃는 비용이 크다.
+
+---
+
+## 4. 대표 성장점 소스별 진단
+
+대표적인 중간 성장점을 하나 골라 소스 단위까지 분해했다.
+
+```text
+B1: 리타
+메인: 흑련
+Secondary: 헬름
+B1 성장: g3-ol0-sr15-e3-a3
+메인 성장: g3-ol0-sr15-e3-a3
+Secondary 성장: g3-ol0-sr15-e3-a3
+보스: 중립
+코어: 0%
+거리 보너스: 0%
+```
+
+### 4.1 흑련 총딜 결과
+
+```text
+기존 운용 흑련 딜: 1,761,817,101.47
+몰아주기 흑련 딜:  1,777,635,586.33
+절대 증가량:          +15,818,484.86
+메인 g:                    +0.89785%
+```
+
+결과 자체는 플러스다. 하지만 메인 B3에 메스트를 몰아주는 효과가 다른 구간에는 아무 영향도 주지 않는다고 생각했을 때 기대할 법한 증가량보다 훨씬 작다.
+
+### 4.2 대미지 소스별 반응
+
+| 흑련 대미지 소스 | 기존 운용 흑련 딜 중 비중 | 몰아주기 변화율 |
 |---|---:|---:|
-| normal_attack | 23.49% | +0.641% |
-| skill1_phase1, plain | 9.89% | +0.785% |
-| skill1_phase2, distributed | 26.16% | **+1.326%** |
-| skill1_phase3, distributed | 40.46% | +0.798% |
+| `normal_attack` | 23.49% | +0.641% |
+| `skill1_phase1` 일반 | 9.89% | +0.785% |
+| `skill1_phase2` 분배 | 26.16% | **+1.326%** |
+| `skill1_phase3` 분배 | 40.46% | +0.798% |
 
-This directly rejects the hypothesis that SBS is weak because her distributed packets fail to benefit from Mast.
+이 결과는 **흑련의 분배 대미지가 메스트 버프를 제대로 못 받아서 약한 것**이라는 가설을 직접 기각한다.
 
-The clearest counterexample is Skill 1 phase 2: the distributed packet gains **+1.326%**, which is more than the plain phase 1 and normal attack in the same representative test.
+가장 명확한 반례는 스킬 1 2단계다. 분배 대미지인 `skill1_phase2`가 대표점에서 **+1.326%** 증가해, 일반 대미지인 1단계와 평타보다 오히려 더 크게 반응했다.
 
-Therefore:
+따라서 다음 식은 성립하지 않는다.
 
 ```text
-SBS low g != distributed packet not receiving Mast value
+흑련의 낮은 g = 분배 대미지가 메스트 효과를 제대로 못 받음
 ```
 
 ---
 
-## 5. Cycle-level cancellation: the actual cause
+## 5. 실제 원인: 사이클 간 상쇄
 
-The representative diagnostic becomes clear when SBS damage is split by burst cycle.
+대표점의 흑련 대미지를 버스트 사이클별로 나누면 원인이 바로 드러난다.
 
-Most cycles are effectively unchanged. The large differences occur at the two Main-targeted Funnel windows and the immediately following cycles:
+대부분의 사이클은 사실상 동일하고, 큰 차이는 몰아주기가 적용되는 메인 사이클과 바로 다음 사이클에서 발생한다.
 
-| Cycle | Conventional SBS | Funnel SBS | Absolute delta | Relative change |
+| 사이클 | 기존 운용 흑련 | 몰아주기 흑련 | 절대 차이 | 변화율 |
 |---:|---:|---:|---:|---:|
 | 5 | 195.369m | 215.004m | **+19.634m** | **+10.05%** |
 | 6 | 61.712m | 48.579m | **-13.132m** | **-21.28%** |
 | 11 | 185.590m | 204.466m | **+18.876m** | **+10.17%** |
 | 12 | 57.816m | 48.123m | **-9.693m** | **-16.76%** |
 
-Cycle 13 adds only a very small residual difference of roughly +0.133m; the other cycles are essentially unchanged.
+13사이클에는 약 +0.133m의 아주 작은 잔여 차이만 있고, 나머지 사이클은 사실상 동일하다.
 
-The structure is therefore:
+구조를 요약하면 다음과 같다.
 
 ```text
-cycle 5:  Main-targeted Mast window      -> large SBS gain
-cycle 6:  following M3 removed           -> large SBS loss
+5사이클:  메인 쪽으로 메스트를 당김  -> 흑련 크게 증가
+6사이클:  다음 M3가 사라짐           -> 흑련 크게 감소
 
-cycle 11: Main-targeted Mast window      -> large SBS gain
-cycle 12: following M3 removed           -> large SBS loss
+11사이클: 메인 쪽으로 메스트를 당김  -> 흑련 크게 증가
+12사이클: 다음 M3가 사라짐            -> 흑련 크게 감소
 ```
 
-The two Main-favored cycles add approximately:
+두 메인 우대 사이클에서 얻는 절대 이득은 약:
 
 ```text
 +19.634m + 18.876m = +38.510m
 ```
 
-The two immediately following cycles remove approximately:
+바로 다음 두 사이클에서 잃는 절대 손실은 약:
 
 ```text
 -13.132m - 9.693m = -22.825m
 ```
 
-A large fraction of the apparent Funnel benefit is therefore returned immediately in the next cycle. After all cycles are summed, SBS is left with only about **+0.90% Main gain** at the representative point.
+즉 메인 B3에서 얻은 큰 이득의 상당 부분을 바로 다음 사이클에서 다시 반납한다.
 
-This is the defining feature of the SBS case.
+모든 사이클을 합치면 대표점의 흑련 메인 증가율은 결국 **약 +0.90%**만 남는다.
 
----
-
-## 6. Why Quency behaves differently despite also using distributed damage
-
-Quency: Escape Queen was used as the strongest counterexample to the distributed-damage hypothesis.
-
-In the representative source diagnostic:
-
-```text
-Quency Main total g:          +3.561%
-Quency burst_distributed:     +8.642%
-Quency normal_attack:         +0.178%
-```
-
-Approximately 97% of Quency's absolute Main gain at that point came from the `burst_distributed` source.
-
-This means Quency's valuable Funnel-sensitive damage is much more concentrated in the exact Main-targeted window. She still has sustained damage, but the high-value distributed burst packet aligns directly with the cycle where Mast is moved forward.
-
-SBS is structurally different. Her damage is distributed across continuously cycling Skill 1 phases, so the following cycle remains valuable enough that removing M3 produces a large counter-loss.
-
-This comparison shows that the useful explanatory axis is not:
-
-```text
-distributed vs non-distributed
-```
-
-but rather something closer to:
-
-```text
-how concentrated is valuable Main damage in the Main-targeted Mast-favored window?
-vs
-how much valuable Main damage remains in the adjacent cycle that loses M3?
-```
+이 인접 사이클 상쇄가 흑련 케이스의 가장 중요한 특징이다.
 
 ---
 
-## 7. B1 sensitivity test: Liter was not the cause
+## 6. 같은 분배딜 캐릭터인 퀀시는 왜 다른가
 
-A second hypothesis was that SBS's low `g` might be specific to Liter's short, strong B1 buff structure. To test this, only B1 was changed from Liter to Little Mermaid while keeping the isolation environment and 64-point growth grid.
+퀀시: 이스케이프 퀸은 `분배 대미지라서 몰아주기 반응이 약하다`는 가설을 반박하는 가장 강한 대조군이었다.
 
-Results:
+대표 소스 진단에서 퀀시는 다음 결과를 보였다.
 
-| B1 | Main | Avg Main `g` | Avg team Funnel change | Avg Conventional Main share | Avg break-even Main share | Funnel wins |
+```text
+퀀시 메인 총 g:            +3.561%
+burst_distributed:          +8.642%
+normal_attack:              +0.178%
+```
+
+이 대표점에서 퀀시의 메인 절대 증가량 약 97%가 `burst_distributed`에서 나왔다.
+
+즉 퀀시는 몰아주기에 민감한 고가치 딜이 **메스트를 앞으로 당겨오는 바로 그 메인 B3 구간**에 매우 강하게 집중되어 있다.
+
+흑련은 반대로 지속적으로 순환하는 스킬 1이 딜의 큰 부분을 차지한다. 그래서 자기 B3 다음 사이클에도 가치 있는 딜이 많이 남아 있고, 그 구간에서 M3를 제거하면 큰 반대 손실이 생긴다.
+
+따라서 설명력이 높은 구분은 다음이 아니다.
+
+```text
+분배 대미지 / 비분배 대미지
+```
+
+오히려 다음에 가깝다.
+
+```text
+메스트를 앞으로 당기는 메인 B3 구간에 가치 있는 메인 딜이 얼마나 집중되어 있는가?
+
+대비
+
+M3를 잃는 바로 다음 사이클에 가치 있는 메인 딜이 얼마나 남아 있는가?
+```
+
+---
+
+## 7. B1 민감도 테스트: 리타가 원인은 아니었다
+
+두 번째 가설은 흑련의 낮은 `g`가 리타의 짧고 강한 B1 버프 구조에 특화된 현상일 가능성이었다.
+
+이를 확인하기 위해 나머지 격리 조건과 64점 성장 격자는 그대로 두고, B1만 리타에서 리틀 머메이드로 바꿨다.
+
+결과는 다음과 같다.
+
+| B1 | 메인 | 평균 메인 `g` | 평균 팀 몰아주기 변화 | 평균 기존 운용 메인 비중 | 평균 손익분기 메인 비중 | 몰아주기 승 |
 |---|---|---:|---:|---:|---:|---:|
-| Liter | SBS | +0.918% | -1.545% | 48.59% | 80.88% | 0 / 64 |
-| **Little Mermaid** | **SBS** | **+1.068%** | **-1.753%** | 42.15% | 78.11% | 0 / 64 |
-| Liter | Quency | +3.707% | -1.223% | 34.97% | 51.07% | 0 / 64 |
-| **Little Mermaid** | **Quency** | **+3.332%** | **-1.781%** | 27.78% | 52.93% | 0 / 64 |
+| 리타 | 흑련 | +0.918% | -1.545% | 48.59% | 80.88% | 0 / 64 |
+| **리틀 머메이드** | **흑련** | **+1.068%** | **-1.753%** | 42.15% | 78.11% | 0 / 64 |
+| 리타 | 퀀시 | +3.707% | -1.223% | 34.97% | 51.07% | 0 / 64 |
+| **리틀 머메이드** | **퀀시** | **+3.332%** | **-1.781%** | 27.78% | 52.93% | 0 / 64 |
 
-Changing B1 changes exact magnitudes and damage shares, as expected, but the response ordering survives cleanly:
-
-```text
-Little Mermaid B1
-Quency Main g: +3.332%
-SBS Main g:    +1.068%
-```
-
-Quency still gains a little over three times as much proportional Main damage as SBS.
-
-SBS is also clear-Conventional in all 64 Little Mermaid cases.
-
-Therefore the narrower hypothesis:
+B1이 바뀌면 정확한 딜량과 딜 비중은 당연히 변한다. 하지만 핵심적인 반응 순서는 그대로 유지됐다.
 
 ```text
-SBS low g is mainly a Liter-specific interaction
+리틀 머메이드 B1
+퀀시 메인 g: +3.332%
+흑련 메인 g: +1.068%
 ```
 
-is rejected.
+퀀시는 여전히 흑련보다 비례 메인 증가량이 약 3배 높다.
 
----
+또한 흑련은 리틀 머메이드 조건 64개 전부에서 명확한 기존 운용 우세를 유지했다.
 
-## 8. Hypotheses tested and disposition
-
-### Hypothesis A — Distributed damage is incorrectly receiving Mast value
-
-**Rejected.**
-
-SBS distributed Skill 1 packets increase normally. Phase 2 gains +1.326% in the representative source diagnostic. Other distributed Mains such as Quency and Milk also show substantially stronger Funnel response.
-
-### Hypothesis B — Distributed-damage characters are generally poor Funnel targets
-
-**Rejected.**
-
-Quency averages +3.707% Main `g` with Liter and +3.332% with Little Mermaid. Milk also approaches the non-distributed Rapi control in the first isolation test.
-
-### Hypothesis C — Liter's B1 timing/buff profile causes the SBS anomaly
-
-**Rejected.**
-
-Little Mermaid preserves the same qualitative ordering and SBS remains low-response.
-
-### Hypothesis D — SBS's own burst/non-burst damage distribution causes strong adjacent-cycle cancellation
-
-**Supported by the current diagnostics.**
-
-SBS gains about +10% in the Main-targeted cycles but loses roughly 17–21% in the following altered cycles. Her continuously cycling Skill 1 leaves substantial valuable damage outside her own B3 window, making the lost M3 unusually expensive.
-
-This is the best current explanation.
-
----
-
-## 9. Interpretation for the wider Crown–Mast study
-
-SBS should remain in the official Main sample. Nothing in this investigation justifies removing or correcting her result.
-
-Instead, SBS should be retained as an informative outlier demonstrating that **Main damage share alone does not fully describe Funnel receptivity**.
-
-Two Mains can have similar overall contribution but react very differently depending on the temporal distribution of their damage.
-
-The SBS case suggests that final interpretation should retain at least:
+따라서 다음 가설도 기각된다.
 
 ```text
-Main actor
-Main g
-Main Conventional damage share
-Main absolute gain
-Secondary opportunity cost
-source/timing structure for outliers
+흑련의 낮은 g는 주로 리타 특이 상호작용 때문이다
 ```
 
-A useful conceptual variable for future analysis is **burst concentration / Funnel-window concentration**:
+---
 
-> the fraction of the Main's valuable damage that occurs in the cycle where Mast is moved forward, relative to the valuable damage that remains in the following cycle where M3 is removed.
+## 8. 검증한 가설과 최종 판정
 
-This does not need to become a new official study axis before the frozen v1 batch. It is primarily an explanatory lens for interpreting character-level outliers after the official results exist.
+### 가설 A — 분배 대미지가 메스트 효과를 잘못 받고 있다
+
+**기각.**
+
+흑련의 분배형 스킬 1 패킷은 정상적으로 증가한다. 대표 소스 진단에서 2단계는 +1.326% 증가했다. 퀀시와 밀크 같은 다른 분배딜 메인도 훨씬 강한 몰아주기 반응을 보인다.
+
+### 가설 B — 분배딜 캐릭터는 전반적으로 몰아주기에 약하다
+
+**기각.**
+
+퀀시는 리타에서 평균 +3.707%, 리틀 머메이드에서 평균 +3.332%의 메인 `g`를 보였다. 밀크 역시 첫 격리 테스트에서 비분배 대조군인 라피와 비슷한 수준까지 올라왔다.
+
+### 가설 C — 리타의 B1 시간축/버프 구조가 흑련 이상치를 만든다
+
+**기각.**
+
+리틀 머메이드로 바꿔도 질적인 순서가 그대로 유지됐고 흑련은 계속 낮은 반응을 보였다.
+
+### 가설 D — 흑련의 버스트/논버스트 딜 분포가 강한 인접 사이클 상쇄를 만든다
+
+**현재 진단 결과가 가장 강하게 지지한다.**
+
+흑련은 메인 우대 사이클에서 약 +10%씩 증가하지만, 바로 다음 변경 사이클에서는 약 -17~-21% 감소한다. 자기 B3 밖에서도 계속 도는 스킬 1 때문에 다음 사이클의 M3 상실 비용이 유독 크다.
+
+현재로서는 이것이 가장 타당한 설명이다.
 
 ---
 
-## 10. Scope and limitations
+## 9. 전체 Crown–Mast 연구에서의 해석
 
-This case study does **not** claim:
+흑련은 공식 메인 표본에 그대로 남겨야 한다. 이번 조사에서 흑련 결과를 제거하거나 보정해야 할 근거는 나오지 않았다.
 
-- that SBS is always a poor Mast target in every encounter;
-- that real boss movement, invulnerability, parts, forced cover, or phase transitions cannot change the result;
-- that one universal burst-concentration threshold exists;
-- that the 64 diagnostic grid is a probability distribution of real player builds;
-- that the Funnel/Conventional result here is an official v1 result.
+오히려 흑련은 **메인 총딜 비중만으로는 몰아주기 적성을 완전히 설명할 수 없다**는 점을 보여주는 중요한 이상치다.
 
-The baseline deliberately removes encounter-pattern loss. A boss pattern that disproportionately removes SBS's non-B3 damage or changes which cycles connect could alter the practical trade.
+전체 딜 기여도가 비슷한 메인 둘이라도, 딜이 시간축상 어디에 분포하는지에 따라 몰아주기 반응은 크게 달라질 수 있다.
 
-The result should therefore be read as:
+따라서 공식 결과를 해석할 때는 최소한 다음 정보를 유지하는 것이 좋다.
 
-> under the controlled RAID14 baseline, SBS is unusually resistant to sustained Mast funneling because her valuable damage is not concentrated enough in her own B3 window to outweigh the adjacent-cycle Mast opportunity cost.
+```text
+메인 캐릭터
+메인 g
+기존 운용 기준 메인 딜 비중
+메인 절대 증가량
+Secondary 기회비용
+이상치의 대미지 소스/시간축 구조
+```
+
+향후 해석용 개념으로는 **버스트 집중도 / 몰아주기 구간 집중도**가 유용하다.
+
+이는 대략 다음을 뜻한다.
+
+> 메스트를 앞으로 당겨오는 메인 사이클에 가치 있는 메인 딜이 얼마나 몰려 있는지를, M3를 잃는 다음 사이클에 남아 있는 가치 있는 메인 딜과 비교하는 관점.
+
+이 개념을 공식 v1 배치 실행 전에 새로운 독립 축으로 추가할 필요는 없다. 우선은 공식 결과가 나온 뒤 캐릭터별 이상치를 설명하는 해석 도구로 사용하는 것이 적절하다.
 
 ---
 
-## 11. Reproducibility / provenance
+## 10. 적용 범위와 한계
 
-Branch:
+이 케이스 스터디는 다음을 주장하지 않는다.
+
+- 모든 실전 보스에서 흑련이 항상 메스트 몰아주기에 부적합하다는 주장
+- 실제 보스 이동, 무적, 부위, 강제 엄폐, 페이즈 전환이 결과를 바꾸지 못한다는 주장
+- 하나의 보편적인 버스트 집중도 임계값이 존재한다는 주장
+- 64개 진단 성장점이 실제 유저 육성 분포의 확률표본이라는 주장
+- 여기서 나온 기존 운용/몰아주기 결과가 공식 v1 결과라는 주장
+
+기본 연구에서는 의도적으로 보스 패턴에 의한 딜로스를 제거한다. 만약 특정 보스 패턴이 흑련의 논버스트 딜만 크게 깎거나 적중하는 사이클 자체를 바꾼다면 실전 손익은 달라질 수 있다.
+
+따라서 이 결과는 다음처럼 해석해야 한다.
+
+> **통제된 RAID14 기준에서 흑련은 가치 있는 딜이 자기 B3에 충분히 집중되지 않고 다음 사이클에도 크게 남기 때문에, 메인 B3로 메스트를 당겨오는 이득이 인접 사이클 M3 기회비용에 크게 상쇄된다.**
+
+---
+
+## 11. 재현 정보
+
+브랜치:
 
 ```text
 research/14-burst-baseline
 ```
 
-Primary diagnostic scripts:
+주요 진단 스크립트:
 
 ```text
 scripts/run_distributed_pretest.py
 scripts/run_distributed_source_diagnostic.py
 ```
 
-Source-level diagnostic commit/run:
+소스 단위 진단 커밋/실행:
 
 ```text
 commit: 3a324da9977158a03e3000575d68e842f75e91a3
 GitHub Actions run: 33584299157
 ```
 
-Little Mermaid B1 sensitivity implementation/execution:
+리틀 머메이드 B1 민감도 구현/실행:
 
 ```text
-620178e05f02e18359dbbfa5fc6875d9ca252491  add B1 sensitivity option
-6b97d3cb4d7118ce35b00a0a79eb6b85f579997c  SBS/Quency Little Mermaid matrix
-GitHub Actions run 33585317692                 SBS full 64-point result
+620178e05f02e18359dbbfa5fc6875d9ca252491  B1 민감도 옵션 추가
+6b97d3cb4d7118ce35b00a0a79eb6b85f579997c  흑련/퀀시 리틀 머메이드 행렬
+GitHub Actions run 33585317692                 흑련 64점 전체 결과
 
-d67dcda64d776657929a8f9f5413e4c58eac93b4  Quency 4-way profile sharding
-GitHub Actions run 33585697924                 Quency 4 x 16-point result
+d67dcda64d776657929a8f9f5413e4c58eac93b4  퀀시 4분할 병렬 실행
+GitHub Actions run 33585697924                 퀀시 4 x 16점 결과
 ```
 
-Audited SBS mechanic implementation:
+검증된 흑련 메커니즘 구현:
 
 ```text
 crown_mast_engine/character_mechanics/scarlet_black_shadow.py
 crown_mast_engine/data/characters.json
 ```
 
-Related broader diagnostic document:
+관련 종합 진단 문서:
 
 ```text
 docs/DISTRIBUTED_MAIN_PRETEST_2026-09-02.md
 ```
 
-Official study status at time of this case study:
+이 케이스 스터디 작성 시점의 공식 연구 상태:
 
 ```text
-official 33,792-scenario batch: NOT RUN
-official result count: 0
+공식 33,792 시나리오 배치: 미실행
+공식 결과 수: 0
 ```
 
 ---
 
-## 12. Final case-study conclusion
+## 12. 최종 결론
 
-The SBS anomaly is considered **resolved and non-blocking**.
+흑련 이상치는 **원인 규명이 끝났으며 공식 연구를 막는 문제가 아니다.**
 
-The result is not caused by a generic distributed-damage bug and is not primarily caused by Liter. It is a character-specific timing effect produced by SBS's relatively broad damage distribution across both her own B3 cycle and the following cycle.
+이 결과는 일반적인 분배 대미지 버그 때문이 아니며, 주된 원인이 리타인 것도 아니다. 핵심은 흑련의 가치 있는 딜이 자기 B3와 그 다음 사이클에 비교적 넓게 퍼져 있는 캐릭터 고유의 시간축 구조다.
 
-In short:
+한 문장으로 정리하면 다음과 같다.
 
-> **SBS receives Mast correctly. She simply has too much valuable non-B3 / adjacent-cycle damage for moving Mast forward to create the same net Main gain seen on burst-concentrated characters such as Quency.**
+> **흑련은 메스트 버프를 정상적으로 잘 받는다. 다만 자기 B3 밖과 바로 다음 사이클에도 가치 있는 딜이 너무 많이 남아 있어서, 메스트를 자기 B3 앞으로 당겨와도 퀀시처럼 버스트 집중도가 높은 캐릭터만큼 큰 순이득이 남지 않는다.**
 
-For future interpretation, SBS should be treated as a canonical example of why `Main is strong` and `Main has high total damage share` are insufficient by themselves to predict whether Mast funneling will be efficient.
+향후 공식 결과를 해석할 때 흑련은 `메인이 강하다`, `메인 총딜 비중이 높다`만으로는 메스트 몰아주기 효율을 예측할 수 없다는 대표 사례로 취급한다.
