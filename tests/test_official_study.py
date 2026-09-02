@@ -136,11 +136,11 @@ class OfficialStudyTests(unittest.TestCase):
         }
         self.assertEqual(core_rates, OFFICIAL_CORE_HIT_RATE_PCT)
 
-    def test_out_of_sample_duplicate_roster_is_rejected_before_case_generation(self) -> None:
+    def test_out_of_sample_roster_is_rejected_before_case_generation(self) -> None:
         with self.assertRaises(ValueError):
             build_official_roster_cases(
                 TeamRoster(
-                    b1="liter",
+                    b1="neon-vision-eye",
                     main_b3="raven",
                     secondary_b3="epinel",
                 )
