@@ -28,6 +28,12 @@ DISTRIBUTED_MAINS = (
 )
 CONTROL_MAINS = ("rapi-red-hood",)
 ALL_MAINS = DISTRIBUTED_MAINS + CONTROL_MAINS
+MAIN_PROFILES = (
+    "g1-base5-none",
+    "g2-ol0-sr5",
+    "g3-ol0-sr15-e3-a3",
+    "g4-ol5-sr15-e4-a4-ammo3",
+)
 
 
 def _stats(values):
@@ -102,7 +108,7 @@ def summarize(batch):
     }
 
 
-def run_main(main_actor: str):
+def run_main(main_actor: str, *, main_profile: str | None = None):
     # Isolation pass: neutral boss, no core, no range bonus. This deliberately
     # removes axes that can favor ordinary weapon packets and asks whether the
     # weak-funnel pattern is shared across distinct distributed-damage structures.
@@ -122,6 +128,14 @@ def run_main(main_actor: str):
         combat_settings=combat,
         condition_id="distributed-pretest-neutral-core0",
     )
+    if main_profile is not None:
+        cases = tuple(
+            case for case in cases if case.labels["main_profile"] == main_profile
+        )
+        if len(cases) != 16:
+            raise RuntimeError(
+                f"expected 16 cases for main profile {main_profile}, got {len(cases)}"
+            )
     batch = run_sample_batch(cases)
     return summarize(batch)
 
@@ -131,7 +145,10 @@ def main() -> None:
         description="Run distributed Main isolation pretest"
     )
     parser.add_argument("--main", choices=ALL_MAINS, default=None)
+    parser.add_argument("--main-profile", choices=MAIN_PROFILES, default=None)
     args = parser.parse_args()
+    if args.main_profile is not None and args.main is None:
+        parser.error("--main-profile requires --main")
     selected = ALL_MAINS if args.main is None else (args.main,)
 
     payload = {
@@ -149,10 +166,14 @@ def main() -> None:
             "core_hit_rate_pct": 0.0,
             "range_bonus_pct": 0.0,
             "growth_grid": "checkpoint-v3 4x4x4 = 64 per main",
+            "main_profile_shard": args.main_profile,
         },
         "distributed_mains": list(DISTRIBUTED_MAINS),
         "control_mains": list(CONTROL_MAINS),
-        "results": {main_actor: run_main(main_actor) for main_actor in selected},
+        "results": {
+            main_actor: run_main(main_actor, main_profile=args.main_profile)
+            for main_actor in selected
+        },
     }
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
 
