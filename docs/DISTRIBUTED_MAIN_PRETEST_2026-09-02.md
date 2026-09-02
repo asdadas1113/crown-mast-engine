@@ -235,7 +235,44 @@ SBS's low `g` is a real modeled character/timing behavior under the current audi
 
 The full official batch remains **not run** and official result count remains **0**.
 
-## 6. Execution provenance
+## 6. B1 sensitivity follow-up — Little Mermaid
+
+A final sensitivity check was added to test whether SBS's low `g` was specific to Liter's B1 buff structure. Only the B1 actor was changed from Liter to Little Mermaid; all other isolation conditions were preserved:
+
+```text
+B1: Little Mermaid
+Secondary B3: Helm
+Boss DEF: 140
+Boss element: neutral
+Core hit rate: 0%
+Range bonus: 0%
+Growth grid: checkpoint-v3 4 x 4 x 4 = 64 per Main
+```
+
+SBS was rerun across the full 64 points. Quency was used as the contrasting distributed Main and was run as four equal 16-case Main-profile shards; the 64-point aggregate below is the arithmetic mean of the four equal-sized shard means.
+
+| B1 | Main | Avg Main `g` | Avg team Funnel change | Avg Conventional Main share | Avg break-even Main share | Funnel wins |
+|---|---|---:|---:|---:|---:|---:|
+| Liter | Scarlet: Black Shadow | +0.918% | -1.545% | 48.59% | 80.88% | 0 / 64 |
+| Little Mermaid | Scarlet: Black Shadow | **+1.068%** | -1.753% | 42.15% | 78.11% | 0 / 64 |
+| Liter | Quency: Escape Queen | +3.707% | -1.223% | 34.97% | 51.07% | 0 / 64 |
+| Little Mermaid | Quency: Escape Queen | **+3.332%** | -1.781% | 27.78% | 52.93% | 0 / 64 |
+
+The B1 change moves the exact magnitudes and Main shares, as expected from a different B1 damage/buff structure, but it does **not** reverse the Main-response ordering:
+
+```text
+Little Mermaid B1 average Main g
+Quency  +3.332%
+SBS     +1.068%
+```
+
+Quency still gains a little over three times as much Main damage proportionally as SBS under Funnel. SBS also remains clear-Conventional in all 64 cases.
+
+This follow-up therefore rejects the narrower alternative hypothesis that SBS's weak Funnel response is mainly a Liter-specific interaction. The best current explanation remains character/timing structure: SBS retains substantial valuable damage outside its own B3 window, so moving Mast value into the Main B3 window is substantially offset by the adjacent cycle where the conventional route would have supplied stronger Mast value.
+
+For the purposes of the pre-official-batch audit, the SBS anomaly is considered **resolved / non-blocking**. No additional B1-specific SBS diagnostic is required unless the official study later reveals a new reversal pattern.
+
+## 7. Execution provenance
 
 Pretest implementation:
 
@@ -260,6 +297,17 @@ GitHub Actions source diagnostic run:
 
 ```text
 33584299157
+```
+
+B1 sensitivity implementation / execution:
+
+```text
+620178e05f02e18359dbbfa5fc6875d9ca252491  add --b1 sensitivity option
+6b97d3cb4d7118ce35b00a0a79eb6b85f579997c  Little Mermaid SBS/Quency matrix
+33585317692                                         SBS 64-point run
+
+d67dcda64d776657929a8f9f5413e4c58eac93b4  Quency 4-way profile sharding
+33585697924                                         Quency 4 x 16-point run
 ```
 
 The regression suite is separate from the diagnostic jobs. The official batch and benchmark are not invoked by these pretest markers.
