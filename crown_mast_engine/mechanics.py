@@ -16,7 +16,7 @@ from .models import BattleEvent, TeamRoster
 from .timeline import BurstCycle
 
 
-ENGINE_RULE_REVISION = "2026-09-02-r10-audited-damage-buckets"
+ENGINE_RULE_REVISION = "2026-09-02-r11-cinderella-hp-charge-cadence"
 
 
 @dataclass(frozen=True)
