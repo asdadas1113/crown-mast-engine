@@ -22,7 +22,7 @@ Status: **초안 / 공식 결과 아님**
 
 ## 2. Secondary B3 3개 기준
 
-### 2.1 Epinel — Low secondary anchor
+### 2.1 Epinel — Low opportunity-cost / positive-control anchor
 
 역할:
 - 실전 추천 캐릭터를 대표하기 위한 표본이 아님.
@@ -36,11 +36,11 @@ Status: **초안 / 공식 결과 아님**
 - Epinel에서 몰아주기가 이긴다고 해서 Epinel 편성을 추천하지 않는다.
 - 이 표본의 목적은 `몰아주기 자체가 구조적으로 불가능한 전략은 아니다`를 확인하고, 낮은 Secondary 기여도의 영향을 관찰하는 것이다.
 
-### 2.2 Helm — practical mid secondary anchor
+### 2.2 Helm — practical middle anchor
 
 역할:
-- 실제로 활용 가능한 주류 캐릭터이면서, 메인 캐리보다는 **서브딜러 성격이 뚜렷한 실전 기준점**.
-- Low와 High 사이의 practical middle anchor.
+- 실제로 활용 가능한 주류 캐릭터이면서, 메인 캐리보다 **서브딜러 성격이 뚜렷한 실전 기준점**.
+- Low와 upper-bound 사이의 practical middle anchor.
 
 확인하려는 것:
 - 실전적인 Secondary 기여도를 가진 편성에서도 몰아주기 역전이 자주 발생하는가.
@@ -48,31 +48,34 @@ Status: **초안 / 공식 결과 아님**
 
 이 표본은 세 기준 중 **현실적인 중앙 기준**으로 우선 해석한다.
 
-### 2.3 Snow White: Heavy Arms — High secondary anchor
+### 2.3 Snow White: Heavy Arms — High opportunity-cost / upper-bound stress-test anchor
 
 역할:
-- 자체 피해 기여도가 매우 높은 상위급 딜러를 Secondary B3에 둔 **high-contribution anchor**.
+- 자체 피해 기여도가 매우 높은 메인급 딜러를 Secondary B3 자리에 둔 **high opportunity-cost upper-bound stress test**.
+- 일반적인 `강한 서브딜러 대표`를 뜻하지 않는다.
 
 확인하려는 것:
-- 포기하는 Secondary의 가치가 커질수록 sustained funnel의 기회비용이 얼마나 증가하는가.
+- 포기하는 Secondary의 가치가 극단적으로 커질수록 sustained funnel의 기회비용이 얼마나 증가하는가.
 - 메인에게 유리한 성장/코어/우월코드 조건을 주더라도 몰아주기 유효영역이 남는가.
 
 해석 주의:
-- `High`는 게임 전체의 절대 티어 명칭이 아니라 본 연구에서 Secondary 기여도 축의 상단 representative point라는 의미다.
+- Snow White: Heavy Arms는 조건에 따라 메인 캐리급 기여를 할 수 있으므로 실전 Secondary의 중앙값이나 일반적인 상위 서브딜러를 대표한다고 주장하지 않는다.
+- 이 표본은 **Secondary 기회비용 축의 상단 경계값**을 만드는 것이 목적이다.
+- 최종 결론에서 이 표본 때문에 conventional 승리 비율이 높아진 것을 실전 편성 전체에 그대로 일반화하지 않는다.
 
 ---
 
 ## 3. 분석의 중심
 
-초기 분류는 다음과 같이 사용한다.
+초기 내부 분류는 다음처럼만 사용한다.
 
 ```text
-Epinel                  -> Low
-Helm                    -> Mid / practical
-Snow White: Heavy Arms  -> High
+Epinel                  -> Low opportunity-cost / positive control
+Helm                    -> Practical middle
+Snow White: Heavy Arms  -> High opportunity-cost / upper-bound stress test
 ```
 
-다만 최종 분석에서는 캐릭터 이름이나 선험적 Low/Mid/High 분류에만 의존하지 않는다.
+다만 최종 분석에서는 캐릭터 이름이나 선험적 Low/Mid/High 분류에 의존하지 않는다.
 
 각 scenario에서 conventional rotation 기준으로 실제 계산된:
 
@@ -93,7 +96,7 @@ Snow White: Heavy Arms  -> High
 
 ---
 
-## 4. 현재 robustness grid 초안
+## 4. 현재 robustness grid
 
 성장축은 기존 realistic v3 구조를 유지한다.
 
@@ -114,7 +117,7 @@ Secondary growth: 4 checkpoints
 
 등의 불균형한 현실 가능 범위까지 포함해 결론의 robustness를 확인한다.
 
-추가 환경축 초안:
+추가 환경축:
 
 ```text
 Core: off / on
@@ -129,7 +132,7 @@ Main elemental advantage: off / on
 
 Rapi: Red Hood를 B1 Combat Assist로 사용하는 경우 같은 Rapi를 Main/Secondary B3에 중복 편성할 수 없다. 현재 `TeamRoster` core validation에서도 동일 캐릭터 중복을 차단한다.
 
-전체 scenario 수는 **최종 B1/Main 후보 목록을 고정한 뒤 다시 산정**한다.
+공식 v1 표본은 132 valid rosters, 총 **33,792 scenarios**로 동결되어 있다. 사용자 명시 승인 전에는 공식 batch를 실행하지 않는다.
 
 ---
 
@@ -174,7 +177,8 @@ Rapi: Red Hood를 B1 Combat Assist로 사용하는 경우 같은 Rapi를 Main/Se
 
 ## 7. 현재 상태
 
-- Secondary 3-anchor 선정: **초안 확정**
+- Secondary 3-anchor 역할 정의: **동결**
+- 공식 v1 표본: **132 rosters / 33,792 scenarios 동결**
+- 분배딜 Main 사전검증: `docs/DISTRIBUTED_MAIN_PRETEST_2026-09-02.md`
 - 공식 research batch: **아직 실행하지 않음**
 - 공식 결과 파일: **아직 없음**
-- 다음 단계: 최종 B1/Main 표본 목록과 결과 저장 schema 확정 후 공식 batch 설계
