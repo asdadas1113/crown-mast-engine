@@ -45,6 +45,7 @@ jobs:
           tests.test_snow_white_heavy_arms
           tests.test_timeline
           tests.test_checkpoints_v3
+          tests.test_official_study
 
   benchmark:
     if: github.event_name == 'workflow_dispatch'
