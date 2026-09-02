@@ -13,8 +13,8 @@ class CinderellaSkillHook(SkillHookBase):
     """Controlled single-boss implementation of original Cinderella.
 
     The Crown-Mast baseline has no incoming enemy damage, so Cinderella's Decoy is
-    treated as continuously alive.  Beautiful therefore accumulates deterministically
-    every three seconds until 12 stacks.  Entering Burst Stage III grants her Max-HP
+    treated as continuously alive. Beautiful therefore accumulates deterministically
+    every three seconds until 12 stacks. Entering Burst Stage III grants her Max-HP
     to ATK conversion regardless of which B3 actor casts, matching the audited trigger.
 
     Her unusual RL cadence is declared in character data and handled by the shared
@@ -22,6 +22,12 @@ class CinderellaSkillHook(SkillHookBase):
     speed, the weapon is capped at three shots/s, and a real reload to max ammo resets
     that acceleration.
     """
+
+    def __init__(self, context: SkillHookContext) -> None:
+        # State is fully represented by scheduled windows and battle time under the
+        # controlled no-incoming-damage baseline, but registry factories uniformly
+        # construct hooks with their SkillHookContext.
+        del context
 
     def scheduled_buffs(
         self,
