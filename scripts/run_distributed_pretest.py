@@ -28,6 +28,10 @@ DISTRIBUTED_MAINS = (
 )
 CONTROL_MAINS = ("rapi-red-hood",)
 ALL_MAINS = DISTRIBUTED_MAINS + CONTROL_MAINS
+B1_CANDIDATES = (
+    "liter",
+    "little-mermaid",
+)
 MAIN_PROFILES = (
     "g1-base5-none",
     "g2-ol0-sr5",
@@ -108,7 +112,12 @@ def summarize(batch):
     }
 
 
-def run_main(main_actor: str, *, main_profile: str | None = None):
+def run_main(
+    main_actor: str,
+    *,
+    b1_actor: str = "liter",
+    main_profile: str | None = None,
+):
     # Isolation pass: neutral boss, no core, no range bonus. This deliberately
     # removes axes that can favor ordinary weapon packets and asks whether the
     # weak-funnel pattern is shared across distinct distributed-damage structures.
@@ -119,14 +128,14 @@ def run_main(main_actor: str, *, main_profile: str | None = None):
         range_bonus_pct=0.0,
     )
     roster = TeamRoster(
-        b1="liter",
+        b1=b1_actor,
         main_b3=main_actor,
         secondary_b3="helm",
     )
     cases = build_checkpoint_v3_cases(
         roster=roster,
         combat_settings=combat,
-        condition_id="distributed-pretest-neutral-core0",
+        condition_id=f"distributed-pretest-{b1_actor}-neutral-core0",
     )
     if main_profile is not None:
         cases = tuple(
@@ -145,6 +154,7 @@ def main() -> None:
         description="Run distributed Main isolation pretest"
     )
     parser.add_argument("--main", choices=ALL_MAINS, default=None)
+    parser.add_argument("--b1", choices=B1_CANDIDATES, default="liter")
     parser.add_argument("--main-profile", choices=MAIN_PROFILES, default=None)
     args = parser.parse_args()
     if args.main_profile is not None and args.main is None:
@@ -156,10 +166,10 @@ def main() -> None:
         "purpose": (
             "Check whether Scarlet: Black Shadow's weak sustained-funnel result "
             "is shared by other distributed-damage Main B3 structures before the "
-            "official research batch."
+            "official research batch, with optional B1 sensitivity checks."
         ),
         "fixed": {
-            "b1": "liter",
+            "b1": args.b1,
             "secondary_b3": "helm",
             "boss_def": 140.0,
             "boss_element": None,
@@ -171,7 +181,11 @@ def main() -> None:
         "distributed_mains": list(DISTRIBUTED_MAINS),
         "control_mains": list(CONTROL_MAINS),
         "results": {
-            main_actor: run_main(main_actor, main_profile=args.main_profile)
+            main_actor: run_main(
+                main_actor,
+                b1_actor=args.b1,
+                main_profile=args.main_profile,
+            )
             for main_actor in selected
         },
     }
