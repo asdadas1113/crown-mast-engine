@@ -1,23 +1,23 @@
-# Crown–Mast Research Results
+# Crown–Mast 연구 결과
 
 이 디렉터리는 **공식 연구 결과와 별도로 보존할 가치가 있는 독립 진단 연구 결과를 함께 수집하는 공간**이다.
 
 두 종류는 반드시 구분한다.
 
 ```text
-Official study results
--> frozen official design에 따라 생성된 publication-facing 결과
+공식 연구 결과
+-> 동결된 공식 설계에 따라 생성된 최종 공개용 결과
 
-Independent diagnostic / case studies
--> 공식 batch 이전·중간에 발견한 메커니즘, 이상치, 원인분석 등
--> 정보 소득은 보존하되 official result count에는 포함하지 않음
+독립 진단 연구 / 케이스 스터디
+-> 공식 배치 이전·중간에 발견한 메커니즘, 이상치, 원인 분석 등
+-> 정보 소득은 보존하되 공식 결과 수에는 포함하지 않음
 ```
 
 ## 목적
 
-기존 `docs/RAID14_CHECKPOINT_*` 문서와 개발 중 실험값은 엔진 검증·탐색·회귀 확인을 위한 역사적 checkpoint다. 단순 checkpoint 숫자를 공식 결과로 승격하지 않는다.
+기존 `docs/RAID14_CHECKPOINT_*` 문서와 개발 중 실험값은 엔진 검증·탐색·회귀 확인을 위한 역사적 체크포인트다. 단순 체크포인트 숫자를 공식 결과로 승격하지 않는다.
 
-다만 검증 과정에서 **독립적으로 해석 가치가 있는 발견**이 생기면, 재현 조건·가설검증·원인분석이 충분한 경우 `research_results/` 아래에 별도 case study로 보존할 수 있다. 이러한 문서는 공식 v1 batch와 명확히 분리한다.
+다만 검증 과정에서 **독립적으로 해석 가치가 있는 발견**이 생기면, 재현 조건·가설 검증·원인 분석이 충분한 경우 `research_results/` 아래에 별도 케이스 스터디로 보존할 수 있다. 이러한 문서는 공식 v1 배치와 명확히 분리한다.
 
 공식 연구 결과는 연구 설계가 확정된 뒤 현행 검증 엔진으로 새로 수집한다.
 
@@ -25,44 +25,44 @@ Independent diagnostic / case studies
 
 1. 연구 결과를 생성하기 전 엔진/캐릭터 메커니즘/시간축 검증을 끝낸다.
 2. 결과 파일에는 최소한 다음을 기록한다.
-   - engine rule revision
-   - skill-hook revision
-   - branch / commit SHA
-   - RAID14 timeline revision
-   - roster
+   - 엔진 규칙 리비전
+   - 스킬 훅 리비전
+   - 브랜치 / 커밋 SHA
+   - RAID14 시간축 리비전
+   - 로스터
    - 성장 프로필
-   - core 조건
-   - main elemental-advantage 조건
-   - 비교 rotation
-3. 기존 checkpoint 숫자를 공식 결과로 복사하지 않는다.
-4. 연구 batch는 사용자 명시 승인 후에만 실행한다.
+   - 코어 조건
+   - 메인 우월속성 조건
+   - 비교 로테이션
+3. 기존 체크포인트 숫자를 공식 결과로 복사하지 않는다.
+4. 연구 배치는 사용자 명시 승인 후에만 실행한다.
 5. 원자료와 요약/해석을 분리한다.
 6. 승패 빈도만 보지 않고 **효과크기와 역전 조건의 구조**를 함께 기록한다.
-7. 각 grid point는 확률 표본이 아니라 통제된 결정론적 scenario다. 승리 비율을 실전 발생확률로 해석하지 않는다.
-8. 독립 diagnostic/case study는 제목과 본문에 **not official batch result** 상태를 명시하고 official result count에 포함하지 않는다.
+7. 각 격자점은 확률 표본이 아니라 통제된 결정론적 시나리오다. 승리 비율을 실전 발생확률로 해석하지 않는다.
+8. 독립 진단 연구/케이스 스터디는 제목과 본문에 **공식 배치 결과가 아님**을 명시하고 공식 결과 수에 포함하지 않는다.
 
-## Independent diagnostic / case studies
+## 독립 진단 연구 / 케이스 스터디
 
-### Scarlet: Black Shadow Funnel Response Case Study — 2026-09-02
+### 흑련 몰아주기 반응 케이스 스터디 — 2026-09-02
 
 ```text
 research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 ```
 
-공식 batch 이전에 흑련이 다른 Main 후보보다 유독 낮은 Funnel `g`를 보인 원인을 조사한 독립 연구다.
+공식 배치 이전에 흑련이 다른 메인 후보보다 유독 낮은 몰아주기 `g`를 보인 원인을 조사한 독립 연구다.
 
 핵심 정보:
 
-- distributed damage 버킷 오류 가설: 기각
-- distributed Main 전체가 Funnel에 약하다는 가설: 기각
-- Liter B1 특이성 가설: 기각
-- 가장 잘 지지되는 원인: **흑련의 가치 있는 딜이 자기 B3에 충분히 집중되지 않고 다음 cycle에도 크게 남아 있어, Main cycle의 Mast 이득이 adjacent-cycle M3 손실로 크게 상쇄됨**
-- Liter 64점 평균 SBS Main `g`: +0.918%
-- Little Mermaid 64점 평균 SBS Main `g`: +1.068%
-- 비교군 Quency: +3.707% / +3.332%
-- 대표점 cycle 5/6/11/12에서 `+10% -> -21%`, `+10% -> -17%` 형태의 직접적인 cancellation 확인
+- 분배 대미지 버킷 오류 가설: 기각
+- 분배딜 메인 전체가 몰아주기에 약하다는 가설: 기각
+- 리타 B1 특이성 가설: 기각
+- 가장 잘 지지되는 원인: **흑련의 가치 있는 딜이 자기 B3에 충분히 집중되지 않고 다음 사이클에도 크게 남아 있어, 메인 사이클의 메스트 이득이 인접 사이클 M3 손실로 크게 상쇄됨**
+- 리타 64점 평균 흑련 메인 `g`: +0.918%
+- 리틀 머메이드 64점 평균 흑련 메인 `g`: +1.068%
+- 비교군 퀀시: +3.707% / +3.332%
+- 대표점 5/6/11/12사이클에서 `+10% -> -21%`, `+10% -> -17%` 형태의 직접적인 상쇄 확인
 
-이 문서는 **독립 연구 성과**로 보존하지만 공식 33,792-scenario 결과에는 포함하지 않는다.
+이 문서는 **독립 연구 성과**로 보존하지만 공식 33,792 시나리오 결과에는 포함하지 않는다.
 
 ## 현재 연구 질문
 
@@ -74,7 +74,7 @@ research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 
 정확한 보편 임계값을 추정하는 것이 주목적은 아니다.
 
-## 공식 v1 sample space
+## 공식 v1 표본 공간
 
 상세 설계:
 
@@ -82,13 +82,13 @@ research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 research_results/OFFICIAL_STUDY_DESIGN_V1.md
 ```
 
-Study id:
+연구 ID:
 
 ```text
 crown-mast-secondary-opportunity-v1
 ```
 
-Final B1 sample:
+최종 B1 표본:
 
 ```text
 Liter
@@ -98,7 +98,7 @@ Little Mermaid
 Rapi: Red Hood — B1 Combat Assist
 ```
 
-Final Main B3 sample:
+최종 메인 B3 표본:
 
 ```text
 Rapi: Red Hood
@@ -112,47 +112,47 @@ Quency: Escape Queen
 Raven
 ```
 
-Secondary B3 anchors:
+Secondary B3 기준점:
 
 ```text
-Epinel                  -> low-end positive control
-Helm                    -> practical middle anchor
-Snow White: Heavy Arms  -> high-contribution anchor
+Epinel                  -> 낮은 기회비용 기준점
+Helm                    -> 실전적인 중간 기준점
+Snow White: Heavy Arms  -> 높은 기여도 상한 스트레스 테스트 기준점
 ```
 
-The Main list deliberately excludes the three Secondary anchors so Main/Secondary axes remain independent.
+메인 목록에서는 Secondary 기준점 3명을 의도적으로 제외해 메인/Secondary 축이 서로 독립적으로 유지되게 했다.
 
-Rapi RH is the only character shared by the B1 and Main candidate lists. `Rapi B1 + Rapi Main` is excluded during candidate generation before `TeamRoster` construction.
+라피 RH는 B1 후보와 메인 후보 목록에 동시에 존재하는 유일한 캐릭터다. `Rapi B1 + Rapi Main` 조합은 `TeamRoster` 생성 전에 후보 생성 단계에서 제외한다.
 
-Canonical v1 count:
+공식 v1 시나리오 수:
 
 ```text
-raw rosters:     5 x 9 x 3 = 135
-Rapi duplicates:             - 3
-valid rosters:                132
-per roster:      64 x 2 x 2 = 256 scenarios
-total:           132 x 256 = 33,792 scenarios
+원시 로스터:       5 x 9 x 3 = 135
+라피 중복 조합:                - 3
+유효 로스터:                   132
+로스터당:          64 x 2 x 2 = 256 시나리오
+총합:              132 x 256 = 33,792 시나리오
 ```
 
-Environment axes:
+환경 축:
 
 ```text
-Core: off=0% / on=100% eligible core-hit rate
-Main advantage: off / on using the real boss element naturally beaten by Main
+코어: off=0% / on=100% 적격 코어 적중률
+메인 우월속성: off / on, 실제 메인 속성이 우월을 갖는 보스 속성 사용
 ```
 
-Main advantage is not isolated to the Main actor; same-element teammates receive normal advantage under the selected boss element.
+메인 우월속성은 메인 한 명에게만 인위적으로 적용하지 않는다. 같은 속성의 팀원이 있다면 선택된 보스 속성에 따라 정상적으로 함께 우월 보너스를 받는다.
 
 ## 실행/저장 구조
 
-Official execution is sharded by valid roster:
+공식 실행은 유효 로스터 단위로 분할한다.
 
 ```text
-1 roster shard = 256 scenarios
-132 roster shards total
+로스터 1개 분할 = 256 시나리오
+총 132개 로스터 분할
 ```
 
-When the official run is authorized, use:
+공식 실행이 승인되면 다음 구조를 사용한다.
 
 ```text
 research_results/runs/<run_id>/
@@ -163,7 +163,7 @@ research_results/runs/<run_id>/
   analysis/
 ```
 
-Raw JSONL should store compact scenario-level records needed for Secondary opportunity-cost analysis. Do not store every verbose cycle/source report for all 33,792 points by default; selected full reports can be deterministically reproduced from the manifest.
+원시 JSONL에는 Secondary 기회비용 분석에 필요한 압축된 시나리오 단위 기록을 저장한다. 33,792개 전부에 대해 상세 사이클/소스 보고서를 기본 저장하지 않는다. 필요한 선택 사례의 전체 보고서는 매니페스트에서 결정론적으로 재현할 수 있다.
 
 ## 현재 구현
 
@@ -172,14 +172,14 @@ crown_mast_engine/official_study.py
 tests/test_official_study.py
 ```
 
-The generator freezes the candidate lists, pre-excludes duplicate actors, reports the canonical arithmetic, and builds one 256-scenario roster shard without executing research simulations.
+생성기는 후보 목록을 동결하고, 중복 캐릭터를 사전에 제외하며, 공식 시나리오 수 계산을 검증하고, 실제 연구 시뮬레이션을 실행하지 않은 상태에서 256개 시나리오짜리 로스터 분할 하나를 구성할 수 있다.
 
 ## 현재 상태
 
-- Secondary 3-anchor 선정: **v1 확정**
-- B1 5명 / Main B3 9명 표본: **v1 확정**
-- canonical scenario count: **33,792**
+- Secondary 3개 기준점 선정: **v1 확정**
+- B1 5명 / 메인 B3 9명 표본: **v1 확정**
+- 공식 시나리오 수: **33,792**
 - 실행/저장 구조: **v1 설계 완료**
-- independent diagnostic case study: **SBS Funnel response 1건 보존**
-- 공식 research batch: **아직 실행하지 않음**
+- 독립 진단 케이스 스터디: **흑련 몰아주기 반응 1건 보존**
+- 공식 연구 배치: **아직 실행하지 않음**
 - 공식 결과 파일: **아직 없음**
