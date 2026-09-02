@@ -46,6 +46,9 @@ jobs:
           tests.test_timeline
           tests.test_checkpoints_v3
           tests.test_official_study
+      - name: Distributed Main isolation pretest
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[distributed-pretest]')
+        run: python scripts/run_distributed_pretest.py
 
   benchmark:
     if: github.event_name == 'workflow_dispatch'
