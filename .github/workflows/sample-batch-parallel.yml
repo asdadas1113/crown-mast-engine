@@ -71,6 +71,29 @@ jobs:
       - name: Distributed Main isolation pretest
         run: python scripts/run_distributed_pretest.py --main ${{ matrix.main }}
 
+  b1-sensitivity-pretest:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[b1-sensitivity]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        main:
+          - scarlet-black-shadow
+          - quency-escape-queen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile B1 sensitivity pretest
+        run: python -m compileall -q crown_mast_engine scripts/run_distributed_pretest.py
+      - name: Little Mermaid B1 sensitivity pretest
+        run: >-
+          python scripts/run_distributed_pretest.py
+          --b1 little-mermaid
+          --main ${{ matrix.main }}
+
   quency-pretest:
     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[quency-pretest]')
     runs-on: ubuntu-latest
