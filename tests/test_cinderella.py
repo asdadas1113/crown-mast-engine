@@ -3,7 +3,6 @@ import unittest
 from crown_mast_engine import simulate_rotation
 from crown_mast_engine.character_mechanics import STANDARD_SKILL_HOOKS
 from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
-from crown_mast_engine.equipment import STANDARD_BUILD
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
 from crown_mast_engine.weapon_cadence import generate_weapon_shots
@@ -44,7 +43,7 @@ class CinderellaMechanicsTests(unittest.TestCase):
             duration_sec=16.0,
             startup_delay_frames=8,
         )
-        self.assertGreaterEqual(len(shots), 25)
+        self.assertGreaterEqual(len(shots), 26)
         self.assertEqual(shots[1].frame - shots[0].frame, 20)
         self.assertEqual(shots[23].frame - shots[22].frame, 20)
         # The 24-round magazine reloads, then the +100% charge-speed state must
@@ -61,7 +60,10 @@ class CinderellaMechanicsTests(unittest.TestCase):
         self.assertEqual(len(windows), 12)
         self.assertEqual(tuple(window.start for window in windows), tuple(range(3, 37, 3)))
         self.assertEqual(windows[-1].value, 19.2)
-        self.assertAlmostEqual(self.result.buff_total(36.1, self.actor, "max_hp_pct"), 19.2)
+        self.assertAlmostEqual(
+            self.result.buff_total(36.1, self.actor, "max_hp_pct"),
+            19.2,
+        )
 
     def test_b3_stage_entry_refreshes_hp_to_atk_even_when_helm_casts(self) -> None:
         b3_events = tuple(
@@ -78,9 +80,17 @@ class CinderellaMechanicsTests(unittest.TestCase):
             and window.skill == "skill1_flawless_glass"
             and window.stat == "max_hp_to_atk_pct"
         )
-        self.assertEqual(tuple(window.start for window in hp_to_atk_windows), tuple(event.time for event in b3_events))
+        self.assertEqual(
+            tuple(window.start for window in hp_to_atk_windows),
+            tuple(event.time for event in b3_events),
+        )
         self.assertTrue(all(window.value == 2.71 for window in hp_to_atk_windows))
-        self.assertTrue(all(abs((window.end - window.start) - 10.0) < 1e-9 for window in hp_to_atk_windows))
+        self.assertTrue(
+            all(
+                abs((window.end - window.start) - 10.0) < 1e-9
+                for window in hp_to_atk_windows
+            )
+        )
 
     def test_hp_to_atk_uses_final_max_hp_and_current_growth_build(self) -> None:
         # Standard Cinderella: progression HP + Base5 Defender HP.
@@ -156,12 +166,19 @@ class CinderellaMechanicsTests(unittest.TestCase):
         # receive the stack-scaled same-target rider.
         self.assertGreaterEqual(len(bonus), max(1, len(base) - 1))
         self.assertTrue(all(event.breakdown.sequential == 10 for event in bonus))
-        self.assertTrue(all(event.coefficient_pct % 28.9 < 1e-7 for event in bonus))
+        for event in bonus:
+            stacks = event.coefficient_pct / 28.9
+            self.assertAlmostEqual(stacks, round(stacks), places=9)
+            self.assertGreaterEqual(stacks, 1)
+            self.assertLessEqual(stacks, 12)
 
     def test_standard_registry_contains_cinderella(self) -> None:
         factories = dict(STANDARD_SKILL_HOOKS.mechanics_signature.skill_hook_factories)
         self.assertIn(self.actor, factories)
-        self.assertIn("cinderella", STANDARD_SKILL_HOOKS.mechanics_signature.skill_hook_revision)
+        self.assertIn(
+            "cinderella",
+            STANDARD_SKILL_HOOKS.mechanics_signature.skill_hook_revision,
+        )
 
 
 if __name__ == "__main__":
