@@ -1,6 +1,6 @@
-# Crown–Mast official study design v1
+# Crown–Mast 공식 연구 설계 v1
 
-Status: **sample space / execution-storage design finalized; official research batch not started**
+상태: **공식 배치 실행 전 후보군 재검토 중 / 공식 연구 결과 없음**
 
 Study id:
 
@@ -8,31 +8,31 @@ Study id:
 crown-mast-secondary-opportunity-v1
 ```
 
-This document freezes the canonical sample space that will be used when the user explicitly authorizes the official research batch. It does **not** contain research results.
+이 문서는 사용자가 공식 연구 배치를 명시적으로 승인했을 때 사용할 표본 공간과 실행·저장 구조를 정의한다. 연구 결과를 담는 문서가 아니다.
+
+2026-09-02에 첫 공식 배치 실행 전에 Main 표본을 다시 검토하면서 **원본 신데렐라(Cinderella)** 를 추가했다. 퀀시·브레디 등의 유지/제외와 네온: 비전 아이의 공식 Main 편입 여부는 차후 논의 대상으로 남겨 두었으므로, 현재 후보군은 최종 동결 상태가 아니다.
 
 ---
 
-## 1. Research question
+## 1. 연구 질문
 
-Under the externally controlled RAID14 baseline, change only Crown/Mast B2 operation and test how broadly the conventional claim
+외생변수를 통제한 RAID14 기준선에서 Crown/Mast B2 운용만 바꾸었을 때 다음 관습적 판단이 실제로 얼마나 넓은 범위에서 유효한지 확인한다.
 
-> `if one Main dealer is strong, repeatedly funnel Mast into that dealer`
+> `강한 Main 딜러가 있으면 Mast를 반복적으로 Main에게 몰아주는 편이 유리하다.`
 
-is actually useful.
+주요 질문은 다음과 같다.
 
-The primary questions are:
+1. 지속 몰아주기가 이기는 조건은 제한적인가?
+2. 몰아주기가 이기더라도 이득 폭은 작은가?
+3. 몰아주기 우세 파티 구조는 현실적인 편성에서 쉽게 만들어지는가?
 
-1. Is the sustained-funnel winning region limited?
-2. When funnel wins, is the gain usually small?
-3. Are funnel-favorable party structures uncommon among practical compositions?
-
-The analysis centers on the **opportunity cost of the Secondary B3** rather than on a universal Main-share threshold.
+분석의 중심은 보편적인 Main 딜 지분 임계값 하나가 아니라 **Secondary B3를 포기하면서 발생하는 기회비용**이다.
 
 ---
 
-## 2. Final B1 sample — 5
+## 2. B1 표본 — 5명
 
-Canonical engine slugs:
+엔진 slug:
 
 ```text
 liter
@@ -42,42 +42,37 @@ little-mermaid
 rapi-red-hood
 ```
 
-Display names:
+표시명:
 
 ```text
-Liter
-Anis: Star
-Moran (Favorite Item)
-Little Mermaid
-Rapi: Red Hood — B1 Combat Assist role
+리타
+아니스: 스타
+목단(애장품)
+리틀 머메이드
+라피: 레드 후드 — B1 Combat Assist
 ```
 
-The set intentionally spans materially different B1 environments: a conventional team buffer, a high-self-contribution B1, a favorite-item/self-damage route, a team damage/taken environment, and the audited Rapi RH Combat Assist branch.
+B1 축은 서로 다른 버프·자체딜 환경을 확보하기 위한 표본이다.
 
-`neon-vision-eye` remains implemented and available for later sensitivity work but is not part of the frozen v1 official B1 sample. The v1 B1 scope is the previously established four-B1 set plus the newly audited Rapi RH B1 branch.
-
-### Rapi duplicate rule
-
-If Rapi RH is assigned to B1, the same Rapi RH cannot also occupy Main B3.
-
-The canonical generator excludes that pair **before** constructing `TeamRoster`.
+라피: 레드 후드를 B1으로 사용하는 경우 같은 라피를 Main B3에 동시에 편성할 수 없다. 공식 generator가 `TeamRoster` 생성 전에 해당 중복 조합을 제외하고, `TeamRoster`의 중복 검증이 두 번째 안전장치로 작동한다.
 
 ```text
-B1 Rapi + Main Rapi -> excluded
+B1 라피 + Main 라피 -> 제외
 ```
 
-The `TeamRoster` unique-character validation remains the second safety layer.
+`neon-vision-eye`는 B1 캐릭터가 아니다. 엔진 구현은 존재하지만 **공식 Main 표본 편입 여부는 아직 재검토 중**이다.
 
 ---
 
-## 3. Final Main B3 sample — 9
+## 3. 현재 Main B3 표본 — 10명
 
-Canonical engine slugs:
+엔진 slug:
 
 ```text
 rapi-red-hood
 scarlet-black-shadow
 bready
+cinderella
 cinderella-crystal-wave
 liberalio
 milk-blooming-bunny
@@ -86,65 +81,66 @@ quency-escape-queen
 raven
 ```
 
-Display names:
+표시명:
 
 ```text
-Rapi: Red Hood
-Scarlet: Black Shadow
-Bready
-Cinderella: Crystal Wave
-Liberalio
-Milk: Blooming Bunny
-Phantom (Favorite Item)
-Quency: Escape Queen
-Raven
+라피: 레드 후드
+홍련: 흑영
+브레디
+신데렐라
+신데렐라: 크리스탈 웨이브
+리버렐리오
+밀크: 블루밍 바니
+팬텀(애장품)
+퀀시: 이스케이프 퀸
+레이븐
 ```
 
-The purpose is not to claim that these are the nine universally strongest B3 units. They are the **audited research sample** used to cover meaningfully different damage structures and Mast/Crown interactions in the current engine.
+이 목록은 보편적인 티어표가 아니라 연구 표본이다. 서로 다른 딜 시간분포와 메스트/크라운 상호작용을 가진 Main을 확보하는 것이 목적이다.
 
-The three Secondary anchors are deliberately not reused as Main candidates. This keeps the Main and Secondary experimental axes independent and prevents Epinel / Helm / Snow White: Heavy Arms self-duplicate exclusions from distorting the grid.
+원본 신데렐라는 현재 상위권 보스 Main을 보강하면서 동시에 다음 구조를 추가한다.
 
-The current Main sample covers, among other structures:
+- 최종 최대체력 기반 공격력 변환
+- B3 Stage 진입마다 갱신되는 10초 공격력 변환 구간
+- 첫 완충 후 가속되고 재장전 시 다시 예열되는 특수 RL 사격 주기
+- 자기 B3에서 10회 순차 공격으로 집중되는 큰 버스트 대미지
+- 전투 시간이 지날수록 누적되는 Beautiful 최대체력 스택
 
-- conventional high-output Main behavior;
-- distributed-damage-heavy behavior;
-- full-burst/charge-dependent behavior;
-- forced-core skill damage;
-- stack/route state machines;
-- favorite-item behavior;
-- DoT behavior.
+따라서 단순히 강한 캐릭터를 하나 더 넣는 것이 아니라, **Main 딜의 시간적 집중도와 몰아주기 반응 관계**를 확인하는 데 유용한 표본이다.
 
-Mechanic semantics for these actors remain governed by `docs/SOURCE_VALIDATION_POLICY.md` and the current character audit. The candidate list itself is a sampling decision, not a tier-list claim.
+현재 퀀시·브레디 등 기존 후보의 유지/제외 여부와 네온: 비전 아이의 공식 Main 편입 여부는 아직 결정하지 않았다. 첫 공식 배치 전에 이 목록을 다시 최종 동결해야 한다.
+
+Secondary anchor 세 명은 Main 축과 의도적으로 분리한다. 따라서 에피넬 / 헬름 / 스노우 화이트: 헤비암즈는 현재 Main 후보로 사용하지 않는다.
 
 ---
 
-## 4. Secondary B3 anchors — 3
-
-Frozen v1 anchors:
+## 4. Secondary B3 기준점 — 3명
 
 ```text
-epinel                 -> low-end positive control
-helm                    -> practical middle anchor
-snow-white-heavy-arms   -> high-contribution anchor
+epinel                 -> 낮은 기회비용 대조군
+helm                    -> 실전적인 중앙 기준점
+snow-white-heavy-arms   -> 높은 기회비용 상단 스트레스 테스트
 ```
 
-Final analysis must use **actual conventional Secondary damage/share** as the main explanatory variable. Low/Mid/High labels are only experimental shorthand.
+스노우 화이트: 헤비암즈는 일반적인 `강한 서브딜러`의 대표가 아니다. 메인 캐리급 자체딜을 가진 캐릭터를 Secondary에 두어 **포기 비용의 상단 경계**를 확인하기 위한 스트레스 테스트다.
+
+최종 분석에서는 Low/Mid/High 라벨보다 기존 운용 기준으로 실제 계산된 **Secondary 총딜 및 5인 딜 지분**을 우선한다.
 
 ---
 
-## 5. Growth grid
+## 5. 성장 격자
 
-Use the existing realistic-v3 checkpoints for each variable role:
+B1 / Main B3 / Secondary B3 각각 기존 realistic-v3 성장 checkpoint 4개를 사용한다.
 
 ```text
-B1 growth        4
-Main B3 growth   4
-Secondary growth 4
+B1 성장        4
+Main B3 성장   4
+Secondary 성장 4
 
-4 x 4 x 4 = 64 growth points
+4 x 4 x 4 = 64 성장점
 ```
 
-The four profiles remain:
+성장 프로필:
 
 ```text
 g1-base5-none
@@ -153,112 +149,109 @@ g3-ol0-sr15-e3-a3
 g4-ol5-sr15-e4-a4-ammo3
 ```
 
-Crown and Mast stay fixed at the existing v3 B2 build.
+Crown과 Mast는 기존 v3의 고정 B2 빌드를 유지한다.
 
-These 64 points are deterministic robustness checkpoints, not probability samples and not a dense estimator of a universal threshold.
+64점은 발생확률 표본이 아니라 불균형 성장 상태까지 포함해 결론의 강건성을 확인하기 위한 결정론적 통제점이다.
 
 ---
 
-## 6. Environment axes
+## 6. 환경축
 
-### 6.1 Core: off / on
-
-Operational v1 definition:
+### 6.1 코어 off / on
 
 ```text
 core off -> core_hit_rate_pct = 0
 core on  -> core_hit_rate_pct = 100
 ```
 
-`core on` means a fully available core for otherwise core-eligible attacks. This is a controlled sensitivity extreme, **not** a claim that real encounters provide 100% core exposure.
+`core on`은 코어가 완전히 노출된 민감도 극단값이다. 실제 전투에서 항상 100% 코어를 때린다는 뜻이 아니다.
 
-If realistic partial core exposure is studied later, it is a separate sensitivity/follow-up axis and must not be silently mixed into this v1 grid.
+### 6.2 Main 우월코드 off / on
 
-### 6.2 Main elemental advantage: off / on
-
-This remains a **real boss-element condition**, not an artificial Main-only multiplier.
+우월코드는 Main에게만 인위적으로 배율을 주지 않는다.
 
 ```text
-advantage off -> neutral boss element condition
-advantage on  -> choose the boss element naturally beaten by the Main B3 element
+advantage off -> 중립 보스 속성
+advantage on  -> Main B3가 실제로 우월을 가지는 보스 속성
 ```
 
-Therefore, if another teammate has the same advantageous element, that teammate receives normal elemental advantage too. This is intentional and preserves a plausible battle environment.
+같은 속성의 다른 아군도 실제 규칙에 따라 우월코드를 함께 받는다.
 
 ---
 
-## 7. Official roster and scenario count
+## 7. 현재 roster 및 시나리오 수
 
-Raw Cartesian roster count:
+신데렐라 추가 후 현재 계산은 다음과 같다.
+
+Raw roster:
 
 ```text
-5 B1 x 9 Main x 3 Secondary = 135 rosters
+5 B1 x 10 Main x 3 Secondary = 150 rosters
 ```
 
-Invalid duplicate rosters:
+중복 제외:
 
 ```text
 Rapi B1 + Rapi Main x 3 Secondary = 3
 ```
 
-No Main candidate is one of the three Secondary anchors, and no B1 candidate is one of the three Secondary anchors. Therefore there are no additional role-duplicate exclusions in v1.
-
-Valid rosters:
+현재 유효 roster:
 
 ```text
-135 - 3 = 132
+150 - 3 = 147
 ```
 
-Per valid roster:
+한 roster당:
 
 ```text
 64 growth x 2 core x 2 Main advantage = 256 scenarios
 ```
 
-Total official sample space:
+현재 총 표본 공간:
 
 ```text
-132 x 256 = 33,792 scenarios
+147 x 256 = 37,632 scenarios
 ```
 
-Useful partitions:
+Secondary별로는:
 
 ```text
-per Secondary anchor: 44 valid B1/Main pairs x 256 = 11,264 scenarios
-all 3 anchors:                                  33,792 scenarios
+49 valid B1/Main pairs x 256 = 12,544 scenarios
+3 anchors                         = 37,632 scenarios
 ```
 
-`33,792` is now the canonical v1 arithmetic because the candidate lists above are frozen. It is still a count of controlled deterministic scenarios, not an estimate of real-world occurrence frequency.
+단, Main 후보 재검토가 끝나지 않았으므로 **37,632는 현재 코드 기준 임시 공식 표본 수**다. 첫 공식 배치 전에 후보군을 최종 동결하면 다시 canonical count를 확정한다.
 
 ---
 
-## 8. Execution unit
+## 8. 실행 단위
 
-The canonical execution shard is **one valid roster**.
+실행 shard는 계속 **유효 roster 하나**다.
 
 ```text
 1 roster shard
-= 64 growth points
-x 2 core conditions
-x 2 Main-advantage conditions
+= 64 growth
+x 2 core
+x 2 Main advantage
 = 256 scenarios
 ```
 
-Benefits:
+따라서 현재 후보군을 그대로 쓸 경우 147개의 독립 shard가 된다.
 
-- 132 independent, resumable shards;
-- no need to hold all 33,792 full reports in memory;
-- simple failure/retry boundary;
-- easy provenance mapping from roster to raw result file;
-- Secondary-anchor analysis can be assembled without rerunning simulations.
+장점:
 
-The batch must not start until the user explicitly authorizes official result collection.
+- 실패한 roster만 다시 실행할 수 있음
+- 전체 결과를 한 번에 메모리에 올릴 필요가 없음
+- roster와 raw 파일의 provenance가 명확함
+- Secondary 기준점별 분석을 쉽게 합칠 수 있음
+
+공식 배치는 사용자의 명시적 승인 전에는 실행하지 않는다.
 
 ---
 
-## 9. Canonical storage layout
+## 9. 저장 구조
 
-When the official batch is authorized, use a run-specific directory:
+공식 배치 승인 후 다음 구조를 사용한다.
 
 ```text
 research_results/runs/<run_id>/
@@ -274,9 +267,7 @@ research_results/runs/<run_id>/
     reversal_structure.md
 ```
 
-### `manifest.json`
-
-Must record at minimum:
+`manifest.json`에는 최소 다음을 기록한다.
 
 ```text
 study_id
@@ -286,112 +277,100 @@ commit_sha
 engine_rule_revision
 skill_hook_revision
 catalog_source_revision
-timeline_id / exact timeline parameters
+timeline revision / exact parameters
 baseline rotation
 candidate lists
-growth-grid definition
-core-axis definition
-Main-advantage definition
+growth grid
+core axis
+Main advantage axis
 valid roster count
 scenario count
 shard policy
 completed shard ids
 ```
 
-The manifest is the authoritative provenance record for a run.
+`raw/<roster_id>.jsonl`에는 시나리오당 compact record 하나를 저장한다. 모든 37,632점의 verbose cycle/source report를 저장하지 않고, 필요한 상세 사례는 manifest를 기준으로 재현한다.
 
-### `raw/<roster_id>.jsonl`
-
-Store one compact record per scenario, 256 lines per completed roster shard.
-
-Do **not** store the entire verbose `ComparisonReport` for all 33,792 cases by default. The study is deterministic and the manifest is sufficient to reproduce a selected full report later. Keeping full cycle/source breakdowns for every point would greatly inflate repository size without improving the primary analysis.
-
-Each compact raw row should include at minimum:
+compact row에는 최소 다음을 포함한다.
 
 ```text
-case_id
-study_id / run_id / roster_id
+case / study / run / roster id
 B1 / Main / Secondary
-B1 growth / Main growth / Secondary growth
-core condition / core_hit_rate_pct
-Main advantage condition / boss element
-engine / hook / catalog revisions
-conventional team damage
-funnel team damage
-team absolute delta
-team relative delta
+각 역할 성장 프로필
+core / Main advantage 조건
+engine / hook / catalog revision
+기존 운용 / 몰아주기 팀 총딜
+절대·상대 변화량
 outcome band
-Main conventional/funnel damage and share
-Main absolute gain
-Secondary conventional/funnel damage and share
-rest-of-team conventional/funnel damage
-rest-of-team opportunity loss
-g / l / local break-even fields
-per-character conventional/funnel damage and shares
+Main 기존/몰아주기 딜 및 지분
+Main 절대 이득
+Secondary 기존/몰아주기 딜 및 지분
+나머지 파티 opportunity loss
+g / l / local break-even
+캐릭터별 기존/몰아주기 딜 및 지분
 ```
-
-This is enough for the planned Secondary-opportunity-cost analysis while remaining reproducible.
-
-### Derived tables
-
-`tables/scenarios.csv` is a flattened derivative of raw JSONL for plotting/statistics.
-
-`tables/rosters.csv` contains one-row-per-roster aggregates and completion/provenance information.
-
-Derived tables are rebuildable; raw JSONL + manifest are canonical.
 
 ---
 
-## 10. Primary analysis outputs
+## 10. 우선 분석 항목
 
 Primary:
 
-1. funnel win/loss/tie-band frequency by Secondary anchor;
-2. funnel-win effect-size distribution;
-3. funnel loss distribution where conventional wins;
-4. conventional Secondary damage-share distribution around reversals;
-5. absolute Main gain versus rest-of-team opportunity loss.
+1. Secondary 기준점별 몰아주기 승/패/동률 구간
+2. 몰아주기 승리점의 효과크기 분포
+3. 기존 운용 승리점에서 몰아주기를 택했을 때의 손실 분포
+4. 역전 부근의 실제 Secondary 딜 지분
+5. Main 절대 이득과 나머지 파티 opportunity loss의 비교
 
 Secondary slicing:
 
 ```text
 Main B3
 B1
-growth combination
+성장 조합
 core off/on
 Main advantage off/on
 ```
 
-The main interpretive question remains:
+핵심 해석 질문은 다음과 같다.
 
-> As conventional Secondary contribution rises, how quickly does the sustained-funnel winning region contract?
-
----
-
-## 11. Non-claims
-
-The v1 grid does not establish:
-
-- a universal Main-share threshold;
-- the real-world probability that funnel wins;
-- that Crown-Crown-Mast always wins every NIKKE encounter;
-- that full core exposure is a normal boss condition;
-- that the nine Main candidates are a universal tier list;
-- that pattern-loss-free results transfer unchanged to bosses with jumps, invulnerability, forced cover, or part-exposure windows.
-
-Pattern-loss work remains a separate follow-up.
+> 기존 운용에서 Secondary의 기여도가 커질수록 지속 몰아주기의 승리영역은 얼마나 빠르게 줄어드는가?
 
 ---
 
-## 12. Implementation status
+## 11. 이 연구가 주장하지 않는 것
 
-Implemented without running research results:
+현재 v1 grid는 다음을 직접 증명하지 않는다.
+
+- 보편적인 Main 딜 지분 임계값
+- 실전에서 몰아주기가 이길 확률
+- 모든 NIKKE 전투에서 Crown-Crown-Mast가 항상 최선이라는 주장
+- 100% 코어 노출이 일반적이라는 주장
+- 현재 Main 후보들이 보편적인 티어표 상위 10명이라는 주장
+- 점프·무적·강제 엄폐·부위 노출 등의 패턴 손실이 있는 전투에서도 결과가 그대로 유지된다는 주장
+
+패턴 손실은 별도 후속연구로 다룬다.
+
+---
+
+## 12. 구현 상태
+
+현재 구현:
 
 ```text
 crown_mast_engine/official_study.py
 tests/test_official_study.py
+crown_mast_engine/data/character_cinderella.json
+crown_mast_engine/character_mechanics/cinderella.py
+tests/test_cinderella.py
 ```
 
-The generator freezes candidate lists, pre-excludes duplicate actors, exposes the canonical count, and builds one 256-scenario roster shard without executing it.
+현재 상태:
 
-Official research results remain **0** until explicit user authorization.
+- 원본 신데렐라 엔진 구현: 추가
+- 현재 공식 Main 후보: 10명
+- 현재 유효 roster: 147
+- 현재 표본 공간: 37,632
+- Main 후보 최종 재검토: **미완료**
+- 공식 research batch: **실행하지 않음**
+- 공식 연구 결과 수: **0**
