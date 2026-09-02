@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Callable
 
+
 @dataclass(frozen=True)
 class BuffWindow:
     source: str
@@ -84,7 +85,12 @@ class BuffBook:
             if existing.active_at(time):
                 self._windows[index] = replace(existing, end=time)
 
-    def active(self, time: float, target: str, stat: str | None = None) -> tuple[BuffWindow, ...]:
+    def active(
+        self,
+        time: float,
+        target: str,
+        stat: str | None = None,
+    ) -> tuple[BuffWindow, ...]:
         indices = (
             self._indices_by_target.get(target, ())
             if stat is None
@@ -99,7 +105,12 @@ class BuffBook:
     def total(self, time: float, target: str, stat: str) -> float:
         return sum(buff.value for buff in self.active(time, target, stat))
 
-    def grouped_totals(self, time: float, target: str, stat: str) -> tuple[float, ...]:
+    def grouped_totals(
+        self,
+        time: float,
+        target: str,
+        stat: str,
+    ) -> tuple[float, ...]:
         grouped: dict[tuple[str, str], float] = {}
         for buff in self.active(time, target, stat):
             key = (buff.source, buff.skill)
@@ -118,6 +129,37 @@ class BuffBook:
                 raise ValueError(f"caster ATK buff has no caster: {buff}")
             total += static_atk_resolver(buff.caster) * buff.value / 100
         return total
+
+    def _max_hp_to_atk_flat(
+        self,
+        *,
+        target: str,
+        max_hp_pct: float,
+        max_hp_to_atk_pct: float,
+        static_atk_resolver: Callable[[str], float],
+    ) -> float:
+        if max_hp_to_atk_pct == 0:
+            return 0.0
+
+        # SimulationResult.resolved_offensive_buffs passes its bound static_atk
+        # resolver here.  That gives this generic buff layer access to the same
+        # catalog/build snapshot without adding a Cinderella-only branch to the
+        # damage formula or changing every existing resolver call site.
+        result = getattr(static_atk_resolver, "__self__", None)
+        if result is None or not hasattr(result, "catalog") or not hasattr(result, "build_profile"):
+            raise ValueError("Max HP to ATK conversion requires a simulation-bound resolver")
+
+        definition = result.catalog.require(target)
+        if definition.progression_hp <= 0:
+            raise ValueError(f"Max HP to ATK conversion has no HP baseline: {target}")
+        build = result.build_profile(target)
+        static_max_hp = (
+            definition.progression_hp
+            + build.equipment.gear_hp(definition.unit_class)
+            + build.collection.flat_hp
+        )
+        final_max_hp = static_max_hp * (1 + max_hp_pct / 100)
+        return final_max_hp * max_hp_to_atk_pct / 100
 
     def resolve_offensive(
         self,
@@ -138,11 +180,20 @@ class BuffBook:
             else:
                 totals[buff.stat] = totals.get(buff.stat, 0.0) + buff.value
 
+        max_hp_pct = totals.get("max_hp_pct", 0.0)
+        max_hp_to_atk_pct = totals.get("max_hp_to_atk_pct", 0.0)
+        caster_atk_flat += self._max_hp_to_atk_flat(
+            target=target,
+            max_hp_pct=max_hp_pct,
+            max_hp_to_atk_pct=max_hp_to_atk_pct,
+            static_atk_resolver=static_atk_resolver,
+        )
+
         return ResolvedOffensiveBuffs(
             atk_pct=totals.get("atk_pct", 0.0),
             caster_atk_flat=caster_atk_flat,
-            max_hp_pct=totals.get("max_hp_pct", 0.0),
-            max_hp_to_atk_pct=totals.get("max_hp_to_atk_pct", 0.0),
+            max_hp_pct=max_hp_pct,
+            max_hp_to_atk_pct=max_hp_to_atk_pct,
             attack_damage_pct=totals.get("attack_damage_pct", 0.0),
             crit_rate_pct=totals.get("crit_rate_pct", 0.0),
             crit_rate_normal_pct=totals.get("crit_rate_normal_pct", 0.0),
