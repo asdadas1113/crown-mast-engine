@@ -24,12 +24,16 @@ OFFICIAL_B1_CANDIDATES = (
     "rapi-red-hood",
 )
 
-# Final Main B3 sample. Secondary anchors are intentionally kept out of this
-# axis so the Main and Secondary roles stay independent in the canonical grid.
+# Main B3 sample reopened before the first official batch on 2026-09-02 to add
+# original Cinderella as a current high-end Main with a distinct damage timing
+# structure.  Removal/replacement of existing exploratory Mains is deferred.
+# Secondary anchors remain intentionally outside this axis so the Main and
+# Secondary roles stay independent in the canonical grid.
 OFFICIAL_MAIN_B3_CANDIDATES = (
     "rapi-red-hood",
     "scarlet-black-shadow",
     "bready",
+    "cinderella",
     "cinderella-crystal-wave",
     "liberalio",
     "milk-blooming-bunny",
@@ -59,7 +63,7 @@ OFFICIAL_RAW_ROSTER_COUNT = (
     * len(OFFICIAL_SECONDARY_B3_ANCHORS)
 )
 OFFICIAL_INVALID_DUPLICATE_ROSTER_COUNT = 3
-OFFICIAL_VALID_ROSTER_COUNT = 132
+OFFICIAL_VALID_ROSTER_COUNT = 147
 OFFICIAL_ENVIRONMENT_COUNT = (
     len(OFFICIAL_CORE_HIT_RATE_PCT) * len(OFFICIAL_MAIN_ADVANTAGE_LEVELS)
 )
