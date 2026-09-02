@@ -15,10 +15,15 @@ from crown_mast_engine.models import TeamRoster
 from crown_mast_engine.samples import run_sample_batch
 
 
+# Official-v1 Main B3 candidates whose audited hooks emit distributed packets.
+# They intentionally cover different structures: frequent skill riders, burst-only
+# packets, mixed normal/distributed packets, and self-stacking distributed amp.
 DISTRIBUTED_MAINS = (
     "scarlet-black-shadow",
     "bready",
     "quency-escape-queen",
+    "phantom",
+    "milk-blooming-bunny",
 )
 CONTROL_MAINS = ("rapi-red-hood",)
 ALL_MAINS = DISTRIBUTED_MAINS + CONTROL_MAINS
@@ -97,9 +102,9 @@ def summarize(batch):
 
 
 def main() -> None:
-    # Isolation pass: neutral boss, no core, no range bonus.  This deliberately
-    # removes two axes that can make non-distributed weapon damage look better and
-    # asks only whether distributed-main structure itself reproduces the SBS pattern.
+    # Isolation pass: neutral boss, no core, no range bonus. This deliberately
+    # removes axes that can favor ordinary weapon packets and asks whether the
+    # weak-funnel pattern is shared across distinct distributed-damage structures.
     combat = CombatSettings(
         boss_def=140.0,
         boss_element=None,
