@@ -1,0 +1,93 @@
+name: Temporary reload regression values
+
+on:
+  push:
+    branches: [research/14-burst-baseline]
+
+permissions:
+  contents: read
+
+jobs:
+  values:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/14-burst-baseline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply verified reload inputs and print exact regression values
+        shell: bash
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          import json
+          from pathlib import Path
+
+          edits = {
+              'crown_mast_engine/data/characters.json': {
+                  'liter': 90, 'crown': 150, 'mast-romantic-maid': 150,
+                  'rapi-red-hood': 150, 'helm': 120, 'anis-star': 120,
+                  'little-mermaid': 60, 'snow-white-heavy-arms': 120,
+                  'epinel': 60, 'neon-vision-eye': 120,
+              },
+              'crown_mast_engine/data/character_cinderella.json': {'cinderella': 120},
+              'crown_mast_engine/data/character_cinderella_crystal_wave.json': {'cinderella-crystal-wave': 150},
+              'crown_mast_engine/data/character_phantom_favorite_item.json': {'phantom': 120},
+              'crown_mast_engine/data/character_bready.json': {'bready': 120},
+              'crown_mast_engine/data/character_quency_escape_queen.json': {'quency-escape-queen': 60},
+          }
+          for path, mapping in edits.items():
+              p=Path(path); data=json.loads(p.read_text(encoding='utf-8'))
+              for c in data['characters']:
+                  if c['slug'] in mapping:
+                      c['weapon']['reload_frames']=mapping[c['slug']]
+              p.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+          # Reload modules only after data was edited: this process has not imported the package yet.
+          from tests.simulation_fixtures import standard_rotation_comparison
+          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, ResearchScenario, RAID14_TIMELINE, analyze_entry_variants, analyze_rotations
+          from crown_mast_engine.combat import CombatSettings, generate_weapon_shots
+          from crown_mast_engine.characters import WeaponProfile
+          from crown_mast_engine.models import TeamRoster
+          from dataclasses import replace
+
+          a=standard_rotation_comparison(); o=a.overall
+          print('STD', repr({
+              'team_c':o.team_c,'team_f':o.team_f,'g':o.g,'l':o.l,
+              'relative':o.team_relative_change,'break_even':o.break_even_main_share_c,
+              'main_share':o.conventional_main_share,
+          }))
+          d=a.secondary_b3_mast3_burst_omission_cycle_damage
+          print('OMISSION', repr({'c':d.conventional,'f':d.funnel,'loss':d.loss_from_funnel,'relative_loss':d.relative_loss_from_funnel}))
+
+          legacy=analyze_entry_variants(ResearchScenario.standard()).crown_entry.overall
+          raid_scenario=replace(ResearchScenario.standard(), timeline=RAID14_TIMELINE)
+          variants=analyze_entry_variants(raid_scenario)
+          raid=variants.crown_entry.overall
+          entry=variants.first_burst.team
+          print('RAID14', repr({
+              'entry_relative':entry.relative_change,
+              'entry_crown':entry.crown_entry,'entry_mast':entry.mast_entry,'entry_delta':entry.delta_mast_minus_crown,
+              'legacy_be':legacy.break_even_main_share_c,'raid_be':raid.break_even_main_share_c,
+              'legacy_relative':legacy.team_relative_change,'raid_relative':raid.team_relative_change,
+          }))
+
+          roster=TeamRoster(); bare=BuildProfile.uniform(GearState.OL5)
+          high=BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=4,element_lines=4,ammo_lines=3))
+          base={actor:bare for actor in roster.members}; settings=CombatSettings(boss_element='Wind')
+          ol={
+              'bare':analyze_rotations(roster=roster,builds=base,combat_settings=settings,main_actor='rapi-red-hood').overall,
+              'rapi_high':analyze_rotations(roster=roster,builds={**base,'rapi-red-hood':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
+              'helm_high':analyze_rotations(roster=roster,builds={**base,'helm':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
+              'both_high':analyze_rotations(roster=roster,builds={**base,'rapi-red-hood':high,'helm':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
+          }
+          print('OL', repr({k:{'relative':v.team_relative_change,'main_share':v.conventional_main_share,'be':v.break_even_main_share_c,'winner':v.observed_winner.value} for k,v in ol.items()}))
+
+          sbs=analyze_rotations(roster=TeamRoster(main_b3='rapi-red-hood', secondary_b3='scarlet-black-shadow')).overall
+          print('SBS', repr({'team_c':sbs.team_c,'team_f':sbs.team_f,'relative':sbs.team_relative_change,'be':sbs.break_even_main_share_c,'main_share':sbs.conventional_main_share}))
+
+          w=WeaponProfile(weapon_type='SR',normal_attack_pct=69.04,core_attack_pct=200,ammo=6,reload_frames=120,charge_frames=60,charge_multiplier_pct=250,hits_per_shot=1,burst_gauge_per_shot=5.6)
+          shots=generate_weapon_shots(actor='test-sr',weapon=w,duration_sec=15,startup_delay_frames=0)
+          print('SR_FRAMES', [s.frame for s in shots[:7]])
+          PY
