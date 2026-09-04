@@ -41,6 +41,9 @@ def weapon(
 
 
 class WeaponTimingTests(unittest.TestCase):
+    def test_default_combat_settings_use_generic_raid_defense(self) -> None:
+        self.assertEqual(CombatSettings().boss_def, 12_000)
+
     def test_reload_formula_matches_pinned_runtime(self) -> None:
         self.assertEqual(effective_reload_frames(171, 0), 180)
         self.assertEqual(effective_reload_frames(171, 100), 13)
@@ -151,15 +154,15 @@ class WeaponTimingTests(unittest.TestCase):
         self.assertEqual([shot.frame for shot in shots[:5]], [0, 22, 36, 46, 54])
         self.assertTrue(all(not shot.core_eligible for shot in shots[:5]))
 
-    def test_smg_nominal_rate_is_quantized_to_twenty_pulls_per_second(self) -> None:
+    def test_smg_rate_uses_min_firing_rounds_adjusted_twenty_four_per_second(self) -> None:
         shots = generate_weapon_shots(
             actor="test-smg",
             weapon=weapon("SMG"),
             duration_sec=1,
             startup_delay_frames=0,
         )
-        self.assertEqual(len(shots), 20)
-        self.assertEqual([shot.frame for shot in shots[:4]], [2, 5, 8, 11])
+        self.assertEqual(len(shots), 24)
+        self.assertEqual([shot.frame for shot in shots[:4]], [2, 4, 7, 9])
 
     def test_charge_weapon_uses_charge_release_and_reload_frames(self) -> None:
         charged = WeaponProfile(

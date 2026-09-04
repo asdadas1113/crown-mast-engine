@@ -211,7 +211,6 @@
         "burst": {
           "damage_pct": 2808.0,
           "delay_sec": 0.4,
-          "required_pulls": 120.0,
           "projectile_attachment_pct": 421.2,
           "duration_sec": 10.0
         }

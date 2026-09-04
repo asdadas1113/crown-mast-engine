@@ -47,28 +47,32 @@ class OverloadIntegrationTests(unittest.TestCase):
             for name, builds in builds_by_case.items()
         }
 
-    def test_representative_ol_cases_cross_the_expected_boundary(self) -> None:
+    def test_representative_ol_cases_track_the_updated_boundary(self) -> None:
         bare = self.results["all_bare"].overall
         rapi_high = self.results["rapi_high"].overall
         helm_high = self.results["helm_high"].overall
         both_high = self.results["both_high"].overall
 
         self.assertEqual(bare.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertEqual(rapi_high.observed_winner, RotationWinner.FUNNEL)
+        self.assertEqual(rapi_high.observed_winner, RotationWinner.CONVENTIONAL)
         self.assertEqual(helm_high.observed_winner, RotationWinner.CONVENTIONAL)
         self.assertEqual(both_high.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertAlmostEqual(bare.team_relative_change, -0.010917, places=5)
-        self.assertAlmostEqual(rapi_high.team_relative_change, 0.000269, places=5)
+        self.assertAlmostEqual(bare.team_relative_change, -0.011499938904004026)
+        self.assertAlmostEqual(rapi_high.team_relative_change, -1.1406497744226307e-05)
 
-    def test_main_share_and_break_even_move_with_ol_distribution(self) -> None:
+    def test_main_share_moves_toward_break_even_with_ol_distribution(self) -> None:
         bare = self.results["all_bare"].overall
         rapi_high = self.results["rapi_high"].overall
         helm_high = self.results["helm_high"].overall
 
         self.assertLess(bare.conventional_main_share, bare.break_even_main_share_c)
-        self.assertGreater(
+        self.assertLess(
             rapi_high.conventional_main_share,
             rapi_high.break_even_main_share_c,
+        )
+        self.assertLess(
+            rapi_high.break_even_main_share_c - rapi_high.conventional_main_share,
+            bare.break_even_main_share_c - bare.conventional_main_share,
         )
         self.assertLess(
             helm_high.conventional_main_share,

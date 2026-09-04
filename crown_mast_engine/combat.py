@@ -18,9 +18,10 @@ MG_WINDDOWN_DECAY = 2.78
 MG_NO_CORE_RAMP_ROUNDS = 18
 CHARGE_RELEASE_RECOVERY_FRAMES = 22
 
+# Current PvE baseline assumes Min Firing Rounds Adjustment is enabled.
 PULLS_PER_SECOND: dict[str, float] = {
     "AR": 12.0,
-    "SMG": 20.0,
+    "SMG": 24.0,
     "SG": 1.5,
     "MG": 60.0,
     "Pistol": 4.0,
@@ -85,7 +86,7 @@ MG_LADDER_CUM = _cumulative(MG_RAMP_INTERVALS)
 
 @dataclass(frozen=True)
 class CombatSettings:
-    boss_def: float = 140.0
+    boss_def: float = 12_000.0
     core_hit_rate_pct: float = 0.0
     range_bonus_pct: float = 0.0
     element_multiplier: float = 1.0

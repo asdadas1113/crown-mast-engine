@@ -41,14 +41,19 @@ class RapiRedHoodMechanicsTests(unittest.TestCase):
         self.assertTrue(all(not event.traits.core_eligible for event in missiles))
         self.assertTrue(all(not event.traits.projectile_attachment for event in missiles))
 
-    def test_stage3_missile_requires_120_prior_normal_attacks(self) -> None:
+    def test_stage3_missile_does_not_require_prior_normal_attacks(self) -> None:
         early_timeline = (
             BurstCycle(1, 0.2, 0.4, 0.6, 0.9, 10.9, "main_b3"),
         )
         result = simulate_rotation(CROWN_CROWN_MAST, timeline=early_timeline)
-        self.assertFalse(
-            any(event.source == "burst_stage3_missile" for event in result.damage_events)
-        )
+        missiles = [
+            event
+            for event in result.damage_events
+            if event.source == "burst_stage3_missile"
+        ]
+        self.assertEqual(len(missiles), 1)
+        self.assertEqual(missiles[0].time, 1.0)
+        self.assertTrue(missiles[0].full_burst)
 
     def test_full_burst_self_atk_buff_applies_on_both_b3_slots(self) -> None:
         def rapi_self_atk(time: float) -> float:

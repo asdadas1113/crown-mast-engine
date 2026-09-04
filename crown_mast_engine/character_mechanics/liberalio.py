@@ -17,10 +17,9 @@ class LiberalioSkillHook(SkillHookBase):
     this scope. Her core-hit-gated 20.83% Attack Damage line is retained in data but
     remains inert while the base research uses 0% core hit rate.
 
-    The pinned nikke-sim revision models the 925% Burst packet at Burst cast time;
-    current guide prose describes Liberalio's visual nuke as delayed. Until that
-    landing timing is independently validated for this engine, this hook follows the
-    pinned project source rather than introducing an unverified delay.
+    Current Prydwen and NIKKE.gg references independently describe the 925%
+    Burst packet as additional damage landing about 1.1 seconds after cast. The
+    delayed packet therefore uses Full Burst and the buffs active at landing.
     """
 
     def __init__(self, context: SkillHookContext) -> None:
@@ -99,7 +98,11 @@ class LiberalioSkillHook(SkillHookBase):
                 end=event.time + duration,
             ),
             DamageRequest(
-                time=event.time,
+                time=round(
+                    event.time
+                    + context.definition.skill_value("burst", "landing_delay_sec"),
+                    6,
+                ),
                 actor=context.actor,
                 source="burst_nuke",
                 category=DamageCategory.BURST,
@@ -109,7 +112,7 @@ class LiberalioSkillHook(SkillHookBase):
                 traits=DamageTraits(
                     category=DamageCategory.BURST,
                     core_eligible=False,
-                    full_burst_eligible=False,
+                    full_burst_eligible=True,
                     range_eligible=False,
                 ),
             ),

@@ -109,7 +109,7 @@ class LiberalioMechanicsTests(unittest.TestCase):
         self.assertTrue(all(not event.traits.core_eligible for event in riders))
         self.assertTrue(all(not event.traits.range_eligible for event in riders))
 
-    def test_burst_packet_and_self_buff_fire_at_b3_cast(self) -> None:
+    def test_burst_packet_lands_after_delay_and_uses_full_burst(self) -> None:
         burst_times = tuple(
             event.time
             for event in self.result.events
@@ -124,9 +124,10 @@ class LiberalioMechanicsTests(unittest.TestCase):
             )
             if event.source == "burst_nuke"
         )
-        self.assertEqual(tuple(event.time for event in nukes), burst_times)
+        expected_nuke_times = tuple(round(time + 1.1, 6) for time in burst_times)
+        self.assertEqual(tuple(event.time for event in nukes), expected_nuke_times)
         self.assertTrue(all(event.coefficient_pct == 925 for event in nukes))
-        self.assertTrue(all(not event.full_burst for event in nukes))
+        self.assertTrue(all(event.full_burst for event in nukes))
 
         buffs = tuple(
             window

@@ -112,10 +112,10 @@ class ScarletBlackShadowAnalysisTests(unittest.TestCase):
 
     def test_strong_distributed_secondary_still_favors_conventional(self) -> None:
         overall = self.analysis.overall
-        self.assertAlmostEqual(overall.team_c, 2_101_149_975.2309287)
-        self.assertAlmostEqual(overall.team_f, 2_094_367_146.9837704, delta=1e-3)
-        self.assertAlmostEqual(overall.team_relative_change, -0.0032281504543300032)
-        self.assertAlmostEqual(overall.break_even_main_share_c, 0.4907435342798073)
+        self.assertAlmostEqual(overall.team_c, 2_040_564_041.4289405)
+        self.assertAlmostEqual(overall.team_f, 2_032_816_835.8842957, delta=1e-3)
+        self.assertAlmostEqual(overall.team_relative_change, -0.003796600051434673)
+        self.assertAlmostEqual(overall.break_even_main_share_c, 0.5020292854336021)
         self.assertLess(
             overall.conventional_main_share,
             overall.break_even_main_share_c,

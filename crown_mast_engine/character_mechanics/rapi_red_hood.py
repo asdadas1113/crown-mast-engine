@@ -29,7 +29,6 @@ class RapiRedHoodSkillHook(SkillHookBase):
 
     def __init__(self, context: SkillHookContext) -> None:
         self._combat_assist = context.roster.b1 == context.actor
-        self._pulls = 0
         self._rocket_meter = 0
         self._stored_rockets = 0
         self._own_stage3_until = 0.0
@@ -145,8 +144,6 @@ class RapiRedHoodSkillHook(SkillHookBase):
             self._own_stage3_until = event.time + context.definition.skill_value(
                 "burst", "duration_sec"
             )
-            if self._pulls < context.definition.skill_value("burst", "required_pulls"):
-                return ()
             return (
                 DamageRequest(
                     time=round(
@@ -179,7 +176,6 @@ class RapiRedHoodSkillHook(SkillHookBase):
     ) -> tuple[SkillEffect, ...]:
         if shot.actor != context.actor:
             return ()
-        self._pulls += 1
         self._rocket_meter += 1
         threshold = int(
             context.definition.skill_value(

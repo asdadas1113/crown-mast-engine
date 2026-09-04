@@ -26,7 +26,7 @@ class DamageTraits:
 class DamageContext:
     static_atk: float
     coefficient_pct: float
-    boss_def: float = 140.0
+    boss_def: float = 12_000.0
     boss_def_pct: float = 0.0
     atk_pct: float = 0.0
     caster_atk_flat: float = 0.0

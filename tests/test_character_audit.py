@@ -161,7 +161,6 @@ class CoreStrikeAuditTests(unittest.TestCase):
 
 class BurstCastTimingAuditTests(unittest.TestCase):
     CASES = (
-        ("liberalio", "burst_nuke"),
         ("raven", "burst_nuke"),
         ("cinderella-crystal-wave", "burst_nuke"),
         ("phantom", "burst_distributed"),
@@ -201,6 +200,19 @@ class BurstCastTimingAuditTests(unittest.TestCase):
                 self.assertTrue(packet.full_burst, "RAID14 timestamps overlap FB start")
                 self.assertFalse(packet.traits.full_burst_eligible)
                 self.assertAlmostEqual(packet.damage, control_packet.damage)
+
+    def test_delayed_liberalio_burst_is_full_burst_eligible(self) -> None:
+        result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=TeamRoster(main_b3="liberalio"),
+            timeline=RAID14_TIMELINE,
+        )
+        packet = next(
+            e for e in result.damage_events_for(actor="liberalio")
+            if e.source == "burst_nuke"
+        )
+        self.assertTrue(packet.traits.full_burst_eligible)
+        self.assertTrue(packet.full_burst)
 
     def test_delayed_rapi_and_ccw_fb_enter_packets_remain_fb_eligible(self) -> None:
         rapi = simulate_rotation(
