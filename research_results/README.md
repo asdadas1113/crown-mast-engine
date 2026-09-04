@@ -1,172 +1,125 @@
-# Crown–Mast 연구 결과
+# Crown–Mast 연구 결과 / 현재 상태
 
-이 디렉터리는 **공식 연구 결과와 별도로 보존할 가치가 있는 독립 진단 연구 결과를 함께 수집하는 공간**이다.
+## 먼저 읽을 것
 
-두 종류는 반드시 구분한다.
+2026-09-05 현재 기존 공식 연구 1 `crown-mast-secondary-opportunity-v1`은 **폐기 / superseded** 상태다.
+
+기존 29,952 scenario raw와 집계 결과는 삭제하지 않지만 **새 연구 1의 결론, 사전 기대값, 목표값으로 참고하지 않는다.** 감사·회귀 비교·역사적 기록용으로만 보존한다.
+
+Canonical status:
 
 ```text
-공식 연구 결과
--> 최종 동결된 공식 설계에 따라 생성된 공개용 결과
-
-독립 진단 연구 / 케이스 스터디
--> 공식 배치 이전·중간에 발견한 메커니즘, 이상치, 원인 분석 등
--> 정보 소득은 보존하되 공식 결과 수에는 포함하지 않음
+research_results/RESEARCH_STATUS_2026-09-05.md
+research_results/runs/official-complete-2026-09-05/SUPERSEDED_DO_NOT_USE.md
+docs/CURRENT_RESEARCH_HANDOFF_2026-09-05.md
 ```
 
-## 운영 원칙
+새 작업을 시작할 때는 위 문서를 먼저 읽는다.
 
-1. 연구 결과를 생성하기 전 엔진/캐릭터 메커니즘/시간축 검증을 끝낸다.
-2. 결과에는 엔진·훅·카탈로그 revision, branch/commit SHA, RAID14 시간축, roster, 성장 프로필, core/우월 조건, 비교 rotation을 기록한다.
-3. 기존 체크포인트 숫자를 공식 결과로 승격하지 않는다.
-4. 공식 연구 배치는 사용자 명시 승인 후에만 실행한다.
-5. 원자료와 요약/해석을 분리한다.
-6. 승패 빈도뿐 아니라 **효과크기와 역전 조건의 구조**를 함께 본다.
-7. 각 격자점은 확률 표본이 아니라 통제된 결정론적 시나리오다.
-8. 독립 진단 연구는 **공식 배치 결과가 아님**을 명시하고 공식 결과 수에 포함하지 않는다.
+---
 
-## 독립 진단 연구 / 케이스 스터디
+## 현재 연구 1 상태
 
-### 흑련 몰아주기 반응 케이스 스터디 — 2026-09-02
+기존 공식 배치는 완료됐었지만, 연구 1을 **처음부터 재시작**하기로 결정했다.
+
+재시작 이유:
+
+1. 엔진을 다시 독립 검증한다.
+2. 기존 공식 grid는 `boss_def=140` 단일 방어력 기준이었다.
+3. 실제 레이드 방어력 수준을 포함하는 방어력 민감도 검증이 빠져 있었다.
+4. 따라서 기존 결과를 새 결론으로 승계하지 않고, 재검증된 엔진과 새 설계로 raw부터 다시 만든다.
+
+다음 공식 batch 전 순서:
+
+```text
+엔진 재검증
+-> 방어력 공식/레이드 대표값 검증
+-> 방어력 축 포함 연구 설계 재동결
+-> 새 study ID / revision 확정
+-> 사용자 명시 승인
+-> 새 공식 raw 실행
+```
+
+---
+
+## 기존 결과의 취급
+
+기존 결과 디렉터리:
+
+```text
+research_results/runs/official-complete-2026-09-05/
+```
+
+이 자료는 다음 용도로만 사용한다.
+
+- provenance 감사
+- 이전 엔진과 새 엔진의 회귀 비교
+- 연구 이력 보존
+
+다음은 금지한다.
+
+- 기존 승패 비율을 새 연구 결론으로 인용
+- 기존 Main별 `g`, `l`, break-even을 새 연구 목표값으로 사용
+- 새 결과와 기존 29,952개 결과를 합산
+- 기존 결과가 재현되도록 엔진/파라미터를 조정
+
+---
+
+## 신데렐라 anomaly watch
+
+기존 폐기 연구에서 신데렐라는 다른 Main 대비 유독 큰 몰아주기 반응을 보였고, 별도 역할반전 탐색에서도 강한 비대칭이 관찰됐다.
+
+이 관찰은 **결론으로 승계하지 않는다.**
+
+다만 재검증 시 놓치지 않도록 신데렐라를 **우선 감시 대상(anomaly watch)** 으로 둔다.
+
+확인할 내용:
+
+- 엔진 재검증 후에도 이상치가 재현되는가
+- `boss_def=140`과 새 레이드 방어력 조건 모두에서 유독 튀는가
+- core / 우월 / 성장 / Secondary 조건을 바꿔도 구조적 차이가 유지되는가
+
+**엔진 재검증 + 방어력 축 포함 새 연구 1에서도 독립적으로 다시 이상치가 나타날 때만** 시간축 / 버스트 집중도 / 인접 사이클 상쇄를 별도 후속 기전 연구로 넘긴다.
+
+재현되지 않으면 기존 신데렐라 관찰은 폐기 연구의 과거 결과로만 남긴다.
+
+---
+
+## 독립 진단 / 케이스 스터디
+
+### 흑련 몰아주기 반응 케이스 스터디
 
 ```text
 research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 ```
 
-공식 배치 이전에 흑련이 다른 메인 후보보다 유독 낮은 몰아주기 `g`를 보인 원인을 조사한 독립 연구다.
+흑련의 인접 사이클 상쇄 등 기존 메커니즘 진단은 감사·가설 생성 자료로 보존한다. 그러나 새 연구 1의 결과를 미리 설명하는 결론으로 사용하지 않는다.
 
-핵심 정보:
+### 헬름 / Secondary 관련 기존 관찰
 
-- 분배 대미지 버킷 오류 가설: 기각
-- 분배딜 메인 전체가 몰아주기에 약하다는 가설: 기각
-- 리타 B1 특이성 가설: 기각
-- 가장 잘 지지되는 원인: **흑련의 가치 있는 딜이 자기 B3에 충분히 집중되지 않고 다음 사이클에도 크게 남아 있어, 메인 사이클의 메스트 이득이 인접 사이클 M3 손실로 크게 상쇄됨**
-- 리타 64점 평균 흑련 메인 `g`: +0.918%
-- 리틀 머메이드 64점 평균 흑련 메인 `g`: +1.068%
-- 비교군 퀀시: +3.707% / +3.332%
-- 대표점 5/6/11/12사이클에서 `+10% -> -21%`, `+10% -> -17%` 형태의 직접적인 상쇄 확인
+기존 폐기 연구에서는 Secondary 개인 딜 지분과 rest-of-team opportunity loss가 단순 비례하지 않는 현상이 있었다. 헬름의 팀 버프 구조가 가능한 설명 후보지만, 새 연구에서 재현되기 전에는 확정 기전으로 취급하지 않는다.
 
-이 문서는 독립 연구 성과로 보존하며 공식 배치 결과에는 포함하지 않는다.
+---
 
-## 현재 연구 질문
+## 과거 설계 문서
 
-외생변수를 최대한 제거한 동일 조건에서 Crown/Mast B2 운용만 바꿨을 때:
-
-- 관습적인 `강한 메인 딜러 → Mast 몰아주기`가 실제로 얼마나 넓은 조건에서 유효한가?
-- 유효한 경우 이득 폭은 얼마나 큰가?
-- 유효 조건이 정상적인 실전 파티 구조에서 자주 만들어질 만한가?
-
-정확한 보편 임계값 추정이 주목적은 아니다.
-
-## 공식 v1 표본 공간
-
-상세 설계:
+기존 설계와 구현 이력은 다음 문서에 남아 있다.
 
 ```text
 research_results/OFFICIAL_STUDY_DESIGN_V1.md
+research_results/SECONDARY_B3_ANCHORS_DRAFT.md
+research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 ```
 
-연구 ID:
+이 문서들은 **과거 설계/감사 정보**로 사용하고, 새 연구 1의 frozen design으로 간주하지 않는다.
 
-```text
-crown-mast-secondary-opportunity-v1
-```
+---
 
-B1 표본:
+## 운영 원칙
 
-```text
-Liter
-Anis: Star
-Moran (Favorite Item)
-Little Mermaid
-Rapi: Red Hood — B1 Combat Assist
-```
-
-Main B3 표본:
-
-```text
-Rapi: Red Hood
-Scarlet: Black Shadow
-Cinderella
-Cinderella: Crystal Wave
-Liberalio
-Neon: Vision Eye
-Phantom (Favorite Item)
-Raven
-```
-
-2026-09-02 첫 공식 배치 전에 후보군을 재검토해 **원본 Cinderella와 Neon: Vision Eye를 포함**하고, Bready / Milk: Blooming Bunny / Quency: Escape Queen은 공식 Main 축에서 제외했다. 세 캐릭터의 엔진 구현과 독립 진단 자료는 유지한다.
-
-Secondary B3 기준점:
-
-```text
-Epinel                  -> 낮은 기회비용 대조군
-Helm                    -> 실전적인 중간 기준점
-Snow White: Heavy Arms  -> 높은 기회비용 상단 스트레스 테스트
-```
-
-Snow White: Heavy Arms는 일반적인 강한 서브딜러 대표가 아니라, 메인급 딜러를 Secondary 자리에 둬 기회비용의 상단을 확인하는 스트레스 테스트다. 최종 해석은 캐릭터 라벨보다 실제 Secondary 딜 및 지분을 우선한다.
-
-공식 v1 시나리오 수:
-
-```text
-원시 로스터:       5 x 8 x 3 = 120
-라피 중복 조합:                - 3
-유효 로스터:                   117
-로스터당:          64 x 2 x 2 = 256 시나리오
-총합:              117 x 256 = 29,952 시나리오
-```
-
-환경축:
-
-```text
-코어: off=0% / on=100% 적격 코어 적중률
-메인 우월속성: off / on, 실제 메인 속성이 우월을 갖는 보스 속성 사용
-```
-
-메인 우월속성은 메인에게만 인위적으로 적용하지 않는다. 같은 속성의 팀원도 선택된 보스 속성에 따라 정상적으로 우월 보너스를 받는다.
-
-## 실행/저장 구조
-
-공식 실행은 유효 roster 단위로 분할한다.
-
-```text
-roster 1개 shard = 256 시나리오
-공식 v1 = 117 shard
-```
-
-공식 실행이 승인되면:
-
-```text
-research_results/runs/<run_id>/
-  manifest.json
-  raw/<roster_id>.jsonl
-  tables/scenarios.csv
-  tables/rosters.csv
-  analysis/
-```
-
-원시 JSONL에는 Secondary 기회비용 분석에 필요한 compact 시나리오 기록을 저장한다. 전체 시나리오의 상세 cycle/source report는 기본 저장하지 않고 필요한 사례만 manifest에서 재현한다.
-
-## 현재 구현
-
-```text
-crown_mast_engine/official_study.py
-tests/test_official_study.py
-crown_mast_engine/data/character_cinderella.json
-crown_mast_engine/character_mechanics/cinderella.py
-tests/test_cinderella.py
-```
-
-## 현재 상태
-
-- Secondary 3개 기준점: **유지**
-- B1 5명 표본: **유지**
-- Main B3 표본: **8명으로 재정리**
-- 원본 신데렐라: **구현 및 Main 후보 포함**
-- 네온: 비전 아이: **Main 후보 포함**
-- 브래디 / 밀크: 블루밍 버니 / 퀀시: 이스케이프 퀸: **공식 Main 제외, 진단용 유지**
-- 공식 표본 수: **29,952**
-- 실행/저장 구조: **설계 완료**
-- 독립 진단 케이스 스터디: **흑련 몰아주기 반응 1건 보존**
-- 공식 연구 배치: **아직 실행하지 않음**
-- 공식 결과 파일: **아직 없음**
+1. `main`은 사용자 명시 지시 없이 수정/병합하지 않는다.
+2. 엔진 재검증 전에 새 대규모 공식 batch를 실행하지 않는다.
+3. 레이드 방어력 값은 외부 근거를 검증한 뒤 exact value를 동결한다.
+4. 각 deterministic grid point를 실전 발생확률로 해석하지 않는다.
+5. 기존 폐기 결과와 새 결과의 provenance를 완전히 분리한다.
+6. 예상 밖 이상치는 먼저 재현성을 확인하고, 재현된 뒤에만 별도 기전 연구로 승격한다.
