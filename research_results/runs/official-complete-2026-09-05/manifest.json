@@ -1,0 +1,150 @@
+{
+  "analysis_conventions": {
+    "grid_weighting": "all deterministic grid points weighted equally; percentages are grid occupancy, not real-world probabilities",
+    "primary_band": "outcome_band from official raw; conventional=clear/marginal_conventional, funnel=clear/marginal_funnel, tie=tie_band",
+    "robust_flip": "matched pair directly changes between conventional and funnel bands; tie transitions excluded",
+    "secondary_interpretation": "measured conventional share and l take precedence over pre-study low/mid/high anchor labels"
+  },
+  "audit": {
+    "coverage_errors": 0,
+    "duplicate_case_ids": 0,
+    "engine_revision": "2026-09-02-r11-cinderella-hp-charge-cadence",
+    "extra_rosters": 0,
+    "input_artifacts_verified": 8,
+    "missing_rosters": 0,
+    "raw_roster_files": 117,
+    "rows": 29952,
+    "skill_hook_revision": "standard-hooks-r13-audited-cinderella",
+    "unique_case_ids": 29952,
+    "unique_rosters": 117
+  },
+  "branch": "research/14-burst-baseline",
+  "counts": {
+    "input_artifacts": 8,
+    "official_scenarios": 29952,
+    "valid_rosters": 117
+  },
+  "input_artifacts": [
+    {
+      "actual_sha256": "c99f337d27c65592df528a56d51b7eb3aa9c813b205504786f1cf44f99d6b7b4",
+      "artifact_id": 9923111368,
+      "calculation_run_id": "33833623839",
+      "expected_rosters": 12,
+      "file": "official-wave1-33833623839-final.zip",
+      "sha256": "c99f337d27c65592df528a56d51b7eb3aa9c813b205504786f1cf44f99d6b7b4",
+      "size_bytes": 940194,
+      "source_commit": "039426665452e18c6dd38712e4b0f63d3b81f6e6",
+      "wave": 1
+    },
+    {
+      "actual_sha256": "416068680ba28b06722ee6eefd99e496a5a2f5cbc7cb567ce5d8b0f65d433741",
+      "artifact_id": 9923700017,
+      "calculation_run_id": "33836180733",
+      "expected_rosters": 16,
+      "file": "official-wave2-33836180733-final.zip",
+      "sha256": "416068680ba28b06722ee6eefd99e496a5a2f5cbc7cb567ce5d8b0f65d433741",
+      "size_bytes": 1266061,
+      "source_commit": "05fb74d76195b5648c7d908f6723c26172b8aeb8",
+      "wave": 2
+    },
+    {
+      "actual_sha256": "e7797c9cf8f4011d5aadf50fc6419b0c822d930ce433a7603ed9c92d212c1489",
+      "artifact_id": 9924247765,
+      "calculation_run_id": "33837775681",
+      "expected_rosters": 16,
+      "file": "official-wave3-33837775681-final.zip",
+      "sha256": "e7797c9cf8f4011d5aadf50fc6419b0c822d930ce433a7603ed9c92d212c1489",
+      "size_bytes": 1314943,
+      "source_commit": "468d32bec91ae501921b42ddc137d72f6a97e9b1",
+      "wave": 3
+    },
+    {
+      "actual_sha256": "73a91783c619645037afbafd7c19ff66a83ae6ab7fdd257de251f1063883069c",
+      "artifact_id": 9946546443,
+      "calculation_run_id": "33896168222",
+      "expected_rosters": 16,
+      "file": "official-wave4-33896168222-final.zip",
+      "sha256": "73a91783c619645037afbafd7c19ff66a83ae6ab7fdd257de251f1063883069c",
+      "size_bytes": 1292588,
+      "source_commit": "23c2fe89b866d26914ac7026bbd6958180df8b98",
+      "wave": 4
+    },
+    {
+      "actual_sha256": "c6e556372c5f08e74acef265a51c3d836bdb0b45df132521a3deb030dbc6047d",
+      "artifact_id": 9947702254,
+      "calculation_run_id": "33899352626",
+      "expected_rosters": 16,
+      "file": "official-wave5-33899352626-final.zip",
+      "sha256": "c6e556372c5f08e74acef265a51c3d836bdb0b45df132521a3deb030dbc6047d",
+      "size_bytes": 1302530,
+      "source_commit": "2cb584f17eab47d34ca95a989b8e549af267767e",
+      "wave": 5
+    },
+    {
+      "actual_sha256": "f90a895d93af910ddf844990c9d5793e6f9fae5b1ac5933b4dbadb7cd2e4d702",
+      "artifact_id": 9949271119,
+      "calculation_run_id": "33903342072",
+      "expected_rosters": 16,
+      "file": "official-wave6-33903342072-final.zip",
+      "sha256": "f90a895d93af910ddf844990c9d5793e6f9fae5b1ac5933b4dbadb7cd2e4d702",
+      "size_bytes": 1303531,
+      "source_commit": "519e41d7401fca4b9eeb3b94efebfe07ca7c4090",
+      "wave": 6
+    },
+    {
+      "actual_sha256": "6a75df4b5be015a98796d07693d704d745959220ac73805387003bed0f458e7e",
+      "artifact_id": 9950169967,
+      "calculation_run_id": "33906093659",
+      "expected_rosters": 16,
+      "file": "official-wave7-33906093659-final.zip",
+      "sha256": "6a75df4b5be015a98796d07693d704d745959220ac73805387003bed0f458e7e",
+      "size_bytes": 1302145,
+      "source_commit": "7f1fbb2cdbafd62ae6dff37545682d015620ee2e",
+      "wave": 7
+    },
+    {
+      "actual_sha256": "9219b6bc9da122277852544e4d9d02b49f11966efe6a6d1ecffd583cef3a2741",
+      "artifact_id": 9950886216,
+      "calculation_run_id": "33908474676",
+      "expected_rosters": 9,
+      "file": "official-wave8-33908474676-final.zip",
+      "sha256": "9219b6bc9da122277852544e4d9d02b49f11966efe6a6d1ecffd583cef3a2741",
+      "size_bytes": 734852,
+      "source_commit": "c2963df579a636abb040d8e27a4e81c0c91fc4b3",
+      "wave": 8
+    }
+  ],
+  "output_sha256": {
+    "human/00_전체_요약.md": "53884dca0932c1b3df96133356b812e8587a72b5b55f8dabd8fed419f353c425",
+    "human/01_세컨더리_기준점_분석.md": "d2ff5647216d2d63d4c68eaf8dbfa4eb14cf8073391c0cc403b134320880ad9a",
+    "human/02_메인_B3_분석.md": "b5d09d82a23ae95178b6b3d3532c6c3f8a4285b8da56b696ed2e2c09a4b36153",
+    "human/03_B1_분석.md": "152ab44612a838a123204ee4cd08eed6d4ad1faa96b65d2a9faa044395e29cfc",
+    "human/04_효과크기_분석.md": "9bbd1a48f2ed3186f415b1b5e40797dbf5039175f875c68baca26e814b8df484",
+    "human/05_역전_구조_분석.md": "293abc0be5ff0403668c566a1315cc0add93e5c6c1a2bea6738d45223603fee7",
+    "human/06_성장_및_환경_민감도.md": "0b70bc5d71ac56063951912ec0f7d6f41ca17cf50173f0b30a7f79c0d9b003e4",
+    "machine/tables/b1_summary.csv": "c2092f51c8a64c6c6aff9afa5f75a400c813217da4856ab4a9b581bf743b686f",
+    "machine/tables/break_even_by_main.csv": "6adbaf69acbe95d461c494c6fecf70f8d0033bd5cae66f52e0e547fc9163c036",
+    "machine/tables/effect_size_summary.csv": "5d76c1f40226d53ffdabede75c6e5abe4faac681c11b6a57060c0af4b0f02164",
+    "machine/tables/environment_summary.csv": "3f4d4cfadef1c684ece0a1aa59ecb2a022fb9fb967936de901351f6220c8fa47",
+    "machine/tables/main_b3_summary.csv": "4961f4a6b4373552ad808ddd305f08406b153a696317bd94b1ad6792fba52df7",
+    "machine/tables/main_secondary_summary.csv": "f1d013c1f29473b8025d127ecaccf6f1b9c1f47af61f3e80b565686a92363568",
+    "machine/tables/main_share_bins.csv": "e39fbd0e639ed57b14dad91367e628ba5e95e4b6ea8c2e5ab794c7e9206b169e",
+    "machine/tables/representative_cases.csv": "1e708e1459128ff982c79e8bf5548253b46a0bc8cff9d4a97657b39303b5eb87",
+    "machine/tables/reversal_summary.csv": "2ee5d485b0f326478e47ec941ea429952702ecfafd50c510585b6c86c3e5e467",
+    "machine/tables/rosters.csv": "de2a74c123ed745922bdf2139c838eba382a1326c0e29d21074e27a30f3fc3a6",
+    "machine/tables/scenarios.csv": "c52a37c79282dc0c7d8e39b95506e8612cce867425349dafc85e8d8dd573d1eb",
+    "machine/tables/secondary_matched_summary.csv": "bf80e0dccdf1361f3babb2372b7592bc7a68e2541714d73e0731c658271fe444",
+    "machine/tables/secondary_share_bins.csv": "6e78b4e1d66ed7680f504749a0fbae0005f5bfc7060b9bb10805eeb2a647ade1",
+    "machine/tables/secondary_summary.csv": "b6ad45c5885425010e56f2567334453c7613b448b0cb1d1ab7eeab46f19d5ff6"
+  },
+  "postprocess_source_head": "c2963df579a636abb040d8e27a4e81c0c91fc4b3",
+  "repository_materialization": "reports and summary tables are suitable for version control; full scenarios.csv remains in the complete analysis package and can be regenerated from the 8 immutable input artifacts",
+  "revisions": {
+    "engine_rule": "2026-09-02-r11-cinderella-hp-charge-cadence",
+    "skill_hooks": "standard-hooks-r13-audited-cinderella"
+  },
+  "run_id": "official-complete-2026-09-05",
+  "run_kind": "official_postprocess",
+  "schema_version": 1,
+  "study_id": "crown-mast-secondary-opportunity-v1"
+}

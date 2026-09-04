@@ -1,0 +1,4 @@
+from_secondary,to_secondary,paired_cases,mean_delta_change_pct_points,median_delta_change_pct_points,to_higher_delta_pct,to_lower_delta_pct,funnel_to_conventional,conventional_to_funnel,tie_to_conventional,tie_to_funnel
+epinel,helm,9984,-1.274261053890769,-1.2452654176664135,0.0,100.0,1282,0,612,0
+epinel,snow-white-heavy-arms,9984,-0.7512696711795936,-0.65805231687599,0.0,100.0,806,0,612,0
+helm,snow-white-heavy-arms,9984,0.5229913827111755,0.5023726161605235,97.94671474358975,2.0532852564102564,0,356,0,407
