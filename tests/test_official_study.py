@@ -36,13 +36,11 @@ class OfficialStudyTests(unittest.TestCase):
             (
                 "rapi-red-hood",
                 "scarlet-black-shadow",
-                "bready",
                 "cinderella",
                 "cinderella-crystal-wave",
                 "liberalio",
-                "milk-blooming-bunny",
+                "neon-vision-eye",
                 "phantom",
-                "quency-escape-queen",
                 "raven",
             ),
         )
@@ -84,7 +82,7 @@ class OfficialStudyTests(unittest.TestCase):
 
         rosters = tuple(iter_official_rosters())
         self.assertEqual(len(rosters), OFFICIAL_VALID_ROSTER_COUNT)
-        self.assertEqual(len({official_roster_id(roster) for roster in rosters}), 147)
+        self.assertEqual(len({official_roster_id(roster) for roster in rosters}), 117)
         self.assertTrue(
             all(len(set(roster.members)) == len(roster.members) for roster in rosters)
         )
@@ -98,11 +96,11 @@ class OfficialStudyTests(unittest.TestCase):
 
     def test_official_scenario_arithmetic(self) -> None:
         self.assertEqual(CHECKPOINT_V3_POINT_COUNT, 64)
-        self.assertEqual(OFFICIAL_RAW_ROSTER_COUNT, 150)
-        self.assertEqual(OFFICIAL_VALID_ROSTER_COUNT, 147)
+        self.assertEqual(OFFICIAL_RAW_ROSTER_COUNT, 120)
+        self.assertEqual(OFFICIAL_VALID_ROSTER_COUNT, 117)
         self.assertEqual(OFFICIAL_SCENARIOS_PER_ROSTER, 64 * 2 * 2)
-        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 147 * 64 * 2 * 2)
-        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 37_632)
+        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 117 * 64 * 2 * 2)
+        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 29_952)
 
     def test_one_roster_shard_contains_256_unique_scenarios(self) -> None:
         roster = TeamRoster(
@@ -144,8 +142,8 @@ class OfficialStudyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_official_roster_cases(
                 TeamRoster(
-                    b1="neon-vision-eye",
-                    main_b3="raven",
+                    b1="liter",
+                    main_b3="quency-escape-queen",
                     secondary_b3="epinel",
                 )
             )
@@ -160,9 +158,9 @@ class OfficialStudyTests(unittest.TestCase):
 
     def test_definition_matches_frozen_design(self) -> None:
         definition = official_study_definition()
-        self.assertEqual(definition["valid_roster_count"], 147)
+        self.assertEqual(definition["valid_roster_count"], 117)
         self.assertEqual(definition["scenarios_per_roster"], 256)
-        self.assertEqual(definition["scenario_count"], 37_632)
+        self.assertEqual(definition["scenario_count"], 29_952)
         self.assertEqual(definition["environment_axes"]["core"], {"off": 0.0, "on": 100.0})
 
 
