@@ -59,7 +59,7 @@ class CinderellaMechanicsTests(unittest.TestCase):
         )
         self.assertEqual(len(windows), 12)
         self.assertEqual(tuple(window.start for window in windows), tuple(range(3, 37, 3)))
-        self.assertEqual(windows[-1].value, 19.2)
+        self.assertAlmostEqual(windows[-1].value, 19.2)
         self.assertAlmostEqual(
             self.result.buff_total(36.1, self.actor, "max_hp_pct"),
             19.2,
