@@ -1,0 +1,149 @@
+name: Temporary reload parity audit
+
+on:
+  push:
+    branches: [research/14-burst-baseline]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/14-burst-baseline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compare current and clean reload models on official rosters
+        shell: bash
+        run: |
+          cat > /tmp/reload_audit.py <<'PY'
+          from __future__ import annotations
+          import copy, json, math
+          from dataclasses import replace
+          from pathlib import Path
+
+          from crown_mast_engine.analysis import analyze_rotations
+          from crown_mast_engine.characters import CharacterCatalog, CharacterDefinition, STANDARD_CHARACTER_CATALOG
+          from crown_mast_engine.combat import CombatSettings
+          from crown_mast_engine.models import DamageCategory
+          from crown_mast_engine.official_study import iter_official_rosters
+          from crown_mast_engine.timeline import RAID14_TIMELINE
+          from crown_mast_engine.rotations import OPENING_MAST_CROWN_MAST
+
+          # Display/raw reload times cross-checked from datamine/current references.
+          # Frames here are the visible/raw reload component, BEFORE the measured ~0.21 s tail.
+          RAW_RELOAD = {
+              'liter': 90,                    # 1.5 s
+              'crown': 150,                   # 2.5 s
+              'mast-romantic-maid': 150,      # 2.5 s
+              'scarlet-black-shadow': 120,    # displayed 2.0 s; special measured reload audited separately
+              'rapi-red-hood': 150,           # 2.5 s
+              'helm': 120,                    # 2.0 s
+              'anis-star': 120,               # 2.0 s
+              'moran-favorite-item': 90,      # 1.5 s raw datamine
+              'little-mermaid': 60,           # 1.0 s
+              'snow-white-heavy-arms': 120,   # 2.0 s
+              'epinel': 60,                   # 1.0 s
+              'neon-vision-eye': 120,         # 2.0 s raw datamine
+              'liberalio': 120,               # 2.0 s
+              'cinderella-crystal-wave': 150, # MG 2.5 s
+              'phantom': 120,                 # AR 2.0 s
+              'raven': 120,                   # RL 2.0 s
+          }
+
+          # Candidate special reload component for SBS: direct measurement around 2.36 s total
+          # reload animation maps to ~131 raw frames under round(raw*.975)+13 ~= 141f.
+          SBS_MEASURED_RAW = 131
+
+          def catalog_with_raw_reload(*, sbs_measured=False, no_empty_recovery=False):
+              defs=[]
+              for d in STANDARD_CHARACTER_CATALOG.definitions:
+                  w=d.weapon
+                  if d.slug in RAW_RELOAD:
+                      raw = SBS_MEASURED_RAW if (sbs_measured and d.slug=='scarlet-black-shadow') else RAW_RELOAD[d.slug]
+                      w=replace(w, reload_frames=raw)
+                  # Diagnostic arm: empty-mag charge recovery is suspected to overlap reload.
+                  # We cannot express overlap with WeaponProfile alone, so mark with a negative
+                  # sentinel handled by the runtime patch below only when requested.
+                  defs.append(replace(d, weapon=w))
+              return CharacterCatalog(tuple(defs), STANDARD_CHARACTER_CATALOG.scope)
+
+          settings=CombatSettings(core_hit_rate_pct=0.0, boss_element=None)
+          rosters=tuple(iter_official_rosters())
+
+          def run(catalog):
+              out={}
+              for r in rosters:
+                  c=analyze_rotations(
+                      roster=r,
+                      timeline=RAID14_TIMELINE,
+                      catalog=catalog,
+                      combat_settings=settings,
+                      conventional_policy=OPENING_MAST_CROWN_MAST,
+                  )
+                  o=c.overall
+                  key=(r.b1,r.main_b3,r.secondary_b3)
+                  out[key]={
+                      'relative':o.team_relative_change,
+                      'be':o.break_even_main_share_c,
+                      'winner':o.observed_winner.value,
+                      'team_c':o.team_c,
+                      'team_f':o.team_f,
+                      'main_share':o.conventional_main_share,
+                      'shots_c':{a:len(c.conventional_result.damage_events_for(actor=a,category=DamageCategory.NORMAL)) for a in r.members},
+                      'shots_f':{a:len(c.funnel_result.damage_events_for(actor=a,category=DamageCategory.NORMAL)) for a in r.members},
+                  }
+              return out
+
+          cur=run(STANDARD_CHARACTER_CATALOG)
+          raw=run(catalog_with_raw_reload())
+          raw_sbs=run(catalog_with_raw_reload(sbs_measured=True))
+
+          def summarize(name, cand):
+              rel_shifts=[]; be_shifts=[]; flips=[]; c_tot=[]; f_tot=[]; shot_deltas={}
+              worst=[]
+              for k,b in cur.items():
+                  x=cand[k]
+                  dr=(x['relative'] or 0)-(b['relative'] or 0)
+                  rel_shifts.append(dr)
+                  if b['be'] is not None and x['be'] is not None:
+                      be_shifts.append(x['be']-b['be'])
+                  if b['winner']!=x['winner']:
+                      flips.append((k,b['winner'],x['winner'],b['relative'],x['relative']))
+                  c_tot.append(x['team_c']/b['team_c']-1)
+                  f_tot.append(x['team_f']/b['team_f']-1)
+                  for arm in ('shots_c','shots_f'):
+                      for actor,v in x[arm].items():
+                          dv=v-b[arm][actor]
+                          if dv:
+                              shot_deltas.setdefault(actor,[]).append(dv)
+                  worst.append((abs(dr),k,b['relative'],x['relative'],b['be'],x['be']))
+              worst.sort(reverse=True)
+              print('\n===',name,'===')
+              print('rosters',len(cand),'winner_flips',len(flips))
+              print('relative_shift min/mean/max',min(rel_shifts),sum(rel_shifts)/len(rel_shifts),max(rel_shifts))
+              if be_shifts: print('break_even_shift min/mean/max',min(be_shifts),sum(be_shifts)/len(be_shifts),max(be_shifts))
+              print('team_c_change min/mean/max',min(c_tot),sum(c_tot)/len(c_tot),max(c_tot))
+              print('team_f_change min/mean/max',min(f_tot),sum(f_tot)/len(f_tot),max(f_tot))
+              print('flips',json.dumps(flips[:20],ensure_ascii=False))
+              print('worst_relative',json.dumps(worst[:15],ensure_ascii=False))
+              print('shot_delta_summary',json.dumps({a:{'min':min(v),'max':max(v),'mean':sum(v)/len(v),'n':len(v)} for a,v in sorted(shot_deltas.items())},ensure_ascii=False,sort_keys=True))
+
+          summarize('RAW_DISPLAY_RELOAD',raw)
+          summarize('RAW_DISPLAY_PLUS_SBS_MEASURED',raw_sbs)
+
+          # Per-actor current vs raw effective unbuffed reload frames; makes the suspected
+          # encoded +21 inflation visible without relying on aggregate damage.
+          from crown_mast_engine.combat import effective_reload_frames
+          print('\n=== RELOAD_FRAME_TABLE ===')
+          for slug in sorted(RAW_RELOAD):
+              d=STANDARD_CHARACTER_CATALOG.require(slug)
+              rawv=RAW_RELOAD[slug]
+              print(slug,'stored',d.weapon.reload_frames,'current_eff',effective_reload_frames(d.weapon.reload_frames,0),'raw_eff',effective_reload_frames(rawv,0))
+          print('SBS measured raw candidate',SBS_MEASURED_RAW,'eff',effective_reload_frames(SBS_MEASURED_RAW,0))
+          PY
+          python /tmp/reload_audit.py
