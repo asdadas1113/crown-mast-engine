@@ -1,0 +1,227 @@
+name: Exploratory SWHA main / Cinderella secondary
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[explore-swha-main-cinderella-secondary]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Focused regression
+        run: >-
+          python -m unittest -q
+          tests.test_snow_white_heavy_arms
+          tests.test_cinderella
+          tests.test_engine
+          tests.test_checkpoints_v3
+
+  exploratory-shards:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        b1: [liter, anis-star, moran-favorite-item, little-mermaid, rapi-red-hood]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run reversed 256-scenario grid
+        shell: bash
+        env:
+          B1_ACTOR: ${{ matrix.b1 }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from crown_mast_engine.checkpoints_v3 import (
+              build_checkpoint_v3_cases,
+              main_advantage_boss_element,
+          )
+          from crown_mast_engine.combat import CombatSettings
+          from crown_mast_engine.models import TeamRoster
+          from crown_mast_engine.samples import run_sample_batch
+
+          b1 = os.environ["B1_ACTOR"]
+          roster = TeamRoster(
+              b1=b1,
+              main_b3="snow-white-heavy-arms",
+              secondary_b3="cinderella",
+          )
+          rows = []
+          for core_condition, core_pct in (("off", 0.0), ("on", 100.0)):
+              for advantage in ("off", "on"):
+                  boss_element = (
+                      None
+                      if advantage == "off"
+                      else main_advantage_boss_element(roster.main_b3)
+                  )
+                  cases = build_checkpoint_v3_cases(
+                      roster=roster,
+                      combat_settings=CombatSettings(
+                          core_hit_rate_pct=core_pct,
+                          boss_element=boss_element,
+                      ),
+                      condition_id=(
+                          f"explore-swha-main-cinderella-secondary--b1-{b1}"
+                          f"--core-{core_condition}--main-advantage-{advantage}"
+                      ),
+                  )
+                  batch = run_sample_batch(cases, workers=4)
+                  for result in batch.results:
+                      row = result.summary_row()
+                      row["b1_profile"] = result.labels["b1_profile"]
+                      row["main_profile"] = result.labels["main_profile"]
+                      row["secondary_profile"] = result.labels["secondary_profile"]
+                      row["core_condition"] = core_condition
+                      row["main_advantage"] = advantage
+                      rows.append(row)
+
+          if len(rows) != 256:
+              raise AssertionError(f"expected 256 rows, got {len(rows)}")
+          if len({row["case_id"] for row in rows}) != 256:
+              raise AssertionError("case ids are not unique")
+
+          out = Path("exploratory-output")
+          out.mkdir(parents=True, exist_ok=True)
+          path = out / f"{b1}.jsonl"
+          with path.open("w", encoding="utf-8") as f:
+              for row in rows:
+                  f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+          print(f"EXPLORATORY_SHARD_OK b1={b1} scenarios={len(rows)} output={path}")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exploratory-swha-cinderella-${{ matrix.b1 }}-${{ github.run_id }}
+          path: exploratory-output
+          retention-days: 30
+
+  finalize:
+    needs: exploratory-shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exploratory-swha-cinderella-*-${{ github.run_id }}
+          path: exploratory-input
+          merge-multiple: true
+      - name: Audit and summarize
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          from statistics import mean, median
+
+          paths = sorted(Path("exploratory-input").glob("*.jsonl"))
+          if len(paths) != 5:
+              raise AssertionError(f"expected 5 shard files, got {len(paths)}")
+          rows = []
+          for path in paths:
+              with path.open(encoding="utf-8") as f:
+                  rows.extend(json.loads(line) for line in f if line.strip())
+          if len(rows) != 1280:
+              raise AssertionError(f"expected 1280 rows, got {len(rows)}")
+          if len({row["case_id"] for row in rows}) != 1280:
+              raise AssertionError("combined case ids are not unique")
+
+          def group_band(items):
+              c = Counter(row["outcome_band"] for row in items)
+              return {
+                  "conventional": c["clear_conventional"] + c["marginal_conventional"],
+                  "tie": c["tie_band"],
+                  "funnel": c["clear_funnel"] + c["marginal_funnel"],
+              }
+
+          def summary(items):
+              bands = group_band(items)
+              deltas = [row["relative_change"] * 100.0 for row in items]
+              return {
+                  "n": len(items),
+                  "bands": bands,
+                  "band_pct": {k: v / len(items) * 100.0 for k, v in bands.items()},
+                  "mean_delta_pct": mean(deltas),
+                  "median_delta_pct": median(deltas),
+                  "min_delta_pct": min(deltas),
+                  "max_delta_pct": max(deltas),
+                  "mean_main_share_pct": mean(row["conventional_main_share"] for row in items) * 100.0,
+                  "mean_g_pct": mean(row["g"] for row in items) * 100.0,
+                  "mean_l_pct": mean(row["l"] for row in items) * 100.0,
+              }
+
+          result = {
+              "study_kind": "exploratory_reversed_roles",
+              "main_b3": "snow-white-heavy-arms",
+              "secondary_b3": "cinderella",
+              "overall": summary(rows),
+              "by_b1": {},
+              "by_environment": {},
+              "equal_main_secondary_growth": {},
+          }
+
+          for b1 in sorted({row["b1"] for row in rows}):
+              result["by_b1"][b1] = summary([row for row in rows if row["b1"] == b1])
+          for core in ("off", "on"):
+              for adv in ("off", "on"):
+                  key = f"core-{core}--adv-{adv}"
+                  subset = [
+                      row for row in rows
+                      if row["core_condition"] == core and row["main_advantage"] == adv
+                  ]
+                  result["by_environment"][key] = summary(subset)
+
+          equal = [row for row in rows if row["main_profile"] == row["secondary_profile"]]
+          result["equal_main_secondary_growth"]["all"] = summary(equal)
+          for core in ("off", "on"):
+              for adv in ("off", "on"):
+                  key = f"core-{core}--adv-{adv}"
+                  subset = [
+                      row for row in equal
+                      if row["core_condition"] == core and row["main_advantage"] == adv
+                  ]
+                  result["equal_main_secondary_growth"][key] = summary(subset)
+
+          sorted_rows = sorted(rows, key=lambda row: row["relative_change"])
+          result["representative"] = {
+              "most_conventional": sorted_rows[0],
+              "closest_to_tie": min(rows, key=lambda row: abs(row["relative_change"])),
+              "most_funnel": sorted_rows[-1],
+          }
+
+          out = Path("exploratory-final")
+          out.mkdir(exist_ok=True)
+          (out / "summary.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          with (out / "all_rows.jsonl").open("w", encoding="utf-8") as f:
+              for row in sorted(rows, key=lambda row: row["case_id"]):
+                  f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+          print("EXPLORATORY_REVERSED_OK scenarios=1280 unique_cases=1280")
+          print(json.dumps(result["overall"], ensure_ascii=False, sort_keys=True))
+          print("EQUAL_GROWTH", json.dumps(result["equal_main_secondary_growth"], ensure_ascii=False, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exploratory-swha-main-cinderella-secondary-${{ github.run_id }}-final
+          path: exploratory-final
+          retention-days: 30
