@@ -1,0 +1,148 @@
+name: Official study wave 5
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[official-wave-5]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: >-
+          python -m compileall -q
+          crown_mast_engine
+          tests
+          scripts/run_official_shard.py
+          scripts/audit_official_wave.py
+          scripts/finalize_official_wave.py
+      - name: Full regression suite
+        run: >-
+          python -m unittest -v
+          tests.test_bready
+          tests.test_liberalio
+          tests.test_raven
+          tests.test_cinderella
+          tests.test_cinderella_crystal_wave
+          tests.test_rapi_red_hood
+          tests.test_character_audit
+          tests.test_roster_validation
+          tests.test_phantom_favorite_item
+          tests.test_milk_blooming_bunny
+          tests.test_quency_escape_queen
+          tests.test_scarlet_black_shadow
+          tests.test_characters
+          tests.test_b1_characters
+          tests.test_buffs
+          tests.test_damage
+          tests.test_combat
+          tests.test_engine
+          tests.test_helm
+          tests.test_neon_vision_eye
+          tests.test_snow_white_heavy_arms
+          tests.test_timeline
+          tests.test_checkpoints_v3
+          tests.test_official_study
+          tests.test_official_results
+
+  official-shards:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        roster_index: [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run official 256-scenario roster shard
+        run: >-
+          python scripts/run_official_shard.py
+          --output-dir official-output/official-wave5-${{ github.run_id }}
+          --run-id official-wave5-${{ github.run_id }}
+          --roster-index ${{ matrix.roster_index }}
+          --workers 4
+      - name: Upload official shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-wave5-shard-${{ matrix.roster_index }}-${{ github.run_id }}
+          path: official-output
+          retention-days: 30
+
+  finalize:
+    needs: official-shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download official shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: official-wave5-shard-*-${{ github.run_id }}
+          path: shard-artifacts
+          merge-multiple: true
+      - name: Strict audit of downloaded shards
+        run: >-
+          python scripts/audit_official_wave.py
+          --raw-dir shard-artifacts/official-wave5-${{ github.run_id }}/machine/raw
+          --run-id official-wave5-${{ github.run_id }}
+          --start-index 60
+          --shard-count 16
+      - name: Validate and assemble official wave
+        run: >-
+          python scripts/finalize_official_wave.py
+          --raw-dir shard-artifacts/official-wave5-${{ github.run_id }}/machine/raw
+          --output-dir official-output/official-wave5-${{ github.run_id }}
+          --run-id official-wave5-${{ github.run_id }}
+          --branch "${GITHUB_REF_NAME}"
+          --commit-sha "${GITHUB_SHA}"
+          --start-index 60
+          --shard-count 16
+      - name: Re-audit assembled raw shards and verify byte identity
+        shell: bash
+        run: |
+          python scripts/audit_official_wave.py \
+            --raw-dir official-output/official-wave5-${{ github.run_id }}/machine/raw \
+            --run-id official-wave5-${{ github.run_id }} \
+            --start-index 60 \
+            --shard-count 16
+          python - <<'PY'
+          from pathlib import Path
+
+          run_id = "official-wave5-${{ github.run_id }}"
+          source = Path("shard-artifacts") / run_id / "machine" / "raw"
+          target = Path("official-output") / run_id / "machine" / "raw"
+          source_files = sorted(source.glob("*.jsonl"))
+          target_files = sorted(target.glob("*.jsonl"))
+          if [path.name for path in source_files] != [path.name for path in target_files]:
+              raise AssertionError("assembled raw file set differs from source artifacts")
+          if len(source_files) != 16:
+              raise AssertionError(f"expected 16 source raw files, found {len(source_files)}")
+          for source_path, target_path in zip(source_files, target_files):
+              if source_path.read_bytes() != target_path.read_bytes():
+                  raise AssertionError(f"assembled raw bytes changed: {source_path.name}")
+          print(f"OFFICIAL_WAVE5_IDENTITY_OK byte_identical_files={len(source_files)}")
+          PY
+      - name: Upload consolidated official wave
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-wave5-${{ github.run_id }}-final
+          path: official-output
+          retention-days: 30
