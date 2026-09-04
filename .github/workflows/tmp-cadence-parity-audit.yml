@@ -39,14 +39,14 @@ jobs:
         run: |
           python - <<'PY'
           from dataclasses import replace
-          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, TeamRoster, analyze_rotations, analyze_entry_variants, ResearchScenario, RAID14_TIMELINE, simulate_rotation
+          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, analyze_rotations, analyze_entry_variants, ResearchScenario, RAID14_TIMELINE, simulate_rotation
           from crown_mast_engine.combat import CombatSettings
-          from crown_mast_engine.models import DamageCategory
+          from crown_mast_engine.models import DamageCategory, TeamRoster
           from crown_mast_engine.rotations import CROWN_CROWN_MAST
           from tests.simulation_fixtures import standard_rotation_comparison
 
           o=standard_rotation_comparison().overall
-          print('STANDARD', repr(vars(o)))
+          print('STANDARD', repr({'team_c':o.team_c,'team_f':o.team_f,'g':o.g,'l':o.l,'relative':o.team_relative_change,'break_even':o.break_even_main_share_c,'main_share':o.conventional_main_share,'winner':o.observed_winner.value}))
 
           roster=TeamRoster()
           bare=BuildProfile.uniform(GearState.OL5)
