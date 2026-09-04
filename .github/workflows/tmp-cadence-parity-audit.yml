@@ -5,76 +5,38 @@ on:
     branches:
       - research/14-burst-baseline
 
-permissions:
-  contents: write
-
 jobs:
-  patch-test:
+  diagnose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: research/14-burst-baseline
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Apply confirmed audit corrections
+      - name: Apply source corrections in runner
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-
           def r(path, old, new):
               p=Path(path); s=p.read_text(encoding='utf-8')
-              n=s.count(old)
-              if n != 1:
-                  raise SystemExit(f'{path}: expected one match, got {n}: {old!r}')
+              if s.count(old)!=1: raise SystemExit(f'{path}: match={s.count(old)} {old!r}')
               p.write_text(s.replace(old,new),encoding='utf-8')
-
-          r('crown_mast_engine/combat.py',
-            '    boss_damage_taken_pct: float = 0.0\n    startup_delay_frames: int = 8\n',
-            '    boss_damage_taken_pct: float = 0.0\n    # PvE baseline: Settings > Battle > Convenience > Min Firing Rounds Adjustment ON.\n    # At 60 FPS this matters for 24/s SMGs: ON preserves 24/s; OFF quantizes to 20/s.\n    min_firing_rounds_adjustment: bool = True\n    startup_delay_frames: int = 8\n')
-
-          r('crown_mast_engine/engine.py',
-            '                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                shared_charge_modes=shared_charge_modes,\n',
-            '                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                pulls_per_second_override=(\n                    20.0\n                    if definition.weapon.weapon_type == "SMG"\n                    and not self.combat_settings.min_firing_rounds_adjustment\n                    else None\n                ),\n                shared_charge_modes=shared_charge_modes,\n')
-
-          r('crown_mast_engine/engine.py',
-            '                    pulls_per_second_override=mode.pulls_per_second,\n',
-            '                    pulls_per_second_override=(\n                        mode.pulls_per_second\n                        if mode.pulls_per_second is not None\n                        else (\n                            20.0\n                            if mode.weapon.weapon_type == "SMG"\n                            and not self.combat_settings.min_firing_rounds_adjustment\n                            else None\n                        )\n                    ),\n')
-
-          r('crown_mast_engine/data/characters.json',
-            '          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 20.0,\n',
-            '          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 0.0,\n')
-
-          r('crown_mast_engine/research.py',
-            '        "boss_damage_taken_pct": settings.boss_damage_taken_pct,\n        "startup_delay_frames": settings.startup_delay_frames,\n',
-            '        "boss_damage_taken_pct": settings.boss_damage_taken_pct,\n        "min_firing_rounds_adjustment": settings.min_firing_rounds_adjustment,\n        "startup_delay_frames": settings.startup_delay_frames,\n')
-
-          old='''    keys = {\n        "boss_def",\n        "core_hit_rate_pct",\n        "range_bonus_pct",\n        "element_multiplier",\n        "element_multiplier_by_actor",\n        "boss_element",\n        "full_burst_bonus_pct",\n        "boss_damage_taken_pct",\n        "startup_delay_frames",\n        "duration_sec",\n    }\n    _require_exact_keys(payload, keys, "combat_settings")\n    values = dict(payload)\n'''
-          new='''    required_keys = {\n        "boss_def",\n        "core_hit_rate_pct",\n        "range_bonus_pct",\n        "element_multiplier",\n        "element_multiplier_by_actor",\n        "boss_element",\n        "full_burst_bonus_pct",\n        "boss_damage_taken_pct",\n        "startup_delay_frames",\n        "duration_sec",\n    }\n    optional_keys = {"min_firing_rounds_adjustment"}\n    missing = required_keys - payload.keys()\n    extra = payload.keys() - required_keys - optional_keys\n    if missing or extra:\n        details = []\n        if missing:\n            details.append(f"missing={sorted(missing)}")\n        if extra:\n            details.append(f"extra={sorted(extra)}")\n        raise ValueError("combat_settings has invalid fields: " + ", ".join(details))\n    values = dict(payload)\n    values.setdefault("min_firing_rounds_adjustment", True)\n'''
-          r('crown_mast_engine/research.py', old, new)
-
-          old_test='''    def test_mast_drunken_hit_loss_tracks_live_stack(self) -> None:\n        result = standard_conventional_result()\n        mast = result.roster.mast\n        self.assertEqual(result.buff_total(3.8, mast, "normal_attack_pct"), 0)\n        self.assertEqual(result.buff_total(4.0, mast, "normal_attack_pct"), -20)\n        self.assertEqual(result.buff_total(19.0, mast, "normal_attack_pct"), -40)\n        self.assertEqual(result.buff_total(34.0, mast, "normal_attack_pct"), -60)\n        self.assertEqual(result.buff_total(44.3, mast, "normal_attack_pct"), 0)\n\n        mast_normals = result.damage_events_for(\n            actor=mast,\n            category=DamageCategory.NORMAL,\n        )\n        d1 = next(event for event in mast_normals if 3.9 <= event.time < 18.3)\n        d2 = next(event for event in mast_normals if 18.3 <= event.time < 32.7)\n        d3 = next(event for event in mast_normals if 32.7 <= event.time < 44.3)\n        self.assertAlmostEqual(d1.breakdown.coefficient, 0.0557 * 0.8)\n        self.assertAlmostEqual(d2.breakdown.coefficient, 0.0557 * 0.6)\n        self.assertAlmostEqual(d3.breakdown.coefficient, 0.0557 * 0.4)\n'''
-          new_test='''    def test_mast_drunken_hit_rate_debuff_is_not_direct_damage_loss(self) -> None:\n        result = standard_conventional_result()\n        mast = result.roster.mast\n        definition = result.catalog.require(mast)\n        self.assertEqual(definition.skill_value("skill1", "hit_rate_down_per_stack_pct"), 20)\n        self.assertEqual(definition.skill_value("skill1", "expected_normal_damage_loss_per_stack_pct"), 0)\n        for time in (3.8, 4.0, 19.0, 34.0, 44.3):\n            self.assertEqual(result.buff_total(time, mast, "normal_attack_pct"), 0)\n        mast_normals = result.damage_events_for(actor=mast, category=DamageCategory.NORMAL)\n        for window in ((3.9, 18.3), (18.3, 32.7), (32.7, 44.3)):\n            event = next(e for e in mast_normals if window[0] <= e.time < window[1])\n            self.assertAlmostEqual(event.breakdown.coefficient, 0.0557)\n'''
-          r('tests/test_combat.py', old_test, new_test)
-
-          marker='''    def test_reload_formula_matches_pinned_runtime(self) -> None:\n'''
-          insert='''    def test_min_firing_rounds_adjustment_defaults_on_and_can_be_disabled(self) -> None:\n        self.assertTrue(CombatSettings().min_firing_rounds_adjustment)\n        on = simulate_rotation(\n            CROWN_CROWN_MAST,\n            combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0),\n        )\n        off = simulate_rotation(\n            CROWN_CROWN_MAST,\n            combat_settings=CombatSettings(\n                duration_sec=1,\n                startup_delay_frames=0,\n                min_firing_rounds_adjustment=False,\n            ),\n        )\n        on_liter = len([e for e in on.damage_events_for(actor="liter", category=DamageCategory.NORMAL)])\n        off_liter = len([e for e in off.damage_events_for(actor="liter", category=DamageCategory.NORMAL)])\n        self.assertEqual((on_liter, off_liter), (24, 20))\n\n    def test_reload_formula_matches_pinned_runtime(self) -> None:\n'''
-          r('tests/test_combat.py', marker, insert)
+          r('crown_mast_engine/combat.py','    boss_damage_taken_pct: float = 0.0\n    startup_delay_frames: int = 8\n','    boss_damage_taken_pct: float = 0.0\n    min_firing_rounds_adjustment: bool = True\n    startup_delay_frames: int = 8\n')
+          r('crown_mast_engine/engine.py','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                shared_charge_modes=shared_charge_modes,\n','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                pulls_per_second_override=(20.0 if definition.weapon.weapon_type == "SMG" and not self.combat_settings.min_firing_rounds_adjustment else None),\n                shared_charge_modes=shared_charge_modes,\n')
+          r('crown_mast_engine/engine.py','                    pulls_per_second_override=mode.pulls_per_second,\n','                    pulls_per_second_override=(mode.pulls_per_second if mode.pulls_per_second is not None else (20.0 if mode.weapon.weapon_type == "SMG" and not self.combat_settings.min_firing_rounds_adjustment else None)),\n')
+          r('crown_mast_engine/data/characters.json','          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 20.0,\n','          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 0.0,\n')
           PY
-      - name: Focused regression
-        run: python -m unittest tests.test_combat tests.test_analysis tests.test_research -v
-      - name: Full regression
-        run: python -m unittest discover -s tests -v
-      - name: Commit confirmed corrections
-        if: success()
-        shell: bash
+      - name: Print new controlled baselines
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/tmp-cadence-parity-audit.yml
-          git add crown_mast_engine tests
-          git commit -m "Fix Mast accuracy proxy and expose firing adjustment"
-          git push origin HEAD:research/14-burst-baseline
+          python - <<'PY'
+          from crown_mast_engine.analysis import analyze_mast_expected_hit_loss_sensitivity
+          from tests.simulation_fixtures import standard_rotation_comparison
+          a=standard_rotation_comparison(); o=a.overall
+          print('STANDARD',repr({'team_c':o.team_c,'team_f':o.team_f,'g':o.g,'l':o.l,'relative':o.team_relative_change,'break_even':o.break_even_main_share_c,'main_share':o.conventional_main_share,'winner':o.observed_winner.value}))
+          s=analyze_mast_expected_hit_loss_sensitivity()
+          for k,v in s.items():
+              print('SENS',k,repr({'team_c':v.overall.team_c,'team_f':v.overall.team_f,'relative':v.overall.team_relative_change,'winner':v.overall.observed_winner.value}))
+          PY
