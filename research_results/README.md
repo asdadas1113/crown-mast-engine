@@ -57,7 +57,7 @@ research_results/SCARLET_BLACK_SHADOW_FUNNEL_CASE_STUDY_2026-09-02.md
 
 정확한 보편 임계값 추정이 주목적은 아니다.
 
-## 공식 v1 표본 공간 — 현재 재검토 중
+## 공식 v1 표본 공간
 
 상세 설계:
 
@@ -81,22 +81,20 @@ Little Mermaid
 Rapi: Red Hood — B1 Combat Assist
 ```
 
-현재 Main B3 표본:
+Main B3 표본:
 
 ```text
 Rapi: Red Hood
 Scarlet: Black Shadow
-Bready
 Cinderella
 Cinderella: Crystal Wave
 Liberalio
-Milk: Blooming Bunny
+Neon: Vision Eye
 Phantom (Favorite Item)
-Quency: Escape Queen
 Raven
 ```
 
-2026-09-02 첫 공식 배치 전에 후보군을 재검토하면서 **원본 Cinderella를 추가했다.** Quency/Bready 등의 유지 여부와 이미 엔진에 구현된 Neon: Vision Eye의 공식 Main 편입 여부는 차후 논의 대상으로 남겨 두었다. 따라서 Main 후보군은 아직 최종 동결이 아니다.
+2026-09-02 첫 공식 배치 전에 후보군을 재검토해 **원본 Cinderella와 Neon: Vision Eye를 포함**하고, Bready / Milk: Blooming Bunny / Quency: Escape Queen은 공식 Main 축에서 제외했다. 세 캐릭터의 엔진 구현과 독립 진단 자료는 유지한다.
 
 Secondary B3 기준점:
 
@@ -108,17 +106,15 @@ Snow White: Heavy Arms  -> 높은 기회비용 상단 스트레스 테스트
 
 Snow White: Heavy Arms는 일반적인 강한 서브딜러 대표가 아니라, 메인급 딜러를 Secondary 자리에 둬 기회비용의 상단을 확인하는 스트레스 테스트다. 최종 해석은 캐릭터 라벨보다 실제 Secondary 딜 및 지분을 우선한다.
 
-현재 코드 기준 시나리오 수:
+공식 v1 시나리오 수:
 
 ```text
-원시 로스터:       5 x 10 x 3 = 150
-라피 중복 조합:                 - 3
-유효 로스터:                    147
-로스터당:           64 x 2 x 2 = 256 시나리오
-총합:               147 x 256 = 37,632 시나리오
+원시 로스터:       5 x 8 x 3 = 120
+라피 중복 조합:                - 3
+유효 로스터:                   117
+로스터당:          64 x 2 x 2 = 256 시나리오
+총합:              117 x 256 = 29,952 시나리오
 ```
-
-**37,632는 현재 후보군 기준 임시 표본 수**다. Main 후보 최종 재검토 후 공식 배치 직전에 다시 canonical count를 확정한다.
 
 환경축:
 
@@ -135,7 +131,7 @@ Snow White: Heavy Arms는 일반적인 강한 서브딜러 대표가 아니라, 
 
 ```text
 roster 1개 shard = 256 시나리오
-현재 후보군 기준 = 147 shard
+공식 v1 = 117 shard
 ```
 
 공식 실행이 승인되면:
@@ -165,9 +161,11 @@ tests/test_cinderella.py
 
 - Secondary 3개 기준점: **유지**
 - B1 5명 표본: **유지**
-- Main B3 표본: **재검토 중, 현재 10명**
-- 원본 신데렐라: **구현 및 현재 Main 후보 추가**
-- 현재 코드 기준 표본 수: **37,632**
+- Main B3 표본: **8명으로 재정리**
+- 원본 신데렐라: **구현 및 Main 후보 포함**
+- 네온: 비전 아이: **Main 후보 포함**
+- 브래디 / 밀크: 블루밍 버니 / 퀀시: 이스케이프 퀸: **공식 Main 제외, 진단용 유지**
+- 공식 표본 수: **29,952**
 - 실행/저장 구조: **설계 완료**
 - 독립 진단 케이스 스터디: **흑련 몰아주기 반응 1건 보존**
 - 공식 연구 배치: **아직 실행하지 않음**
