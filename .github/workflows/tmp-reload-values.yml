@@ -1,93 +1,191 @@
-name: Temporary reload regression values
+name: Finalize cross-checked reload timing correction
 
 on:
   push:
     branches: [research/14-burst-baseline]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  values:
+  finalize:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: research/14-burst-baseline
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Apply verified reload inputs and print exact regression values
+      - name: Apply audited reload correction
         shell: bash
         run: |
-          PYTHONPATH=. python - <<'PY'
-          import json
+          python - <<'PY'
           from pathlib import Path
+          import re
 
-          edits = {
-              'crown_mast_engine/data/characters.json': {
-                  'liter': 90, 'crown': 150, 'mast-romantic-maid': 150,
-                  'rapi-red-hood': 150, 'helm': 120, 'anis-star': 120,
-                  'little-mermaid': 60, 'snow-white-heavy-arms': 120,
-                  'epinel': 60, 'neon-vision-eye': 120,
-              },
-              'crown_mast_engine/data/character_cinderella.json': {'cinderella': 120},
-              'crown_mast_engine/data/character_cinderella_crystal_wave.json': {'cinderella-crystal-wave': 150},
-              'crown_mast_engine/data/character_phantom_favorite_item.json': {'phantom': 120},
-              'crown_mast_engine/data/character_bready.json': {'bready': 120},
-              'crown_mast_engine/data/character_quency_escape_queen.json': {'quency-escape-queen': 60},
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'{path}: missing expected text: {old!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          def set_reload(path, slug, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              pattern = rf'("slug": "{re.escape(slug)}".*?"reload_frames": ){old}(\b)'
+              updated, count = re.subn(pattern, rf'\g<1>{new}\2', text, count=1, flags=re.S)
+              if count != 1:
+                  raise SystemExit(f'{path}: reload replacement failed for {slug}: {count}')
+              p.write_text(updated, encoding='utf-8')
+
+          # Confirmed ordinary reload inputs. `reload_frames` now means the displayed/raw
+          # reload body in 60-FPS frames; combat.effective_reload_frames applies 0.975 + 13f.
+          main = 'crown_mast_engine/data/characters.json'
+          for slug, old, new in (
+              ('liter',111,90), ('crown',171,150), ('mast-romantic-maid',171,150),
+              ('rapi-red-hood',171,150), ('helm',141,120), ('anis-star',141,120),
+              ('little-mermaid',81,60), ('snow-white-heavy-arms',141,120),
+              ('epinel',81,60), ('neon-vision-eye',111,120),
+          ):
+              set_reload(main, slug, old, new)
+          for path, slug, old, new in (
+              ('crown_mast_engine/data/character_cinderella.json','cinderella',141,120),
+              ('crown_mast_engine/data/character_cinderella_crystal_wave.json','cinderella-crystal-wave',171,150),
+              ('crown_mast_engine/data/character_phantom_favorite_item.json','phantom',141,120),
+              ('crown_mast_engine/data/character_bready.json','bready',141,120),
+              ('crown_mast_engine/data/character_quency_escape_queen.json','quency-escape-queen',81,60),
+          ):
+              set_reload(path, slug, old, new)
+
+          # Append provenance without replacing the original source trail.
+          for path in (
+              main,
+              'crown_mast_engine/data/character_cinderella.json',
+              'crown_mast_engine/data/character_cinderella_crystal_wave.json',
+              'crown_mast_engine/data/character_phantom_favorite_item.json',
+              'crown_mast_engine/data/character_bready.json',
+              'crown_mast_engine/data/character_quency_escape_queen.json',
+          ):
+              p=Path(path); text=p.read_text(encoding='utf-8')
+              marker='reload-timing-audit@2026-09-05'
+              if marker not in text:
+                  text=text.replace('"source_revision": "', '"source_revision": "', 1)
+                  m=re.search(r'("source_revision": ")([^"]*)(")', text)
+                  if not m:
+                      raise SystemExit(f'{path}: source_revision not found')
+                  text=text[:m.start(2)] + m.group(2) + '; ' + marker + text[m.end(2):]
+                  p.write_text(text, encoding='utf-8')
+
+          # Make the data contract explicit.
+          replace_once(
+              'crown_mast_engine/characters.py',
+              '    ammo: int\n    reload_frames: int\n    charge_frames: int',
+              '    ammo: int\n    # Displayed/raw reload duration in 60-FPS frames. The runtime applies\n    # the measured 0.975 body factor and fixed reload tail separately.\n    reload_frames: int\n    charge_frames: int',
+          )
+          replace_once(
+              'crown_mast_engine/combat.py',
+              'def effective_reload_frames(base_frames: int, reload_speed_pct: float) -> int:\n    scaled = base_frames * 0.975 * max(0.0, 1 - reload_speed_pct / 100)',
+              'def effective_reload_frames(base_frames: int, reload_speed_pct: float) -> int:\n    """Resolve a displayed/raw reload body expressed in 60-FPS frames."""\n    scaled = base_frames * 0.975 * max(0.0, 1 - reload_speed_pct / 100)',
+          )
+
+          # Direct data assertions.
+          replace_once('tests/test_characters.py','self.assertEqual(snow.weapon.reload_frames, 141)','self.assertEqual(snow.weapon.reload_frames, 120)')
+          replace_once('tests/test_characters.py','self.assertEqual(epinel.weapon.reload_frames, 81)','self.assertEqual(epinel.weapon.reload_frames, 60)')
+          replace_once('tests/test_characters.py','self.assertEqual(neon.weapon.reload_frames, 111)','self.assertEqual(neon.weapon.reload_frames, 120)')
+          replace_once('tests/test_bready.py','def test_standard_data_matches_pinned_bready_datamine(self) -> None:','def test_standard_data_matches_cross_checked_basis(self) -> None:')
+          replace_once('tests/test_bready.py','self.assertEqual(bready.weapon.reload_frames, 141)','self.assertEqual(bready.weapon.reload_frames, 120)')
+          replace_once('tests/test_cinderella_crystal_wave.py','def test_standard_data_matches_pinned_mg_datamine(self) -> None:','def test_standard_data_matches_cross_checked_mg_basis(self) -> None:')
+          replace_once('tests/test_cinderella_crystal_wave.py','self.assertEqual(ccw.weapon.reload_frames, 171)','self.assertEqual(ccw.weapon.reload_frames, 150)')
+          replace_once('tests/test_phantom_favorite_item.py','def test_data_matches_pinned_favorite_item_basis(self) -> None:','def test_data_matches_cross_checked_favorite_item_basis(self) -> None:')
+          replace_once('tests/test_phantom_favorite_item.py','self.assertEqual(unit.weapon.reload_frames, 141)','self.assertEqual(unit.weapon.reload_frames, 120)')
+          replace_once('tests/test_quency_escape_queen.py','def test_data_matches_pinned_datamine(self) -> None:','def test_data_matches_cross_checked_basis(self) -> None:')
+          replace_once('tests/test_quency_escape_queen.py','self.assertEqual(unit.weapon.reload_frames, 81)','self.assertEqual(unit.weapon.reload_frames, 60)')
+
+          # Timing contract regression: input frames are raw display values, not synthesized
+          # nikke-sim reloadFrames. Do not pin >100% semantics here; that remains unresolved.
+          replace_once(
+              'tests/test_combat.py',
+              '    def test_reload_formula_matches_pinned_runtime(self) -> None:\n        self.assertEqual(effective_reload_frames(171, 0), 180)\n        self.assertEqual(effective_reload_frames(171, 100), 13)\n        self.assertEqual(effective_reload_frames(171, 89.47), 31)',
+              '    def test_reload_formula_uses_displayed_raw_body_frames(self) -> None:\n        self.assertEqual(effective_reload_frames(60, 0), 72)\n        self.assertEqual(effective_reload_frames(90, 0), 101)\n        self.assertEqual(effective_reload_frames(120, 0), 130)\n        self.assertEqual(effective_reload_frames(150, 0), 159)',
+          )
+          # Only the explicit SR reload-cycle test is changed; fixed-charge tests where reload
+          # never occurs are intentionally untouched.
+          marker='    def test_charge_weapon_uses_charge_release_and_reload_frames(self) -> None:'
+          p=Path('tests/test_combat.py'); text=p.read_text(encoding='utf-8')
+          start=text.index(marker); end=text.index('\n    def ', start+len(marker))
+          block=text[start:end]
+          if 'reload_frames=141' not in block or '[59, 141, 223, 305, 387, 469, 701]' not in block:
+              raise SystemExit('charge reload regression block changed unexpectedly')
+          block=block.replace('reload_frames=141','reload_frames=120',1).replace('[59, 141, 223, 305, 387, 469, 701]','[59, 141, 223, 305, 387, 469, 681]',1)
+          p.write_text(text[:start]+block+text[end:], encoding='utf-8')
+
+          # Re-pin deterministic regression outputs produced by the corrected timing inputs.
+          replacements = {
+              'tests/test_analysis.py': [
+                  ('2_163_858_076.989933','2_168_143_852.8701534'),
+                  ('2_132_049_373.9287062','2_141_385_963.124464'),
+                  ('0.014909377434629167','0.01704007028958876'),
+                  ('0.03845454422690797','0.035110280572748453'),
+                  ('-0.014699995068749971','-0.012341381182004008'),
+                  ('0.7206094123068284','0.6732510902070452'),
+                  ('193_243_197.92306998','200_320_497.83517963'),
+                  ('156_151_135.17818892','160_607_148.9064402'),
+                  ('37_092_062.74488106','39_713_348.92873943'),
+                  ('0.19194498509410607','0.19824905268264115'),
+              ],
+              'tests/test_research.py': [
+                  ('2_163_858_076.989933','2_168_143_852.8701534'),
+                  ('2_132_049_373.9287062','2_141_385_963.124464'),
+                  ('0.44514249362747565','0.43660107773480095'),
+                  ('0.7206094123068284','0.6732510902070452'),
+              ],
+              'tests/test_raid14_research.py': [
+                  ('0.024321284304765767','0.025210764534594254'),
+                  ('0.7206094123068284','0.6732510902070452'),
+                  ('0.6559299041750212','0.57561517455178'),
+              ],
+              'tests/test_overload_integration.py': [
+                  ('-0.013490046832416502','-0.011107014572814045'),
+                  ('-0.0014584248278578515','-0.0014456113833816175'),
+              ],
+              'tests/test_scarlet_black_shadow.py': [
+                  ('2_017_348_067.29898','2_020_019_916.9581976'),
+                  ('2_010_479_275.0415113','2_013_803_893.9581938'),
+                  ('-0.0034048622391005257','-0.0030772087680026594'),
+                  ('0.49564565632831664','0.4768153974268866'),
+              ],
           }
-          for path, mapping in edits.items():
-              p=Path(path); data=json.loads(p.read_text(encoding='utf-8'))
-              for c in data['characters']:
-                  if c['slug'] in mapping:
-                      c['weapon']['reload_frames']=mapping[c['slug']]
-              p.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          for path, pairs in replacements.items():
+              for old,new in pairs:
+                  replace_once(path,old,new)
 
-          # Reload modules only after data was edited: this process has not imported the package yet.
-          from tests.simulation_fixtures import standard_rotation_comparison
-          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, ResearchScenario, RAID14_TIMELINE, analyze_entry_variants, analyze_rotations
-          from crown_mast_engine.combat import CombatSettings, generate_weapon_shots
-          from crown_mast_engine.characters import WeaponProfile
-          from crown_mast_engine.models import TeamRoster
-          from dataclasses import replace
-
-          a=standard_rotation_comparison(); o=a.overall
-          print('STD', repr({
-              'team_c':o.team_c,'team_f':o.team_f,'g':o.g,'l':o.l,
-              'relative':o.team_relative_change,'break_even':o.break_even_main_share_c,
-              'main_share':o.conventional_main_share,
-          }))
-          d=a.secondary_b3_mast3_burst_omission_cycle_damage
-          print('OMISSION', repr({'c':d.conventional,'f':d.funnel,'loss':d.loss_from_funnel,'relative_loss':d.relative_loss_from_funnel}))
-
-          legacy=analyze_entry_variants(ResearchScenario.standard()).crown_entry.overall
-          raid_scenario=replace(ResearchScenario.standard(), timeline=RAID14_TIMELINE)
-          variants=analyze_entry_variants(raid_scenario)
-          raid=variants.crown_entry.overall
-          entry=variants.first_burst.team
-          print('RAID14', repr({
-              'entry_relative':entry.relative_change,
-              'entry_crown':entry.crown_entry,'entry_mast':entry.mast_entry,'entry_delta':entry.delta_mast_minus_crown,
-              'legacy_be':legacy.break_even_main_share_c,'raid_be':raid.break_even_main_share_c,
-              'legacy_relative':legacy.team_relative_change,'raid_relative':raid.team_relative_change,
-          }))
-
-          roster=TeamRoster(); bare=BuildProfile.uniform(GearState.OL5)
-          high=BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=4,element_lines=4,ammo_lines=3))
-          base={actor:bare for actor in roster.members}; settings=CombatSettings(boss_element='Wind')
-          ol={
-              'bare':analyze_rotations(roster=roster,builds=base,combat_settings=settings,main_actor='rapi-red-hood').overall,
-              'rapi_high':analyze_rotations(roster=roster,builds={**base,'rapi-red-hood':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
-              'helm_high':analyze_rotations(roster=roster,builds={**base,'helm':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
-              'both_high':analyze_rotations(roster=roster,builds={**base,'rapi-red-hood':high,'helm':high},combat_settings=settings,main_actor='rapi-red-hood').overall,
-          }
-          print('OL', repr({k:{'relative':v.team_relative_change,'main_share':v.conventional_main_share,'be':v.break_even_main_share_c,'winner':v.observed_winner.value} for k,v in ol.items()}))
-
-          sbs=analyze_rotations(roster=TeamRoster(main_b3='rapi-red-hood', secondary_b3='scarlet-black-shadow')).overall
-          print('SBS', repr({'team_c':sbs.team_c,'team_f':sbs.team_f,'relative':sbs.team_relative_change,'be':sbs.break_even_main_share_c,'main_share':sbs.conventional_main_share}))
-
-          w=WeaponProfile(weapon_type='SR',normal_attack_pct=69.04,core_attack_pct=200,ammo=6,reload_frames=120,charge_frames=60,charge_multiplier_pct=250,hits_per_shot=1,burst_gauge_per_shot=5.6)
-          shots=generate_weapon_shots(actor='test-sr',weapon=w,duration_sec=15,startup_delay_frames=0)
-          print('SR_FRAMES', [s.frame for s in shots[:7]])
+          audit = '''# 재장전 시간축 교차검증 — 2026-09-05\n\n## 목적\n\nCrown–Mast 연구 엔진에서 `reload_frames`와 런타임 재장전 보정이 같은 숨은 시간을 두 번 포함할 가능성을 점검했다. 이 문서는 공식 연구 재실행 전 확정된 수정과 보류한 항목을 분리한다.\n\n## 확정한 공용 규칙\n\n`WeaponProfile.reload_frames`는 **인게임에 표시되는 기본 재장전시간을 60 FPS 프레임으로 환산한 raw body**로 정의한다. 런타임은 여기에 기존 `effective_reload_frames()`의 `×0.975`와 고정 `+13f`를 적용한다. 따라서 nikke-sim에서 합성된 `81/111/141/171f`를 그대로 넣고 다시 `+13f`를 적용하던 혼합 정의는 사용하지 않는다.\n\n직접 계측 근거는 Ore-game의 reload-limit 분석(`https://ore-game.com/nikke/post/reload-limit/`)이며, 현행 Moris/Jgaram 계산기는 캐릭터 데이터의 표시 `reload_time`을 재장전 본체 입력으로 사용한다. Prydwen의 최신 캐릭터 페이지에서도 이번에 정규화한 캐릭터들의 표시 재장전시간을 교차확인했다. NIKKE.gg의 Crown/Mast 및 관련 캐릭터 분석은 고속 재장전의 실제 영향과 특수 재장전 사례를 추가 확인하는 용도로 사용했다.\n\n0% 재장전속도에서 현재 식의 기준점은 다음과 같다.\n\n- 표시 1.0초 (`60f`) → `72f`\n- 표시 1.5초 (`90f`) → `101f`\n- 표시 2.0초 (`120f`) → `130f`\n- 표시 2.5초 (`150f`) → `159f`\n\n## 이번에 정규화한 캐릭터\n\n- Liter: 1.5초 → 90f\n- Crown: 2.5초 → 150f\n- Mast: Romantic Maid: 2.5초 → 150f\n- Rapi: Red Hood: 2.5초 → 150f\n- Helm: 2.0초 → 120f\n- Anis: Star: 2.0초 → 120f\n- Little Mermaid: 1.0초 → 60f\n- Snow White: Heavy Arms: 2.0초 → 120f\n- Epinel: 1.0초 → 60f\n- Neon: Vision Eye: 2.0초 → 120f\n- Cinderella: 2.0초 → 120f\n- Cinderella: Crystal Wave: 일반 MG 재장전 2.5초 → 150f\n- Phantom (Favorite Item): 2.0초 → 120f\n- Bready: 2.0초 → 120f\n- Quency: Escape Queen: 1.0초 → 60f\n\nCCW는 MG-only 연구 범위다. NIKKE.gg/Prydwen이 구분하는 두 번째 모드전환용 3.0초 고정 재장전은 현재 연구 모델에 들어오지 않으므로 일반 2.5초 재장전만 정규화했다.\n\n## 확인 후 변경하지 않은 항목\n\n### Scarlet: Black Shadow\n표시 재장전 2.0초와 별개로 실제 자동발사·재장전 동작이 특수하다. 기존 152f를 단순 120f로 바꾸기에는 직접 계측과 데이터 정의가 완전히 합치하지 않아 유지했다.\n\n### Raven\n표시값과 실제 RL 동작 간 특수 지연을 분해할 독립 근거가 부족하므로 유지했다.\n\n### Liberalio\n표시 2.0초는 확인되지만 Moris에 별도 post-reload 0.5초 예외가 존재한다. 어느 부분이 기본 재장전이고 어느 부분이 캐릭터 고유 복귀시간인지 독립적으로 확정되지 않아 유지했다.\n\n### Moran (Favorite Item)\n최신 Prydwen 표기와 기존 datamine의 재장전시간이 충돌한다. 수정하지 않았다.\n\n### Milk: Blooming Bunny\n현재 Crown 연구는 AUTO 기준이며 특수 수동/강제 재장전 경로를 모델링하지 않는다. 이번 공용 수정에서 제외했다.\n\n### 100% 초과 재장전속도\nOre-game/Prydwen은 약 109~110%까지 추가 단축·perfect reload 동작을 보고하지만 현행 Moris와 Crown은 100%에서 body를 0으로 clamp한다. 구현 간 해석이 갈리므로 **이번에는 런타임 식을 수정하지 않았다.**\n\n### 공용 post-reload 11f 및 차지 마지막 탄 겹침\nPrydwen의 last-shot→first-shot 계측과 Ore-game의 세분화는 추가 공격불가시간이 있음을 시사하지만, Moris는 SG 외 무기군에 이를 공용값으로 일반화하지 않는다. 따라서 새 공용 post-reload delay를 추가하지 않았다. 또한 Helm 기준 6발+재장전 약 10.4초 실측은 현재의 차지 회복+재장전 직렬 총시간과 잘 맞으므로 마지막 탄 회복을 재장전과 겹치게 바꾸지 않았다.\n\n## 영향\n\n대표 legacy 비교에서 break-even main share가 약 0.7206에서 0.6733으로 이동했다. RAID14의 Mast opener 상대 이득은 약 2.43%에서 2.52%로 이동했다. 이는 공통 스케일만 바뀐 것이 아니라 재장전속도 버프와 캐릭터별 탄창 주기가 정책 간 상대값에 들어가기 때문이다.\n\n공식 29,952-scenario 연구 배치는 이 수정 검증 과정에서 실행하지 않았다.\n'''
+          Path('docs/RELOAD_TIMING_AUDIT_2026-09-05.md').write_text(audit, encoding='utf-8')
           PY
+          git diff --check
+          git diff --stat
+      - name: Focused reload and research regression
+        run: |
+          python -m unittest \
+            tests.test_combat tests.test_characters tests.test_b1_characters \
+            tests.test_bready tests.test_cinderella tests.test_cinderella_crystal_wave \
+            tests.test_phantom_favorite_item tests.test_quency_escape_queen \
+            tests.test_neon_vision_eye tests.test_snow_white_heavy_arms tests.test_epinel \
+            tests.test_analysis tests.test_research tests.test_raid14_research \
+            tests.test_overload_integration tests.test_scarlet_black_shadow -v
+      - name: Full regression
+        run: python -m unittest discover -s tests -v
+      - name: Commit corrected reload model
+        shell: bash
+        run: |
+          rm -f .github/workflows/tmp-reload-parity-audit.yml .github/workflows/tmp-reload-values.yml
+          git diff --check
+          git status --short
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add crown_mast_engine tests docs/RELOAD_TIMING_AUDIT_2026-09-05.md .github/workflows
+          git commit -m 'Normalize cross-checked reload timing inputs'
+          git push origin HEAD:research/14-burst-baseline
