@@ -1,0 +1,113 @@
+name: Exploratory SWHA main / Cinderella secondary v3
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[explore-swha-main-cinderella-secondary-v3]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Focused regression
+        run: >-
+          python -m unittest -q
+          tests.test_snow_white_heavy_arms
+          tests.test_cinderella
+          tests.test_engine
+          tests.test_checkpoints_v3
+
+  shards:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        b1: [liter, anis-star, moran-favorite-item, little-mermaid, rapi-red-hood]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run reversed grid
+        run: >-
+          python scripts/run_reversed_swha_cinderella_exploratory.py
+          --b1 "${{ matrix.b1 }}"
+          --output "exploratory-output/${{ matrix.b1 }}.jsonl"
+          --workers 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reversed-v3-${{ matrix.b1 }}-${{ github.run_id }}
+          path: exploratory-output
+          retention-days: 30
+
+  finalize:
+    needs: shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: reversed-v3-*-${{ github.run_id }}
+          path: input
+          merge-multiple: true
+      - name: Audit and summarize
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          from statistics import mean, median
+
+          paths = sorted(Path("input").glob("*.jsonl"))
+          assert len(paths) == 5, len(paths)
+          rows=[]
+          for path in paths:
+              rows += [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert len(rows) == 1280, len(rows)
+          assert len({r["case_id"] for r in rows}) == 1280
+
+          def s(items):
+              c=Counter(r["outcome_band"] for r in items)
+              bands={"conventional":c["clear_conventional"]+c["marginal_conventional"],"tie":c["tie_band"],"funnel":c["clear_funnel"]+c["marginal_funnel"]}
+              d=[r["relative_change"]*100 for r in items]
+              return {"n":len(items),"bands":bands,"band_pct":{k:v/len(items)*100 for k,v in bands.items()},"mean_delta_pct":mean(d),"median_delta_pct":median(d),"min_delta_pct":min(d),"max_delta_pct":max(d),"mean_main_share_pct":mean(r["conventional_main_share"] for r in items)*100,"mean_g_pct":mean(r["g"] for r in items)*100,"mean_l_pct":mean(r["l"] for r in items)*100}
+
+          result={"main_b3":"snow-white-heavy-arms","secondary_b3":"cinderella","overall":s(rows),"by_b1":{},"by_environment":{},"equal_main_secondary_growth":{}}
+          for b1 in sorted({r["b1"] for r in rows}): result["by_b1"][b1]=s([r for r in rows if r["b1"]==b1])
+          for core in ("off","on"):
+              for adv in ("off","on"):
+                  key=f"core-{core}--adv-{adv}"
+                  result["by_environment"][key]=s([r for r in rows if r["core_condition"]==core and r["main_advantage"]==adv])
+          equal=[r for r in rows if r["main_profile"]==r["secondary_profile"]]
+          result["equal_main_secondary_growth"]["all"]=s(equal)
+          for core in ("off","on"):
+              for adv in ("off","on"):
+                  key=f"core-{core}--adv-{adv}"
+                  result["equal_main_secondary_growth"][key]=s([r for r in equal if r["core_condition"]==core and r["main_advantage"]==adv])
+          result["representative"]={"most_conventional":min(rows,key=lambda r:r["relative_change"]),"closest_to_tie":min(rows,key=lambda r:abs(r["relative_change"])),"most_funnel":max(rows,key=lambda r:r["relative_change"])}
+          out=Path("final"); out.mkdir(exist_ok=True)
+          (out/"summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          with (out/"all_rows.jsonl").open("w",encoding="utf-8") as f:
+              for r in sorted(rows,key=lambda r:r["case_id"]): f.write(json.dumps(r,ensure_ascii=False,sort_keys=True)+"\n")
+          print("EXPLORATORY_REVERSED_OK scenarios=1280 unique_cases=1280")
+          print("OVERALL",json.dumps(result["overall"],ensure_ascii=False,sort_keys=True))
+          print("EQUAL",json.dumps(result["equal_main_secondary_growth"],ensure_ascii=False,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reversed-swha-main-cinderella-secondary-v3-${{ github.run_id }}-final
+          path: final
+          retention-days: 30
