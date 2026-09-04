@@ -1,4 +1,4 @@
-name: Temporary reload parity audit
+name: Temporary standard reload validation
 
 on:
   push:
@@ -8,109 +8,118 @@ permissions:
   contents: read
 
 jobs:
-  audit:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: research/14-burst-baseline
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Compare current and clean reload models on official rosters
+      - name: Apply only cross-checked standard reload values in workspace
         shell: bash
         run: |
-          cat > /tmp/reload_audit.py <<'PY'
-          from __future__ import annotations
+          python - <<'PY'
           import json
-          from dataclasses import replace
+          from pathlib import Path
 
-          from crown_mast_engine.analysis import analyze_rotations
-          from crown_mast_engine.characters import CharacterCatalog, STANDARD_CHARACTER_CATALOG
-          from crown_mast_engine.combat import CombatSettings
-          from crown_mast_engine.models import DamageCategory
-          from crown_mast_engine.official_study import iter_official_rosters
-          from crown_mast_engine.timeline import RAID14_TIMELINE
-          from crown_mast_engine.rotations import OPENING_MAST_CROWN_MAST
-
-          RAW_RELOAD = {
-              'liter': 90, 'crown': 150, 'mast-romantic-maid': 150,
-              'scarlet-black-shadow': 120, 'rapi-red-hood': 150,
-              'helm': 120, 'anis-star': 120, 'moran-favorite-item': 90,
-              'little-mermaid': 60, 'snow-white-heavy-arms': 120,
-              'epinel': 60, 'neon-vision-eye': 120, 'liberalio': 120,
-              'cinderella-crystal-wave': 150, 'phantom': 120, 'raven': 120,
+          # Only units whose ordinary reload is independently supported by current display data
+          # plus direct/community timing evidence. Ambiguous/special units are intentionally absent:
+          # SBS, Raven, Liberalio, Moran, Milk: Blooming Bunny.
+          edits = {
+              'crown_mast_engine/data/characters.json': {
+                  'liter': 90,
+                  'crown': 150,
+                  'mast-romantic-maid': 150,
+                  'rapi-red-hood': 150,
+                  'helm': 120,
+                  'anis-star': 120,
+                  'little-mermaid': 60,
+                  'snow-white-heavy-arms': 120,
+                  'epinel': 60,
+                  'neon-vision-eye': 120,
+              },
+              'crown_mast_engine/data/character_cinderella.json': {'cinderella': 120},
+              'crown_mast_engine/data/character_cinderella_crystal_wave.json': {'cinderella-crystal-wave': 150},
+              'crown_mast_engine/data/character_phantom_favorite_item.json': {'phantom': 120},
+              'crown_mast_engine/data/character_bready.json': {'bready': 120},
+              'crown_mast_engine/data/character_quency_escape_queen.json': {'quency-escape-queen': 60},
           }
-          SBS_MEASURED_RAW = 131
+          for path, mapping in edits.items():
+              p = Path(path)
+              data = json.loads(p.read_text(encoding='utf-8'))
+              seen = set()
+              for char in data['characters']:
+                  slug = char['slug']
+                  if slug in mapping:
+                      old = char['weapon']['reload_frames']
+                      new = mapping[slug]
+                      print(f'{slug}: {old} -> {new}')
+                      char['weapon']['reload_frames'] = new
+                      seen.add(slug)
+              missing = set(mapping) - seen
+              if missing:
+                  raise SystemExit(f'{path}: missing {sorted(missing)}')
+              p.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-          def catalog_with_raw_reload(*, sbs_measured=False):
-              defs=[]
-              for d in STANDARD_CHARACTER_CATALOG.definitions:
-                  w=d.weapon
-                  if d.slug in RAW_RELOAD:
-                      raw = SBS_MEASURED_RAW if (sbs_measured and d.slug=='scarlet-black-shadow') else RAW_RELOAD[d.slug]
-                      w=replace(w, reload_frames=raw)
-                  defs.append(replace(d, weapon=w))
-              return CharacterCatalog(tuple(defs), STANDARD_CHARACTER_CATALOG.scope)
-
-          settings=CombatSettings(core_hit_rate_pct=0.0, boss_element=None)
-          rosters=tuple(iter_official_rosters())
-
-          def run(catalog):
-              out={}
-              for r in rosters:
-                  c=analyze_rotations(
-                      roster=r, timeline=RAID14_TIMELINE, catalog=catalog,
-                      combat_settings=settings, conventional_policy=OPENING_MAST_CROWN_MAST,
-                  )
-                  o=c.overall
-                  key=(r.b1,r.main_b3,r.secondary_b3)
-                  out[key]={
-                      'relative':o.team_relative_change, 'be':o.break_even_main_share_c,
-                      'winner':o.observed_winner.value, 'team_c':o.team_c, 'team_f':o.team_f,
-                      'main_share':o.conventional_main_share,
-                      'shots_c':{a:len(c.conventional_result.damage_events_for(actor=a,category=DamageCategory.NORMAL)) for a in r.members},
-                      'shots_f':{a:len(c.funnel_result.damage_events_for(actor=a,category=DamageCategory.NORMAL)) for a in r.members},
-                  }
-              return out
-
-          cur=run(STANDARD_CHARACTER_CATALOG)
-          raw=run(catalog_with_raw_reload())
-          raw_sbs=run(catalog_with_raw_reload(sbs_measured=True))
-
-          def summarize(name, cand):
-              rel_shifts=[]; be_shifts=[]; flips=[]; c_tot=[]; f_tot=[]; shot_deltas={}; worst=[]
-              for k,b in cur.items():
-                  x=cand[k]
-                  dr=(x['relative'] or 0)-(b['relative'] or 0)
-                  rel_shifts.append(dr)
-                  if b['be'] is not None and x['be'] is not None: be_shifts.append(x['be']-b['be'])
-                  if b['winner']!=x['winner']: flips.append((k,b['winner'],x['winner'],b['relative'],x['relative']))
-                  c_tot.append(x['team_c']/b['team_c']-1); f_tot.append(x['team_f']/b['team_f']-1)
-                  for arm in ('shots_c','shots_f'):
-                      for actor,v in x[arm].items():
-                          dv=v-b[arm][actor]
-                          if dv: shot_deltas.setdefault(actor,[]).append(dv)
-                  worst.append((abs(dr),k,b['relative'],x['relative'],b['be'],x['be']))
-              worst.sort(reverse=True)
-              print('\n===',name,'===')
-              print('rosters',len(cand),'winner_flips',len(flips))
-              print('relative_shift min/mean/max',min(rel_shifts),sum(rel_shifts)/len(rel_shifts),max(rel_shifts))
-              if be_shifts: print('break_even_shift min/mean/max',min(be_shifts),sum(be_shifts)/len(be_shifts),max(be_shifts))
-              print('team_c_change min/mean/max',min(c_tot),sum(c_tot)/len(c_tot),max(c_tot))
-              print('team_f_change min/mean/max',min(f_tot),sum(f_tot)/len(f_tot),max(f_tot))
-              print('flips',json.dumps(flips[:30],ensure_ascii=False))
-              print('worst_relative',json.dumps(worst[:20],ensure_ascii=False))
-              print('shot_delta_summary',json.dumps({a:{'min':min(v),'max':max(v),'mean':sum(v)/len(v),'n':len(v)} for a,v in sorted(shot_deltas.items())},ensure_ascii=False,sort_keys=True))
-
-          summarize('RAW_DISPLAY_RELOAD',raw)
-          summarize('RAW_DISPLAY_PLUS_SBS_MEASURED',raw_sbs)
-
-          from crown_mast_engine.combat import effective_reload_frames
-          print('\n=== RELOAD_FRAME_TABLE ===')
-          for slug in sorted(RAW_RELOAD):
-              d=STANDARD_CHARACTER_CATALOG.require(slug); rawv=RAW_RELOAD[slug]
-              print(slug,'stored',d.weapon.reload_frames,'current_eff',effective_reload_frames(d.weapon.reload_frames,0),'raw_eff',effective_reload_frames(rawv,0))
-          print('SBS measured raw candidate',SBS_MEASURED_RAW,'eff',effective_reload_frames(SBS_MEASURED_RAW,0))
+          # Update direct catalog assertions only; numeric damage regressions are NOT rewritten here.
+          p = Path('tests/test_characters.py')
+          s = p.read_text(encoding='utf-8')
+          for old, new in [
+              ('self.assertEqual(snow.weapon.reload_frames, 141)', 'self.assertEqual(snow.weapon.reload_frames, 120)'),
+              ('self.assertEqual(epinel.weapon.reload_frames, 81)', 'self.assertEqual(epinel.weapon.reload_frames, 60)'),
+              ('self.assertEqual(neon.weapon.reload_frames, 111)', 'self.assertEqual(neon.weapon.reload_frames, 120)'),
+          ]:
+              if old not in s:
+                  raise SystemExit(f'missing assertion: {old}')
+              s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
           PY
-          PYTHONPATH=. python /tmp/reload_audit.py
+          git diff --stat
+          git diff -- crown_mast_engine/data tests/test_characters.py
+      - name: Verify reload formula anchors
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
+          from crown_mast_engine.combat import effective_reload_frames
+          expected = {
+              'liter': 90, 'crown': 150, 'mast-romantic-maid': 150,
+              'rapi-red-hood': 150, 'helm': 120, 'anis-star': 120,
+              'little-mermaid': 60, 'snow-white-heavy-arms': 120,
+              'epinel': 60, 'neon-vision-eye': 120, 'cinderella': 120,
+              'cinderella-crystal-wave': 150, 'phantom': 120,
+              'bready': 120, 'quency-escape-queen': 60,
+          }
+          for slug, frames in expected.items():
+              got = STANDARD_CHARACTER_CATALOG.require(slug).weapon.reload_frames
+              assert got == frames, (slug, got, frames)
+          # Ore-game standard-reload anchors at 60 FPS:
+          # 1.0s -> round(60*.975)+13 = 72f = 1.20s
+          # 1.5s -> 101f = 1.683s
+          # 2.0s -> 130f = 2.167s
+          # 2.5s -> 159f = 2.650s
+          assert effective_reload_frames(60, 0) == 72
+          assert effective_reload_frames(90, 0) == 101
+          assert effective_reload_frames(120, 0) == 130
+          assert effective_reload_frames(150, 0) == 159
+          print('reload anchors OK')
+          PY
+      - name: Focused mechanics regression
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m unittest tests.test_combat tests.test_characters tests.test_b1_characters tests.test_cinderella tests.test_cinderella_crystal_wave tests.test_bready tests.test_phantom_favorite_item tests.test_quency_escape_queen tests.test_neon_vision_eye tests.test_snow_white_heavy_arms tests.test_epinel tests.test_analysis tests.test_research tests.test_raid14_research -v 2>&1 | tee /tmp/focused.log
+      - name: Full regression
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee /tmp/full.log
+      - name: Summarize failures
+        if: always()
+        run: |
+          echo '=== FOCUSED FAILURES ==='
+          grep -E '^(FAIL|ERROR):|^FAILED \(' /tmp/focused.log || true
+          echo '=== FULL FAILURES ==='
+          grep -E '^(FAIL|ERROR):|^FAILED \(' /tmp/full.log || true
