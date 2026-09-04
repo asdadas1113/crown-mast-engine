@@ -47,6 +47,7 @@ jobs:
           tests.test_timeline
           tests.test_checkpoints_v3
           tests.test_official_study
+          tests.test_official_results
 
   distributed-pretest:
     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[distributed-pretest]')
@@ -169,6 +170,35 @@ jobs:
         run: python -m compileall -q crown_mast_engine scripts/run_distributed_source_diagnostic.py
       - name: Source-level distributed Main diagnostic
         run: python scripts/run_distributed_source_diagnostic.py --main ${{ matrix.main }}
+
+  official-writer-smoke:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[official-writer-smoke]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile official writer smoke
+        run: >-
+          python -m compileall -q
+          crown_mast_engine
+          scripts/run_official_writer_smoke.py
+      - name: Run exactly one 256-scenario roster shard
+        run: >-
+          python scripts/run_official_writer_smoke.py
+          --output-dir smoke-output/smoke-${{ github.run_id }}
+          --run-id smoke-${{ github.run_id }}
+          --branch "${GITHUB_REF_NAME}"
+          --commit-sha "${GITHUB_SHA}"
+          --workers 4
+      - name: Upload smoke files
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-writer-smoke-${{ github.run_id }}
+          path: smoke-output
+          retention-days: 7
 
   benchmark:
     if: github.event_name == 'workflow_dispatch'
