@@ -5,19 +5,20 @@ on:
     branches: [research/14-burst-baseline]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  patch-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: research/14-burst-baseline
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Apply confirmed source corrections in runner
+      - name: Apply audited source corrections and regression baselines
         shell: bash
         run: |
           python - <<'PY'
@@ -27,53 +28,81 @@ jobs:
               if n!=1: raise SystemExit(f'{path}: expected 1 match got {n}: {old!r}')
               p.write_text(s.replace(old,new),encoding='utf-8')
 
-          r('crown_mast_engine/combat.py','    boss_damage_taken_pct: float = 0.0\n    startup_delay_frames: int = 8\n','    boss_damage_taken_pct: float = 0.0\n    min_firing_rounds_adjustment: bool = True\n    startup_delay_frames: int = 8\n')
-          r('crown_mast_engine/engine.py','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                shared_charge_modes=shared_charge_modes,\n','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                pulls_per_second_override=(20.0 if definition.weapon.weapon_type == "SMG" and not self.combat_settings.min_firing_rounds_adjustment else None),\n                shared_charge_modes=shared_charge_modes,\n')
-          r('crown_mast_engine/engine.py','                    pulls_per_second_override=mode.pulls_per_second,\n','                    pulls_per_second_override=(mode.pulls_per_second if mode.pulls_per_second is not None else (20.0 if mode.weapon.weapon_type == "SMG" and not self.combat_settings.min_firing_rounds_adjustment else None)),\n')
+          # PvE firing-round adjustment: current optimized baseline ON; OFF remains available.
+          r('crown_mast_engine/combat.py','    boss_damage_taken_pct: float = 0.0\n    startup_delay_frames: int = 8\n','    boss_damage_taken_pct: float = 0.0\n    # PvE baseline uses Settings > Battle > Convenience > Min Firing Rounds Adjustment ON.\n    # At 60 FPS, ON preserves programmed 24/s SMGs; OFF quantizes them to 20/s.\n    min_firing_rounds_adjustment: bool = True\n    startup_delay_frames: int = 8\n')
+          r('crown_mast_engine/engine.py','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                shared_charge_modes=shared_charge_modes,\n','                startup_delay_frames=self.combat_settings.startup_delay_frames,\n                pulls_per_second_override=(\n                    20.0 if definition.weapon.weapon_type == "SMG"\n                    and not self.combat_settings.min_firing_rounds_adjustment else None\n                ),\n                shared_charge_modes=shared_charge_modes,\n')
+          r('crown_mast_engine/engine.py','                    pulls_per_second_override=mode.pulls_per_second,\n','                    pulls_per_second_override=(\n                        mode.pulls_per_second if mode.pulls_per_second is not None else (\n                            20.0 if mode.weapon.weapon_type == "SMG"\n                            and not self.combat_settings.min_firing_rounds_adjustment else None\n                        )\n                    ),\n')
+
+          # Mast drunken Hit Rate is not a direct -20% normal damage multiplier per stack.
           r('crown_mast_engine/data/characters.json','          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 20.0,\n','          "hit_rate_down_per_stack_pct": 20.0,\n          "expected_normal_damage_loss_per_stack_pct": 0.0,\n')
+
+          # SBS measured cadence: 0.3s charge + 26f release/recovery = 0.7333s per auto shot.
           r('crown_mast_engine/data/characters.json','        "hits_per_shot": 1,\n        "burst_gauge_per_shot": 1.25\n      },\n      "skills": {\n        "skill1": {\n          "outside_phase_charge_count": 3.0,','        "hits_per_shot": 1,\n        "burst_gauge_per_shot": 1.25,\n        "charge_release_recovery_frames": 26\n      },\n      "skills": {\n        "skill1": {\n          "outside_phase_charge_count": 3.0,')
+
+          # Persist the explicit firing-round setting through research JSON while keeping old files readable.
           r('crown_mast_engine/research.py','        "boss_damage_taken_pct": settings.boss_damage_taken_pct,\n        "startup_delay_frames": settings.startup_delay_frames,\n','        "boss_damage_taken_pct": settings.boss_damage_taken_pct,\n        "min_firing_rounds_adjustment": settings.min_firing_rounds_adjustment,\n        "startup_delay_frames": settings.startup_delay_frames,\n')
           r('crown_mast_engine/research.py','''    keys = {\n        "boss_def",\n        "core_hit_rate_pct",\n        "range_bonus_pct",\n        "element_multiplier",\n        "element_multiplier_by_actor",\n        "boss_element",\n        "full_burst_bonus_pct",\n        "boss_damage_taken_pct",\n        "startup_delay_frames",\n        "duration_sec",\n    }\n    _require_exact_keys(payload, keys, "combat_settings")\n    values = dict(payload)\n''','''    required_keys = {\n        "boss_def",\n        "core_hit_rate_pct",\n        "range_bonus_pct",\n        "element_multiplier",\n        "element_multiplier_by_actor",\n        "boss_element",\n        "full_burst_bonus_pct",\n        "boss_damage_taken_pct",\n        "startup_delay_frames",\n        "duration_sec",\n    }\n    optional_keys = {"min_firing_rounds_adjustment"}\n    missing = required_keys - payload.keys()\n    extra = payload.keys() - required_keys - optional_keys\n    if missing or extra:\n        details = []\n        if missing: details.append(f"missing={sorted(missing)}")\n        if extra: details.append(f"extra={sorted(extra)}")\n        raise ValueError("combat_settings has invalid fields: " + ", ".join(details))\n    values = dict(payload)\n    values.setdefault("min_firing_rounds_adjustment", True)\n''')
-          PY
-      - name: Print corrected baselines
-        run: |
-          python - <<'PY'
-          from dataclasses import replace
-          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, analyze_rotations, analyze_entry_variants, ResearchScenario, RAID14_TIMELINE, simulate_rotation
-          from crown_mast_engine.combat import CombatSettings
-          from crown_mast_engine.models import DamageCategory, TeamRoster
-          from crown_mast_engine.rotations import CROWN_CROWN_MAST
-          from tests.simulation_fixtures import standard_rotation_comparison
 
-          o=standard_rotation_comparison().overall
-          print('STANDARD', repr({'team_c':o.team_c,'team_f':o.team_f,'g':o.g,'l':o.l,'relative':o.team_relative_change,'break_even':o.break_even_main_share_c,'main_share':o.conventional_main_share,'winner':o.observed_winner.value}))
+          # Focused mechanics tests.
+          r('tests/test_combat.py','''    def test_mast_drunken_hit_loss_tracks_live_stack(self) -> None:\n        result = standard_conventional_result()\n        mast = result.roster.mast\n        self.assertEqual(result.buff_total(3.8, mast, "normal_attack_pct"), 0)\n        self.assertEqual(result.buff_total(4.0, mast, "normal_attack_pct"), -20)\n        self.assertEqual(result.buff_total(19.0, mast, "normal_attack_pct"), -40)\n        self.assertEqual(result.buff_total(34.0, mast, "normal_attack_pct"), -60)\n        self.assertEqual(result.buff_total(44.3, mast, "normal_attack_pct"), 0)\n\n        mast_normals = result.damage_events_for(\n            actor=mast,\n            category=DamageCategory.NORMAL,\n        )\n        d1 = next(event for event in mast_normals if 3.9 <= event.time < 18.3)\n        d2 = next(event for event in mast_normals if 18.3 <= event.time < 32.7)\n        d3 = next(event for event in mast_normals if 32.7 <= event.time < 44.3)\n        self.assertAlmostEqual(d1.breakdown.coefficient, 0.0557 * 0.8)\n        self.assertAlmostEqual(d2.breakdown.coefficient, 0.0557 * 0.6)\n        self.assertAlmostEqual(d3.breakdown.coefficient, 0.0557 * 0.4)\n''','''    def test_mast_drunken_hit_rate_debuff_is_not_direct_damage_loss(self) -> None:\n        result = standard_conventional_result()\n        mast = result.roster.mast\n        definition = result.catalog.require(mast)\n        self.assertEqual(definition.skill_value("skill1", "hit_rate_down_per_stack_pct"), 20)\n        self.assertEqual(definition.skill_value("skill1", "expected_normal_damage_loss_per_stack_pct"), 0)\n        for time in (3.8, 4.0, 19.0, 34.0, 44.3):\n            self.assertEqual(result.buff_total(time, mast, "normal_attack_pct"), 0)\n        mast_normals = result.damage_events_for(actor=mast, category=DamageCategory.NORMAL)\n        for window in ((3.9, 18.3), (18.3, 32.7), (32.7, 44.3)):\n            event = next(e for e in mast_normals if window[0] <= e.time < window[1])\n            self.assertAlmostEqual(event.breakdown.coefficient, 0.0557)\n''')
+          r('tests/test_combat.py','    def test_reload_formula_matches_pinned_runtime(self) -> None:\n','''    def test_min_firing_rounds_adjustment_defaults_on_and_can_be_disabled(self) -> None:\n        self.assertTrue(CombatSettings().min_firing_rounds_adjustment)\n        on = simulate_rotation(CROWN_CROWN_MAST, combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0))\n        off = simulate_rotation(CROWN_CROWN_MAST, combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0, min_firing_rounds_adjustment=False))\n        on_liter = len(on.damage_events_for(actor="liter", category=DamageCategory.NORMAL))\n        off_liter = len(off.damage_events_for(actor="liter", category=DamageCategory.NORMAL))\n        self.assertEqual((on_liter, off_liter), (24, 20))\n\n    def test_reload_formula_matches_pinned_runtime(self) -> None:\n''')
 
-          roster=TeamRoster()
-          bare=BuildProfile.uniform(GearState.OL5)
-          high=BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=4, element_lines=4, ammo_lines=3))
-          extreme=BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=10, element_lines=20, ammo_lines=100))
-          base={actor: bare for actor in roster.members}
-          cases={
-            'all_bare':base,
-            'rapi_high':{**base,'rapi-red-hood':high},
-            'helm_high':{**base,'helm':high},
-            'both_high':{**base,'rapi-red-hood':high,'helm':high},
-            'rapi_extreme':{**base,'rapi-red-hood':extreme},
+          # Mast 0% is now the default sensitivity baseline.
+          r('tests/test_analysis.py','            self.results[20.0].overall.team_c,\n            baseline.overall.team_c,','            self.results[0.0].overall.team_c,\n            baseline.overall.team_c,')
+          r('tests/test_analysis.py','            self.results[20.0].overall.team_f,\n            baseline.overall.team_f,','            self.results[0.0].overall.team_f,\n            baseline.overall.team_f,')
+
+          # Pin catalog semantics and SBS cadence.
+          p=Path('tests/test_characters.py'); s=p.read_text(encoding='utf-8')
+          s=s.replace('''            20,\n        )\n\n        result = standard_conventional_result()''','''            0,\n        )\n\n        result = standard_conventional_result()''',1)
+          s=s.replace('''            20,\n        )\n\n    def test_rapi_red_hood_standard_stats''','''            0,\n        )\n\n    def test_rapi_red_hood_standard_stats''',1)
+          s=s.replace('''        self.assertEqual(scarlet.weapon.charge_multiplier_pct, 150)\n''','''        self.assertEqual(scarlet.weapon.charge_multiplier_pct, 150)\n        self.assertEqual(scarlet.weapon.charge_release_recovery_frames, 26)\n''')
+          p.write_text(s,encoding='utf-8')
+
+          # Refresh intentionally pinned numeric regression values after audited mechanics changes.
+          replacements={
+            '2_079_946_367.614494':'2_163_858_076.989933',
+            '2_053_522_056.5032187':'2_132_049_373.9287062',
+            '0.03652245461042558':'0.03845454422690797',
+            '-0.012704323305019471':'-0.014699995068749971',
+            '0.7101138178090082':'0.7206094123068284',
+            '0.4631009699312502':'0.44514249362747565',
           }
-          settings=CombatSettings(boss_element='Wind')
-          for name,builds in cases.items():
-              x=analyze_rotations(roster=roster, builds=builds, combat_settings=settings, main_actor='rapi-red-hood').overall
-              print('OL',name,repr({'team_c':x.team_c,'team_f':x.team_f,'relative':x.team_relative_change,'main_share':x.conventional_main_share,'break_even':x.break_even_main_share_c,'winner':x.observed_winner.value}))
+          for path in ('tests/test_analysis.py','tests/test_research.py'):
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              for old,new in replacements.items(): s=s.replace(old,new)
+              p.write_text(s,encoding='utf-8')
 
-          legacy=analyze_entry_variants(ResearchScenario.standard())
-          raid=analyze_entry_variants(replace(ResearchScenario.standard(),timeline=RAID14_TIMELINE))
-          print('ENTRY',repr({'relative':raid.first_burst.team.relative_change,'delta':raid.first_burst.team.delta_mast_minus_crown,'legacy_be':legacy.crown_entry.overall.break_even_main_share_c,'raid_be':raid.crown_entry.overall.break_even_main_share_c,'raid_relative':raid.crown_entry.overall.team_relative_change}))
+          p=Path('tests/test_overload_integration.py'); s=p.read_text(encoding='utf-8')
+          s=s.replace('-0.011499938904004026','-0.013490046832416502')
+          s=s.replace('-1.1406497744226307e-05','-0.0014584248278578515')
+          s=s.replace('self.assertGreater(extreme.overall.conventional_main_share, 0.90)','self.assertGreater(extreme.overall.conventional_main_share, 0.89)')
+          p.write_text(s,encoding='utf-8')
 
-          sbs_roster=TeamRoster(secondary_b3='scarlet-black-shadow')
-          sbs=analyze_rotations(roster=sbs_roster).overall
-          print('SBS_OVERALL',repr({'team_c':sbs.team_c,'team_f':sbs.team_f,'relative':sbs.team_relative_change,'break_even':sbs.break_even_main_share_c,'main_share':sbs.conventional_main_share}))
-          rr=simulate_rotation(CROWN_CROWN_MAST,roster=sbs_roster)
-          normals=rr.damage_events_for(actor='scarlet-black-shadow',category=DamageCategory.NORMAL)
-          print('SBS_NORMAL_COUNT',len(normals))
-          print('SBS_FIRST_NORMAL_TIMES',[e.time for e in normals[:12]])
+          p=Path('tests/test_raid14_research.py'); s=p.read_text(encoding='utf-8')
+          s=s.replace('0.02034706170578149','0.024321284304765767')
+          s=s.replace('0.7101138178090082','0.7206094123068284')
+          s=s.replace('0.6508108735117237','0.6559299041750212')
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('tests/test_scarlet_black_shadow.py'); s=p.read_text(encoding='utf-8')
+          s=s.replace('''                (1.75, "skill1_phase1"),\n                (3.75, "skill1_phase2"),\n                (5.75, "skill1_phase3"),''','''                (1.8833333333333333, "skill1_phase1"),\n                (4.083333333333333, "skill1_phase2"),\n                (6.283333333333333, "skill1_phase3"),''')
+          s=s.replace('2_040_564_041.4289405','2_017_348_067.29898')
+          s=s.replace('2_032_816_835.8842957','2_010_479_275.0415113')
+          s=s.replace('-0.003796600051434673','-0.0034048622391005257')
+          s=s.replace('0.5020292854336021','0.49564565632831664')
+          p.write_text(s,encoding='utf-8')
           PY
+      - name: Focused corrected-mechanics regression
+        run: python -m unittest tests.test_combat tests.test_characters tests.test_analysis tests.test_research tests.test_overload_integration tests.test_raid14_research tests.test_scarlet_black_shadow -v
+      - name: Full regression
+        run: python -m unittest discover -s tests -v
+      - name: Commit audited corrections
+        if: success()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/tmp-cadence-parity-audit.yml
+          git add crown_mast_engine tests
+          git commit -m "Correct firing assumptions and Mast accuracy model"
+          git push origin HEAD:research/14-burst-baseline
