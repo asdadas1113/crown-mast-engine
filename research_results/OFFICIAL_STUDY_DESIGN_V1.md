@@ -1,6 +1,6 @@
 # Crown–Mast 공식 연구 설계 v1
 
-상태: **공식 배치 실행 전 후보군 재검토 중 / 공식 연구 결과 없음**
+상태: **공식 배치 실행 전 후보군 재검토 완료 / 공식 연구 결과 없음**
 
 Study id:
 
@@ -10,7 +10,7 @@ crown-mast-secondary-opportunity-v1
 
 이 문서는 사용자가 공식 연구 배치를 명시적으로 승인했을 때 사용할 표본 공간과 실행·저장 구조를 정의한다. 연구 결과를 담는 문서가 아니다.
 
-2026-09-02에 첫 공식 배치 실행 전에 Main 표본을 다시 검토하면서 **원본 신데렐라(Cinderella)** 를 추가했다. 퀀시·브레디 등의 유지/제외와 네온: 비전 아이의 공식 Main 편입 여부는 차후 논의 대상으로 남겨 두었으므로, 현재 후보군은 최종 동결 상태가 아니다.
+2026-09-02 첫 공식 배치 실행 전에 Main 표본을 다시 검토했다. 원본 신데렐라(Cinderella)를 추가하고, 브래디 / 밀크: 블루밍 버니 / 퀀시: 이스케이프 퀸을 공식 Main 축에서 제외했으며, 네온: 비전 아이를 공식 Main 후보로 편입했다. 세 제외 캐릭터의 엔진 구현과 독립 진단 가치는 유지한다.
 
 ---
 
@@ -60,24 +60,20 @@ B1 축은 서로 다른 버프·자체딜 환경을 확보하기 위한 표본�
 B1 라피 + Main 라피 -> 제외
 ```
 
-`neon-vision-eye`는 B1 캐릭터가 아니다. 엔진 구현은 존재하지만 **공식 Main 표본 편입 여부는 아직 재검토 중**이다.
-
 ---
 
-## 3. 현재 Main B3 표본 — 10명
+## 3. Main B3 표본 — 8명
 
 엔진 slug:
 
 ```text
 rapi-red-hood
 scarlet-black-shadow
-bready
 cinderella
 cinderella-crystal-wave
 liberalio
-milk-blooming-bunny
+neon-vision-eye
 phantom
-quency-escape-queen
 raven
 ```
 
@@ -86,19 +82,17 @@ raven
 ```text
 라피: 레드 후드
 홍련: 흑영
-브레디
 신데렐라
 신데렐라: 크리스탈 웨이브
 리버렐리오
-밀크: 블루밍 바니
+네온: 비전 아이
 팬텀(애장품)
-퀀시: 이스케이프 퀸
 레이븐
 ```
 
-이 목록은 보편적인 티어표가 아니라 연구 표본이다. 서로 다른 딜 시간분포와 메스트/크라운 상호작용을 가진 Main을 확보하는 것이 목적이다.
+이 목록은 보편적인 티어표가 아니라 연구 표본이다. 현재 상위권 Main과 서로 다른 딜 시간분포·메커니즘을 확보하는 것이 목적이다.
 
-원본 신데렐라는 현재 상위권 보스 Main을 보강하면서 동시에 다음 구조를 추가한다.
+원본 신데렐라는 다음 구조를 추가한다.
 
 - 최종 최대체력 기반 공격력 변환
 - B3 Stage 진입마다 갱신되는 10초 공격력 변환 구간
@@ -106,9 +100,17 @@ raven
 - 자기 B3에서 10회 순차 공격으로 집중되는 큰 버스트 대미지
 - 전투 시간이 지날수록 누적되는 Beautiful 최대체력 스택
 
-따라서 단순히 강한 캐릭터를 하나 더 넣는 것이 아니라, **Main 딜의 시간적 집중도와 몰아주기 반응 관계**를 확인하는 데 유용한 표본이다.
+네온: 비전 아이는 이미 구현·검증된 B3 딜러이며, 이번 재검토에서 공식 Main 표본으로 편입했다.
 
-현재 퀀시·브레디 등 기존 후보의 유지/제외 여부와 네온: 비전 아이의 공식 Main 편입 여부는 아직 결정하지 않았다. 첫 공식 배치 전에 이 목록을 다시 최종 동결해야 한다.
+다음 캐릭터는 공식 Main 표본에서는 제외하지만 엔진 구현과 진단 자료는 유지한다.
+
+```text
+bready
+milk-blooming-bunny
+quency-escape-queen
+```
+
+브래디는 메스트 분배 대미지 버프가 Recommended Taste 상태를 직접 건드리는 특수 상호작용이 있고, 밀크와 퀀시는 독립 진단용 정보 가치는 충분하지만 현재 공식 Main 대표 표본에서는 우선순위를 낮췄다.
 
 Secondary anchor 세 명은 Main 축과 의도적으로 분리한다. 따라서 에피넬 / 헬름 / 스노우 화이트: 헤비암즈는 현재 Main 후보로 사용하지 않는다.
 
@@ -179,14 +181,12 @@ advantage on  -> Main B3가 실제로 우월을 가지는 보스 속성
 
 ---
 
-## 7. 현재 roster 및 시나리오 수
-
-신데렐라 추가 후 현재 계산은 다음과 같다.
+## 7. roster 및 시나리오 수
 
 Raw roster:
 
 ```text
-5 B1 x 10 Main x 3 Secondary = 150 rosters
+5 B1 x 8 Main x 3 Secondary = 120 rosters
 ```
 
 중복 제외:
@@ -195,10 +195,10 @@ Raw roster:
 Rapi B1 + Rapi Main x 3 Secondary = 3
 ```
 
-현재 유효 roster:
+유효 roster:
 
 ```text
-150 - 3 = 147
+120 - 3 = 117
 ```
 
 한 roster당:
@@ -207,26 +207,26 @@ Rapi B1 + Rapi Main x 3 Secondary = 3
 64 growth x 2 core x 2 Main advantage = 256 scenarios
 ```
 
-현재 총 표본 공간:
+총 표본 공간:
 
 ```text
-147 x 256 = 37,632 scenarios
+117 x 256 = 29,952 scenarios
 ```
 
 Secondary별로는:
 
 ```text
-49 valid B1/Main pairs x 256 = 12,544 scenarios
-3 anchors                         = 37,632 scenarios
+39 valid B1/Main pairs x 256 = 9,984 scenarios
+3 anchors                        = 29,952 scenarios
 ```
 
-단, Main 후보 재검토가 끝나지 않았으므로 **37,632는 현재 코드 기준 임시 공식 표본 수**다. 첫 공식 배치 전에 후보군을 최종 동결하면 다시 canonical count를 확정한다.
+`29,952`는 현재 공식 v1 후보군 기준 canonical count다. 각 시나리오는 발생확률 표본이 아니라 결정론적 통제점이다.
 
 ---
 
 ## 8. 실행 단위
 
-실행 shard는 계속 **유효 roster 하나**다.
+실행 shard는 **유효 roster 하나**다.
 
 ```text
 1 roster shard
@@ -236,7 +236,7 @@ x 2 Main advantage
 = 256 scenarios
 ```
 
-따라서 현재 후보군을 그대로 쓸 경우 147개의 독립 shard가 된다.
+현재 공식 후보군에서는 117개의 독립 shard가 된다.
 
 장점:
 
@@ -289,7 +289,7 @@ shard policy
 completed shard ids
 ```
 
-`raw/<roster_id>.jsonl`에는 시나리오당 compact record 하나를 저장한다. 모든 37,632점의 verbose cycle/source report를 저장하지 않고, 필요한 상세 사례는 manifest를 기준으로 재현한다.
+`raw/<roster_id>.jsonl`에는 시나리오당 compact record 하나를 저장한다. 모든 29,952점의 verbose cycle/source report를 저장하지 않고, 필요한 상세 사례는 manifest를 기준으로 재현한다.
 
 compact row에는 최소 다음을 포함한다.
 
@@ -346,7 +346,7 @@ Main advantage off/on
 - 실전에서 몰아주기가 이길 확률
 - 모든 NIKKE 전투에서 Crown-Crown-Mast가 항상 최선이라는 주장
 - 100% 코어 노출이 일반적이라는 주장
-- 현재 Main 후보들이 보편적인 티어표 상위 10명이라는 주장
+- 현재 Main 후보들이 보편적인 티어표 상위 8명이라는 주장
 - 점프·무적·강제 엄폐·부위 노출 등의 패턴 손실이 있는 전투에서도 결과가 그대로 유지된다는 주장
 
 패턴 손실은 별도 후속연구로 다룬다.
@@ -367,10 +367,11 @@ tests/test_cinderella.py
 
 현재 상태:
 
-- 원본 신데렐라 엔진 구현: 추가
-- 현재 공식 Main 후보: 10명
-- 현재 유효 roster: 147
-- 현재 표본 공간: 37,632
-- Main 후보 최종 재검토: **미완료**
+- 원본 신데렐라 엔진 구현: 완료
+- 네온: 비전 아이 공식 Main 편입: 완료
+- 브래디 / 밀크: 블루밍 버니 / 퀀시: 이스케이프 퀸 공식 Main 제외: 완료
+- 공식 Main 후보: 8명
+- 유효 roster: 117
+- 공식 표본 공간: 29,952
 - 공식 research batch: **실행하지 않음**
 - 공식 연구 결과 수: **0**
