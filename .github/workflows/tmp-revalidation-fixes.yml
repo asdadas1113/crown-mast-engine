@@ -2,143 +2,91 @@ name: Temporary revalidation fixes
 
 on:
   push:
-    branches:
-      - research/14-burst-baseline
+    branches: [research/14-burst-baseline]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch-test-commit:
+  diagnose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: research/14-burst-baseline
-          fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Apply audited corrections
+      - name: Apply audited corrections in runner
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          def replace_once(path: str, old: str, new: str) -> None:
+          def r(path, old, new):
               p = Path(path)
-              text = p.read_text(encoding="utf-8")
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f"{path}: expected one match, found {count}: {old!r}")
-              p.write_text(text.replace(old, new), encoding="utf-8")
+              s = p.read_text(encoding='utf-8')
+              if s.count(old) != 1:
+                  raise SystemExit(f'{path}: expected exactly one match for {old!r}, got {s.count(old)}')
+              p.write_text(s.replace(old, new), encoding='utf-8')
 
-          # Generic raid baseline and current PvE SMG cadence assumption.
-          replace_once(
-              "crown_mast_engine/combat.py",
-              '    "SMG": 20.0,',
-              '    "SMG": 24.0,',
-          )
-          replace_once(
-              "crown_mast_engine/combat.py",
-              "    boss_def: float = 140.0",
-              "    boss_def: float = 12_000.0",
-          )
-          replace_once(
-              "crown_mast_engine/damage.py",
-              "    boss_def: float = 140.0",
-              "    boss_def: float = 12_000.0",
-          )
+          r('crown_mast_engine/combat.py', '    "SMG": 20.0,', '    "SMG": 24.0,')
+          r('crown_mast_engine/combat.py', '    boss_def: float = 140.0', '    boss_def: float = 12_000.0')
+          r('crown_mast_engine/damage.py', '    boss_def: float = 140.0', '    boss_def: float = 12_000.0')
 
-          # Rapi: Red Hood B3 2808% packet is unconditional on prior normal-attack count.
-          replace_once(
-              "crown_mast_engine/character_mechanics/rapi_red_hood.py",
-              "        self._pulls = 0\n",
-              "",
-          )
-          replace_once(
-              "crown_mast_engine/character_mechanics/rapi_red_hood.py",
-              '            if self._pulls < context.definition.skill_value("burst", "required_pulls"):\n                return ()\n',
-              "",
-          )
-          replace_once(
-              "crown_mast_engine/character_mechanics/rapi_red_hood.py",
-              "        self._pulls += 1\n",
-              "",
-          )
-          replace_once(
-              "crown_mast_engine/data/characters.json",
-              '          "required_pulls": 120.0,\n',
-              "",
-          )
+          r('crown_mast_engine/character_mechanics/rapi_red_hood.py', '        self._pulls = 0\n', '')
+          r('crown_mast_engine/character_mechanics/rapi_red_hood.py', '            if self._pulls < context.definition.skill_value("burst", "required_pulls"):\n                return ()\n', '')
+          r('crown_mast_engine/character_mechanics/rapi_red_hood.py', '        self._pulls += 1\n', '')
+          r('crown_mast_engine/data/characters.json', '          "required_pulls": 120.0,\n', '')
 
-          old_rapi_test = '''    def test_stage3_missile_requires_120_prior_normal_attacks(self) -> None:\n        early_timeline = (\n            BurstCycle(1, 0.2, 0.4, 0.6, 0.9, 10.9, "main_b3"),\n        )\n        result = simulate_rotation(CROWN_CROWN_MAST, timeline=early_timeline)\n        self.assertFalse(\n            any(event.source == "burst_stage3_missile" for event in result.damage_events)\n        )\n'''
-          new_rapi_test = '''    def test_stage3_missile_does_not_require_prior_normal_attacks(self) -> None:\n        early_timeline = (\n            BurstCycle(1, 0.2, 0.4, 0.6, 0.9, 10.9, "main_b3"),\n        )\n        result = simulate_rotation(CROWN_CROWN_MAST, timeline=early_timeline)\n        missiles = [\n            event\n            for event in result.damage_events\n            if event.source == "burst_stage3_missile"\n        ]\n        self.assertEqual(len(missiles), 1)\n        self.assertEqual(missiles[0].time, 1.0)\n        self.assertTrue(missiles[0].full_burst)\n'''
-          replace_once("tests/test_rapi_red_hood.py", old_rapi_test, new_rapi_test)
-
-          # Liberalio B3 is an additional-damage packet landing ~1.1 s after cast,
-          # so it receives Full Burst and buffs active at landing.
-          replace_once(
-              "crown_mast_engine/data/character_liberalio.json",
-              '"source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:liberalio datamine+override; Prydwen cross-check@2026-09-02"',
-              '"source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:liberalio datamine+override; Prydwen+NIKKE.gg cross-check@2026-09-05"',
-          )
-          replace_once(
-              "crown_mast_engine/data/character_liberalio.json",
-              '          "duration_sec": 10.0,\n          "damage_pct": 925.0',
-              '          "duration_sec": 10.0,\n          "landing_delay_sec": 1.1,\n          "damage_pct": 925.0',
-          )
-          replace_once(
-              "crown_mast_engine/character_mechanics/liberalio.py",
-              '''    The pinned nikke-sim revision models the 925% Burst packet at Burst cast time;\n    current guide prose describes Liberalio's visual nuke as delayed. Until that\n    landing timing is independently validated for this engine, this hook follows the\n    pinned project source rather than introducing an unverified delay.\n''',
-              '''    Current Prydwen and NIKKE.gg references independently describe the 925%\n    Burst packet as additional damage landing about 1.1 seconds after cast. The\n    delayed packet therefore uses Full Burst and the buffs active at landing.\n''',
-          )
-          replace_once(
-              "crown_mast_engine/character_mechanics/liberalio.py",
-              '''            DamageRequest(\n                time=event.time,\n                actor=context.actor,\n                source="burst_nuke",\n''',
-              '''            DamageRequest(\n                time=round(\n                    event.time\n                    + context.definition.skill_value("burst", "landing_delay_sec"),\n                    6,\n                ),\n                actor=context.actor,\n                source="burst_nuke",\n''',
-          )
-          replace_once(
-              "crown_mast_engine/character_mechanics/liberalio.py",
-              '''                    core_eligible=False,\n                    full_burst_eligible=False,\n                    range_eligible=False,\n''',
-              '''                    core_eligible=False,\n                    full_burst_eligible=True,\n                    range_eligible=False,\n''',
-          )
-
-          old_liberalio_test = '''    def test_burst_packet_and_self_buff_fire_at_b3_cast(self) -> None:\n        burst_times = tuple(\n            event.time\n            for event in self.result.events\n            if event.event_type == EventType.B3_STAGE_ENTER\n            and event.actor == self.actor\n        )\n        nukes = tuple(\n            event\n            for event in self.result.damage_events_for(\n                actor=self.actor,\n                category=DamageCategory.BURST,\n            )\n            if event.source == "burst_nuke"\n        )\n        self.assertEqual(tuple(event.time for event in nukes), burst_times)\n        self.assertTrue(all(event.coefficient_pct == 925 for event in nukes))\n        self.assertTrue(all(not event.full_burst for event in nukes))\n\n        buffs = tuple(\n            window\n            for window in self.result.buffs.windows\n            if window.source == self.actor\n            and window.skill == "burst"\n            and window.stat == "attack_damage_pct"\n        )\n        self.assertEqual(tuple(window.start for window in buffs), burst_times)\n        self.assertTrue(all(window.value == 50 for window in buffs))\n        for window in buffs:\n            self.assertAlmostEqual(window.end - window.start, 10)\n'''
-          new_liberalio_test = '''    def test_burst_packet_lands_after_delay_and_uses_full_burst(self) -> None:\n        burst_times = tuple(\n            event.time\n            for event in self.result.events\n            if event.event_type == EventType.B3_STAGE_ENTER\n            and event.actor == self.actor\n        )\n        nukes = tuple(\n            event\n            for event in self.result.damage_events_for(\n                actor=self.actor,\n                category=DamageCategory.BURST,\n            )\n            if event.source == "burst_nuke"\n        )\n        expected_nuke_times = tuple(round(time + 1.1, 6) for time in burst_times)\n        self.assertEqual(tuple(event.time for event in nukes), expected_nuke_times)\n        self.assertTrue(all(event.coefficient_pct == 925 for event in nukes))\n        self.assertTrue(all(event.full_burst for event in nukes))\n\n        buffs = tuple(\n            window\n            for window in self.result.buffs.windows\n            if window.source == self.actor\n            and window.skill == "burst"\n            and window.stat == "attack_damage_pct"\n        )\n        self.assertEqual(tuple(window.start for window in buffs), burst_times)\n        self.assertTrue(all(window.value == 50 for window in buffs))\n        for window in buffs:\n            self.assertAlmostEqual(window.end - window.start, 10)\n'''
-          replace_once("tests/test_liberalio.py", old_liberalio_test, new_liberalio_test)
-
-          # Tests for the updated generic baseline assumptions.
-          replace_once(
-              "tests/test_combat.py",
-              '''    def test_reload_formula_matches_pinned_runtime(self) -> None:\n''',
-              '''    def test_default_combat_settings_use_generic_raid_defense(self) -> None:\n        self.assertEqual(CombatSettings().boss_def, 12_000)\n\n    def test_reload_formula_matches_pinned_runtime(self) -> None:\n''',
-          )
-          replace_once(
-              "tests/test_combat.py",
-              '''    def test_smg_nominal_rate_is_quantized_to_twenty_pulls_per_second(self) -> None:\n        shots = generate_weapon_shots(\n            actor="test-smg",\n            weapon=weapon("SMG"),\n            duration_sec=1,\n            startup_delay_frames=0,\n        )\n        self.assertEqual(len(shots), 20)\n        self.assertEqual([shot.frame for shot in shots[:4]], [2, 5, 8, 11])\n''',
-              '''    def test_smg_rate_uses_min_firing_rounds_adjusted_twenty_four_per_second(self) -> None:\n        shots = generate_weapon_shots(\n            actor="test-smg",\n            weapon=weapon("SMG"),\n            duration_sec=1,\n            startup_delay_frames=0,\n        )\n        self.assertEqual(len(shots), 24)\n        self.assertEqual([shot.frame for shot in shots[:4]], [2, 4, 7, 9])\n''',
-          )
+          r('crown_mast_engine/data/character_liberalio.json', '"source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:liberalio datamine+override; Prydwen cross-check@2026-09-02"', '"source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:liberalio datamine+override; Prydwen+NIKKE.gg cross-check@2026-09-05"')
+          r('crown_mast_engine/data/character_liberalio.json', '          "duration_sec": 10.0,\n          "damage_pct": 925.0', '          "duration_sec": 10.0,\n          "landing_delay_sec": 1.1,\n          "damage_pct": 925.0')
+          r('crown_mast_engine/character_mechanics/liberalio.py', '                time=event.time,\n                actor=context.actor,\n                source="burst_nuke",', '                time=round(event.time + context.definition.skill_value("burst", "landing_delay_sec"), 6),\n                actor=context.actor,\n                source="burst_nuke",')
+          r('crown_mast_engine/character_mechanics/liberalio.py', '                    core_eligible=False,\n                    full_burst_eligible=False,\n                    range_eligible=False,', '                    core_eligible=False,\n                    full_burst_eligible=True,\n                    range_eligible=False,')
           PY
-
-      - name: Run focused regression
-        run: |
-          python -m unittest \
-            tests.test_combat \
-            tests.test_rapi_red_hood \
-            tests.test_liberalio -v
-
-      - name: Run full regression suite
-        run: python -m unittest discover -s tests -v
-
-      - name: Commit audited corrections and remove temporary workflow
+      - name: Print changed-baseline diagnostics
         shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/tmp-revalidation-fixes.yml
-          git add crown_mast_engine tests
-          git commit -m "Fix audited raid baseline and character mechanics"
-          git push origin HEAD:research/14-burst-baseline
+          python - <<'PY'
+          from dataclasses import replace
+          from crown_mast_engine import BuildProfile, GearState, OverloadProfile, RAID14_TIMELINE, ResearchScenario, analyze_entry_variants, analyze_rotations
+          from crown_mast_engine.combat import CombatSettings
+          from crown_mast_engine.models import TeamRoster
+          from tests.simulation_fixtures import standard_rotation_comparison
+
+          a = standard_rotation_comparison()
+          o = a.overall
+          print('STANDARD', repr({
+              'team_c': o.team_c, 'team_f': o.team_f, 'g': o.g, 'l': o.l,
+              'relative': o.team_relative_change, 'break_even': o.break_even_main_share_c,
+              'main_share': o.conventional_main_share, 'winner': o.observed_winner.value,
+          }))
+          d = a.secondary_b3_mast3_burst_omission_cycle_damage
+          print('OMISSION', repr({'c': d.conventional, 'f': d.funnel, 'loss': d.loss_from_funnel, 'relative_loss': d.relative_loss_from_funnel}))
+
+          roster = TeamRoster()
+          bare = BuildProfile.uniform(GearState.OL5)
+          high = BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=4, element_lines=4, ammo_lines=3))
+          extreme = BuildProfile.uniform(GearState.OL5, OverloadProfile(atk_lines=10, element_lines=20, ammo_lines=100))
+          base = {actor: bare for actor in roster.members}
+          cases = {
+              'all_bare': base,
+              'rapi_high': {**base, 'rapi-red-hood': high},
+              'helm_high': {**base, 'helm': high},
+              'both_high': {**base, 'rapi-red-hood': high, 'helm': high},
+              'rapi_extreme': {**base, 'rapi-red-hood': extreme},
+          }
+          settings = CombatSettings(boss_element='Wind')
+          for name, builds in cases.items():
+              x = analyze_rotations(roster=roster, builds=builds, combat_settings=settings, main_actor='rapi-red-hood').overall
+              print('OL', name, repr({'winner': x.observed_winner.value, 'relative': x.team_relative_change, 'main_share': x.conventional_main_share, 'break_even': x.break_even_main_share_c}))
+
+          scenario = replace(ResearchScenario.standard(), timeline=RAID14_TIMELINE)
+          rv = analyze_entry_variants(scenario)
+          legacy = analyze_entry_variants(ResearchScenario.standard()).crown_entry.overall
+          raid = rv.crown_entry.overall
+          print('RAID14', repr({'entry_relative': rv.first_burst.team.relative_change, 'entry_delta': rv.first_burst.team.delta_mast_minus_crown, 'legacy_break_even': legacy.break_even_main_share_c, 'raid_break_even': raid.break_even_main_share_c, 'legacy_relative': legacy.team_relative_change, 'raid_relative': raid.team_relative_change}))
+
+          sbs = analyze_rotations(roster=TeamRoster(secondary_b3='scarlet-black-shadow')).overall
+          print('SBS', repr({'team_c': sbs.team_c, 'team_f': sbs.team_f, 'relative': sbs.team_relative_change, 'break_even': sbs.break_even_main_share_c, 'main_share': sbs.conventional_main_share, 'winner': sbs.observed_winner.value}))
+          PY
