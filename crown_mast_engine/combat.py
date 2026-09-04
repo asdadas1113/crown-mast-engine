@@ -233,6 +233,7 @@ def js_round(value: float) -> int:
 
 
 def effective_reload_frames(base_frames: int, reload_speed_pct: float) -> int:
+    """Resolve a displayed/raw reload body expressed in 60-FPS frames."""
     scaled = base_frames * 0.975 * max(0.0, 1 - reload_speed_pct / 100)
     return js_round(scaled) + RELOAD_TAIL_FRAMES
 

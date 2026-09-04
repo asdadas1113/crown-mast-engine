@@ -14,7 +14,7 @@ class QuencyEscapeQueenMechanicsTests(unittest.TestCase):
         cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=QUENCY_ROSTER)
         cls.actor = "quency-escape-queen"
 
-    def test_data_matches_pinned_datamine(self) -> None:
+    def test_data_matches_cross_checked_basis(self) -> None:
         unit = self.result.catalog.require(self.actor)
         self.assertEqual(unit.progression_atk, 109_209)
         self.assertEqual(unit.element, "Water")
@@ -22,7 +22,7 @@ class QuencyEscapeQueenMechanicsTests(unittest.TestCase):
         self.assertEqual(unit.weapon.normal_attack_pct, 10.12)
         self.assertEqual(unit.weapon.core_attack_pct, 250)
         self.assertEqual(unit.weapon.ammo, 120)
-        self.assertEqual(unit.weapon.reload_frames, 81)
+        self.assertEqual(unit.weapon.reload_frames, 60)
         self.assertEqual(unit.weapon.hits_per_shot, 2)
         self.assertEqual(unit.weapon.burst_gauge_per_shot, 0.074)
         self.assertEqual(unit.skill_value("skill1", "distributed_damage_pct"), 49.58)

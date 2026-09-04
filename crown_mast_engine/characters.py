@@ -14,6 +14,8 @@ class WeaponProfile:
     normal_attack_pct: float
     core_attack_pct: float
     ammo: int
+    # Displayed/raw reload duration in 60-FPS frames. The runtime applies
+    # the measured 0.975 body factor and fixed reload tail separately.
     reload_frames: int
     charge_frames: int
     charge_multiplier_pct: float

@@ -20,7 +20,7 @@ class BreadyMechanicsTests(unittest.TestCase):
             and int(event.payload.get("mast_stacks", 0)) > 0
         )
 
-    def test_standard_data_matches_pinned_bready_datamine(self) -> None:
+    def test_standard_data_matches_cross_checked_basis(self) -> None:
         bready = self.result.catalog.require(self.actor)
         self.assertEqual(bready.progression_atk, 109_209)
         self.assertEqual(bready.unit_class, "Attacker")
@@ -30,7 +30,7 @@ class BreadyMechanicsTests(unittest.TestCase):
         self.assertEqual(bready.weapon.normal_attack_pct, 69.04)
         self.assertEqual(bready.weapon.core_attack_pct, 200)
         self.assertEqual(bready.weapon.ammo, 6)
-        self.assertEqual(bready.weapon.reload_frames, 141)
+        self.assertEqual(bready.weapon.reload_frames, 120)
         self.assertEqual(bready.weapon.charge_frames, 60)
         self.assertEqual(bready.weapon.charge_multiplier_pct, 250)
         self.assertEqual(bready.weapon.burst_gauge_per_shot, 2.8)

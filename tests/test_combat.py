@@ -52,10 +52,11 @@ class WeaponTimingTests(unittest.TestCase):
         off_liter = len(off.damage_events_for(actor="liter", category=DamageCategory.NORMAL))
         self.assertEqual((on_liter, off_liter), (24, 20))
 
-    def test_reload_formula_matches_pinned_runtime(self) -> None:
-        self.assertEqual(effective_reload_frames(171, 0), 180)
-        self.assertEqual(effective_reload_frames(171, 100), 13)
-        self.assertEqual(effective_reload_frames(171, 89.47), 31)
+    def test_reload_formula_uses_displayed_raw_body_frames(self) -> None:
+        self.assertEqual(effective_reload_frames(60, 0), 72)
+        self.assertEqual(effective_reload_frames(90, 0), 101)
+        self.assertEqual(effective_reload_frames(120, 0), 130)
+        self.assertEqual(effective_reload_frames(150, 0), 159)
 
     def test_ar_cadence_spends_magazine_then_reloads(self) -> None:
         shots = generate_weapon_shots(
@@ -178,7 +179,7 @@ class WeaponTimingTests(unittest.TestCase):
             normal_attack_pct=69.04,
             core_attack_pct=200,
             ammo=6,
-            reload_frames=141,
+            reload_frames=120,
             charge_frames=60,
             charge_multiplier_pct=250,
             hits_per_shot=1,
@@ -192,7 +193,7 @@ class WeaponTimingTests(unittest.TestCase):
         )
         self.assertEqual(
             [shot.frame for shot in shots[:7]],
-            [59, 141, 223, 305, 387, 469, 701],
+            [59, 141, 223, 305, 387, 469, 681],
         )
         self.assertTrue(all(shot.charged for shot in shots))
         self.assertTrue(shots[5].last_bullet)

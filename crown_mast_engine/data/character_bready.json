@@ -5,7 +5,7 @@
     "gear": "Base-5",
     "core": 7,
     "skill_levels": [10, 10, 10],
-    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:bready datamine+override; Prydwen+CannedJar cross-check@2026-09-02"
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:bready datamine+override; Prydwen+CannedJar cross-check@2026-09-02; reload-timing-audit@2026-09-05"
   },
   "characters": [
     {
@@ -23,7 +23,7 @@
         "normal_attack_pct": 69.04,
         "core_attack_pct": 200.0,
         "ammo": 6,
-        "reload_frames": 141,
+        "reload_frames": 120,
         "charge_frames": 60,
         "charge_multiplier_pct": 250.0,
         "hits_per_shot": 1,

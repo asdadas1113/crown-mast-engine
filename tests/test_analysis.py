@@ -37,17 +37,17 @@ class RotationAnalysisTests(unittest.TestCase):
             ComparisonCase.STANDARD_BREAK_EVEN,
         )
         self.assertEqual(overall.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertAlmostEqual(overall.team_c, 2_163_858_076.989933)
-        self.assertAlmostEqual(overall.team_f, 2_132_049_373.9287062, delta=1e-3)
-        self.assertAlmostEqual(overall.g, 0.014909377434629167)
-        self.assertAlmostEqual(overall.l, 0.03845454422690797)
+        self.assertAlmostEqual(overall.team_c, 2_168_143_852.8701534)
+        self.assertAlmostEqual(overall.team_f, 2_141_385_963.124464, delta=1e-3)
+        self.assertAlmostEqual(overall.g, 0.01704007028958876)
+        self.assertAlmostEqual(overall.l, 0.035110280572748453)
         self.assertAlmostEqual(
             overall.team_relative_change,
-            -0.014699995068749971,
+            -0.012341381182004008,
         )
         self.assertAlmostEqual(
             overall.break_even_main_share_c,
-            0.7206094123068284,
+            0.6732510902070452,
         )
         self.assertLess(
             overall.conventional_main_share,
@@ -184,12 +184,12 @@ class RotationAnalysisTests(unittest.TestCase):
             self.analysis.secondary_b3_mast3_deprivation,
             cycle_damage,
         )
-        self.assertAlmostEqual(cycle_damage.conventional, 193_243_197.92306998)
-        self.assertAlmostEqual(cycle_damage.funnel, 156_151_135.17818892, delta=1e-3)
-        self.assertAlmostEqual(cycle_damage.loss_from_funnel, 37_092_062.74488106, delta=1e-3)
+        self.assertAlmostEqual(cycle_damage.conventional, 200_320_497.83517963)
+        self.assertAlmostEqual(cycle_damage.funnel, 160_607_148.9064402, delta=1e-3)
+        self.assertAlmostEqual(cycle_damage.loss_from_funnel, 39_713_348.92873943, delta=1e-3)
         self.assertAlmostEqual(
             cycle_damage.relative_loss_from_funnel,
-            0.19194498509410607,
+            0.19824905268264115,
             delta=1e-12,
         )
 

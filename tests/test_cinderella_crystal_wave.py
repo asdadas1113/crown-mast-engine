@@ -16,7 +16,7 @@ class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
         cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=CCW_ROSTER)
         cls.actor = "cinderella-crystal-wave"
 
-    def test_standard_data_matches_pinned_mg_datamine(self) -> None:
+    def test_standard_data_matches_cross_checked_mg_basis(self) -> None:
         ccw = self.result.catalog.require(self.actor)
         self.assertEqual(ccw.progression_atk, 109_209)
         self.assertEqual(ccw.unit_class, "Attacker")
@@ -26,7 +26,7 @@ class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
         self.assertEqual(ccw.weapon.normal_attack_pct, 5.57)
         self.assertEqual(ccw.weapon.core_attack_pct, 200)
         self.assertEqual(ccw.weapon.ammo, 300)
-        self.assertEqual(ccw.weapon.reload_frames, 171)
+        self.assertEqual(ccw.weapon.reload_frames, 150)
         self.assertEqual(ccw.weapon.charge_frames, 0)
         self.assertEqual(ccw.weapon.burst_gauge_per_shot, 0.05)
 

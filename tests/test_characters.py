@@ -116,7 +116,7 @@ class CharacterCatalogTests(unittest.TestCase):
         self.assertEqual(snow.weapon.weapon_type, "SR")
         self.assertEqual(snow.weapon.normal_attack_pct, 69.04)
         self.assertEqual(snow.weapon.ammo, 6)
-        self.assertEqual(snow.weapon.reload_frames, 141)
+        self.assertEqual(snow.weapon.reload_frames, 120)
         self.assertEqual(snow.weapon.charge_frames, 72)
         self.assertEqual(snow.weapon.charge_multiplier_pct, 250)
         self.assertEqual(
@@ -134,7 +134,7 @@ class CharacterCatalogTests(unittest.TestCase):
         self.assertEqual(epinel.weapon.normal_attack_pct, 10.12)
         self.assertEqual(epinel.weapon.core_attack_pct, 250)
         self.assertEqual(epinel.weapon.ammo, 120)
-        self.assertEqual(epinel.weapon.reload_frames, 81)
+        self.assertEqual(epinel.weapon.reload_frames, 60)
         self.assertEqual(epinel.skill_value("skill2", "crit_rate_pct"), 5.05)
         self.assertEqual(epinel.skill_value("burst", "damage_pct"), 457.87)
 
@@ -147,7 +147,7 @@ class CharacterCatalogTests(unittest.TestCase):
         self.assertEqual(neon.weapon.weapon_type, "RL")
         self.assertEqual(neon.weapon.normal_attack_pct, 61.3)
         self.assertEqual(neon.weapon.ammo, 6)
-        self.assertEqual(neon.weapon.reload_frames, 111)
+        self.assertEqual(neon.weapon.reload_frames, 120)
         self.assertEqual(neon.weapon.charge_frames, 60)
         self.assertEqual(neon.weapon.charge_multiplier_pct, 250)
         self.assertEqual(neon.weapon.burst_gauge_per_shot, 1.5)

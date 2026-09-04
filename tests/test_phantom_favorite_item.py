@@ -15,7 +15,7 @@ class PhantomFavoriteItemMechanicsTests(unittest.TestCase):
         cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=PHANTOM_ROSTER)
         cls.actor = "phantom"
 
-    def test_data_matches_pinned_favorite_item_basis(self) -> None:
+    def test_data_matches_cross_checked_favorite_item_basis(self) -> None:
         unit = self.result.catalog.require(self.actor)
         self.assertEqual(unit.name, "Phantom (Favorite Item)")
         self.assertEqual(unit.progression_atk, 109_209)
@@ -23,7 +23,7 @@ class PhantomFavoriteItemMechanicsTests(unittest.TestCase):
         self.assertEqual(unit.weapon.weapon_type, "AR")
         self.assertEqual(unit.weapon.normal_attack_pct, 15.78)
         self.assertEqual(unit.weapon.ammo, 60)
-        self.assertEqual(unit.weapon.reload_frames, 141)
+        self.assertEqual(unit.weapon.reload_frames, 120)
         self.assertEqual(unit.weapon.burst_gauge_per_shot, 0.25)
         self.assertEqual(unit.skill_value("skill2", "max_stack_distributed_damage_pct"), 250)
         self.assertEqual(unit.skill_value("burst", "damage_pct"), 1457.28)

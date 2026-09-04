@@ -197,10 +197,10 @@ class ComparisonReportTests(unittest.TestCase):
     def test_report_preserves_baseline_totals_and_research_metrics(self) -> None:
         overall = self.report.overall
 
-        self.assertAlmostEqual(overall.team.conventional, 2_163_858_076.989933)
-        self.assertAlmostEqual(overall.team.funnel, 2_132_049_373.9287062, delta=1e-3)
-        self.assertAlmostEqual(overall.conventional_main_share, 0.44514249362747565)
-        self.assertAlmostEqual(overall.break_even_main_share_c, 0.7206094123068284)
+        self.assertAlmostEqual(overall.team.conventional, 2_168_143_852.8701534)
+        self.assertAlmostEqual(overall.team.funnel, 2_141_385_963.124464, delta=1e-3)
+        self.assertAlmostEqual(overall.conventional_main_share, 0.43660107773480095)
+        self.assertAlmostEqual(overall.break_even_main_share_c, 0.6732510902070452)
         self.assertEqual(overall.outcome_band, OutcomeBand.CLEAR_CONVENTIONAL)
 
     def test_report_contains_character_and_cycle_outputs(self) -> None:

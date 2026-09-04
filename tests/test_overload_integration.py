@@ -57,8 +57,8 @@ class OverloadIntegrationTests(unittest.TestCase):
         self.assertEqual(rapi_high.observed_winner, RotationWinner.CONVENTIONAL)
         self.assertEqual(helm_high.observed_winner, RotationWinner.CONVENTIONAL)
         self.assertEqual(both_high.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertAlmostEqual(bare.team_relative_change, -0.013490046832416502)
-        self.assertAlmostEqual(rapi_high.team_relative_change, -0.0014584248278578515)
+        self.assertAlmostEqual(bare.team_relative_change, -0.011107014572814045)
+        self.assertAlmostEqual(rapi_high.team_relative_change, -0.0014456113833816175)
 
     def test_main_share_moves_toward_break_even_with_ol_distribution(self) -> None:
         bare = self.results["all_bare"].overall
