@@ -24,21 +24,19 @@ OFFICIAL_B1_CANDIDATES = (
     "rapi-red-hood",
 )
 
-# Main B3 sample reopened before the first official batch on 2026-09-02 to add
-# original Cinderella as a current high-end Main with a distinct damage timing
-# structure.  Removal/replacement of existing exploratory Mains is deferred.
-# Secondary anchors remain intentionally outside this axis so the Main and
-# Secondary roles stay independent in the canonical grid.
+# Main B3 sample refined before the first official batch. Bready, Milk:
+# Blooming Bunny, and Quency: Escape Queen remain available for diagnostic
+# work but are excluded from the official Main axis. Neon: Vision Eye is
+# promoted into the official Main sample. Secondary anchors stay outside this
+# axis so Main and Secondary roles remain independent in the canonical grid.
 OFFICIAL_MAIN_B3_CANDIDATES = (
     "rapi-red-hood",
     "scarlet-black-shadow",
-    "bready",
     "cinderella",
     "cinderella-crystal-wave",
     "liberalio",
-    "milk-blooming-bunny",
+    "neon-vision-eye",
     "phantom",
-    "quency-escape-queen",
     "raven",
 )
 
@@ -63,7 +61,7 @@ OFFICIAL_RAW_ROSTER_COUNT = (
     * len(OFFICIAL_SECONDARY_B3_ANCHORS)
 )
 OFFICIAL_INVALID_DUPLICATE_ROSTER_COUNT = 3
-OFFICIAL_VALID_ROSTER_COUNT = 147
+OFFICIAL_VALID_ROSTER_COUNT = 117
 OFFICIAL_ENVIRONMENT_COUNT = (
     len(OFFICIAL_CORE_HIT_RATE_PCT) * len(OFFICIAL_MAIN_ADVANTAGE_LEVELS)
 )
