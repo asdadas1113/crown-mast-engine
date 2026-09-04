@@ -53,7 +53,7 @@ class CharacterCatalogTests(unittest.TestCase):
                 "skill1",
                 "expected_normal_damage_loss_per_stack_pct",
             ),
-            20,
+            0,
         )
 
         result = standard_conventional_result()
@@ -79,7 +79,7 @@ class CharacterCatalogTests(unittest.TestCase):
                 "skill1",
                 "expected_normal_damage_loss_per_stack_pct",
             ),
-            20,
+            0,
         )
 
     def test_rapi_red_hood_standard_stats(self) -> None:
@@ -105,6 +105,7 @@ class CharacterCatalogTests(unittest.TestCase):
         self.assertEqual(scarlet.weapon.reload_frames, 152)
         self.assertEqual(scarlet.weapon.charge_frames, 18)
         self.assertEqual(scarlet.weapon.charge_multiplier_pct, 150)
+        self.assertEqual(scarlet.weapon.charge_release_recovery_frames, 26)
 
     def test_snow_white_heavy_arms_standard_stats(self) -> None:
         snow = STANDARD_CHARACTER_CATALOG.require("snow-white-heavy-arms")

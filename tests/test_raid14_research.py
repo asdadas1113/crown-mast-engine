@@ -36,7 +36,7 @@ class Raid14ResearchTests(unittest.TestCase):
         entry = variants.first_burst.team
 
         self.assertGreater(entry.mast_entry, entry.crown_entry)
-        self.assertAlmostEqual(entry.relative_change, 0.02034706170578149)
+        self.assertAlmostEqual(entry.relative_change, 0.024321284304765767)
         self.assertGreater(entry.delta_mast_minus_crown, 0.0)
 
     def test_entry_choice_is_independent_of_later_rotation_choice(self) -> None:
@@ -60,8 +60,8 @@ class Raid14ResearchTests(unittest.TestCase):
 
         self.assertLess(legacy.team_relative_change, 0.0)
         self.assertLess(raid14.team_relative_change, 0.0)
-        self.assertAlmostEqual(legacy.break_even_main_share_c, 0.7101138178090082)
-        self.assertAlmostEqual(raid14.break_even_main_share_c, 0.6508108735117237)
+        self.assertAlmostEqual(legacy.break_even_main_share_c, 0.7206094123068284)
+        self.assertAlmostEqual(raid14.break_even_main_share_c, 0.6559299041750212)
 
 
 if __name__ == "__main__":

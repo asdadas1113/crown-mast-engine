@@ -37,17 +37,17 @@ class RotationAnalysisTests(unittest.TestCase):
             ComparisonCase.STANDARD_BREAK_EVEN,
         )
         self.assertEqual(overall.observed_winner, RotationWinner.CONVENTIONAL)
-        self.assertAlmostEqual(overall.team_c, 2_079_946_367.614494)
-        self.assertAlmostEqual(overall.team_f, 2_053_522_056.5032187, delta=1e-3)
+        self.assertAlmostEqual(overall.team_c, 2_163_858_076.989933)
+        self.assertAlmostEqual(overall.team_f, 2_132_049_373.9287062, delta=1e-3)
         self.assertAlmostEqual(overall.g, 0.014909377434629167)
-        self.assertAlmostEqual(overall.l, 0.03652245461042558)
+        self.assertAlmostEqual(overall.l, 0.03845454422690797)
         self.assertAlmostEqual(
             overall.team_relative_change,
-            -0.012704323305019471,
+            -0.014699995068749971,
         )
         self.assertAlmostEqual(
             overall.break_even_main_share_c,
-            0.7101138178090082,
+            0.7206094123068284,
         )
         self.assertLess(
             overall.conventional_main_share,
@@ -412,11 +412,11 @@ class MastExpectedHitLossSensitivityTests(unittest.TestCase):
         self.assertEqual(tuple(self.results), (0.0, 18.0, 20.0, 22.0))
         baseline = standard_rotation_comparison()
         self.assertAlmostEqual(
-            self.results[20.0].overall.team_c,
+            self.results[0.0].overall.team_c,
             baseline.overall.team_c,
         )
         self.assertAlmostEqual(
-            self.results[20.0].overall.team_f,
+            self.results[0.0].overall.team_f,
             baseline.overall.team_f,
         )
 

@@ -114,7 +114,7 @@
         "skill1": {
           "max_drunken_stacks": 3.0,
           "hit_rate_down_per_stack_pct": 20.0,
-          "expected_normal_damage_loss_per_stack_pct": 20.0,
+          "expected_normal_damage_loss_per_stack_pct": 0.0,
           "crit_rate_pct": 20.05,
           "caster_atk_pct": 35.02
         },
@@ -151,7 +151,8 @@
         "charge_frames": 18,
         "charge_multiplier_pct": 150.0,
         "hits_per_shot": 1,
-        "burst_gauge_per_shot": 1.25
+        "burst_gauge_per_shot": 1.25,
+        "charge_release_recovery_frames": 26
       },
       "skills": {
         "skill1": {

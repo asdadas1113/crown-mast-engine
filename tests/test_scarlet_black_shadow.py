@@ -23,9 +23,9 @@ class ScarletBlackShadowMechanicsTests(unittest.TestCase):
         self.assertEqual(
             [(event.time, event.source) for event in procs[:3]],
             [
-                (1.75, "skill1_phase1"),
-                (3.75, "skill1_phase2"),
-                (5.75, "skill1_phase3"),
+                (1.8833333333333333, "skill1_phase1"),
+                (4.083333333333333, "skill1_phase2"),
+                (6.283333333333333, "skill1_phase3"),
             ],
         )
         self.assertEqual(
@@ -112,10 +112,10 @@ class ScarletBlackShadowAnalysisTests(unittest.TestCase):
 
     def test_strong_distributed_secondary_still_favors_conventional(self) -> None:
         overall = self.analysis.overall
-        self.assertAlmostEqual(overall.team_c, 2_040_564_041.4289405)
-        self.assertAlmostEqual(overall.team_f, 2_032_816_835.8842957, delta=1e-3)
-        self.assertAlmostEqual(overall.team_relative_change, -0.003796600051434673)
-        self.assertAlmostEqual(overall.break_even_main_share_c, 0.5020292854336021)
+        self.assertAlmostEqual(overall.team_c, 2_017_348_067.29898)
+        self.assertAlmostEqual(overall.team_f, 2_010_479_275.0415113, delta=1e-3)
+        self.assertAlmostEqual(overall.team_relative_change, -0.0034048622391005257)
+        self.assertAlmostEqual(overall.break_even_main_share_c, 0.49564565632831664)
         self.assertLess(
             overall.conventional_main_share,
             overall.break_even_main_share_c,

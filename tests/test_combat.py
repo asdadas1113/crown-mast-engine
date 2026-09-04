@@ -44,6 +44,14 @@ class WeaponTimingTests(unittest.TestCase):
     def test_default_combat_settings_use_generic_raid_defense(self) -> None:
         self.assertEqual(CombatSettings().boss_def, 12_000)
 
+    def test_min_firing_rounds_adjustment_defaults_on_and_can_be_disabled(self) -> None:
+        self.assertTrue(CombatSettings().min_firing_rounds_adjustment)
+        on = simulate_rotation(CROWN_CROWN_MAST, combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0))
+        off = simulate_rotation(CROWN_CROWN_MAST, combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0, min_firing_rounds_adjustment=False))
+        on_liter = len(on.damage_events_for(actor="liter", category=DamageCategory.NORMAL))
+        off_liter = len(off.damage_events_for(actor="liter", category=DamageCategory.NORMAL))
+        self.assertEqual((on_liter, off_liter), (24, 20))
+
     def test_reload_formula_matches_pinned_runtime(self) -> None:
         self.assertEqual(effective_reload_frames(171, 0), 180)
         self.assertEqual(effective_reload_frames(171, 100), 13)
@@ -445,25 +453,18 @@ class RotationDamageTests(unittest.TestCase):
             before_b1.breakdown.effective_atk,
         )
 
-    def test_mast_drunken_hit_loss_tracks_live_stack(self) -> None:
+    def test_mast_drunken_hit_rate_debuff_is_not_direct_damage_loss(self) -> None:
         result = standard_conventional_result()
         mast = result.roster.mast
-        self.assertEqual(result.buff_total(3.8, mast, "normal_attack_pct"), 0)
-        self.assertEqual(result.buff_total(4.0, mast, "normal_attack_pct"), -20)
-        self.assertEqual(result.buff_total(19.0, mast, "normal_attack_pct"), -40)
-        self.assertEqual(result.buff_total(34.0, mast, "normal_attack_pct"), -60)
-        self.assertEqual(result.buff_total(44.3, mast, "normal_attack_pct"), 0)
-
-        mast_normals = result.damage_events_for(
-            actor=mast,
-            category=DamageCategory.NORMAL,
-        )
-        d1 = next(event for event in mast_normals if 3.9 <= event.time < 18.3)
-        d2 = next(event for event in mast_normals if 18.3 <= event.time < 32.7)
-        d3 = next(event for event in mast_normals if 32.7 <= event.time < 44.3)
-        self.assertAlmostEqual(d1.breakdown.coefficient, 0.0557 * 0.8)
-        self.assertAlmostEqual(d2.breakdown.coefficient, 0.0557 * 0.6)
-        self.assertAlmostEqual(d3.breakdown.coefficient, 0.0557 * 0.4)
+        definition = result.catalog.require(mast)
+        self.assertEqual(definition.skill_value("skill1", "hit_rate_down_per_stack_pct"), 20)
+        self.assertEqual(definition.skill_value("skill1", "expected_normal_damage_loss_per_stack_pct"), 0)
+        for time in (3.8, 4.0, 19.0, 34.0, 44.3):
+            self.assertEqual(result.buff_total(time, mast, "normal_attack_pct"), 0)
+        mast_normals = result.damage_events_for(actor=mast, category=DamageCategory.NORMAL)
+        for window in ((3.9, 18.3), (18.3, 32.7), (32.7, 44.3)):
+            event = next(e for e in mast_normals if window[0] <= e.time < window[1])
+            self.assertAlmostEqual(event.breakdown.coefficient, 0.0557)
 
     def test_mast_does_not_fire_during_hangover(self) -> None:
         result = standard_conventional_result()

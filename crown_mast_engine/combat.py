@@ -94,6 +94,9 @@ class CombatSettings:
     boss_element: str | None = None
     full_burst_bonus_pct: float = 50.0
     boss_damage_taken_pct: float = 0.0
+    # PvE baseline uses Settings > Battle > Convenience > Min Firing Rounds Adjustment ON.
+    # At 60 FPS, ON preserves programmed 24/s SMGs; OFF quantizes them to 20/s.
+    min_firing_rounds_adjustment: bool = True
     startup_delay_frames: int = 8
     duration_sec: float = STANDARD_BATTLE_DURATION_SEC
 

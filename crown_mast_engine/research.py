@@ -961,13 +961,14 @@ def _combat_settings_to_dict(settings: CombatSettings) -> dict[str, Any]:
         "boss_element": settings.boss_element,
         "full_burst_bonus_pct": settings.full_burst_bonus_pct,
         "boss_damage_taken_pct": settings.boss_damage_taken_pct,
+        "min_firing_rounds_adjustment": settings.min_firing_rounds_adjustment,
         "startup_delay_frames": settings.startup_delay_frames,
         "duration_sec": settings.duration_sec,
     }
 
 
 def _combat_settings_from_dict(payload: Mapping[str, Any]) -> CombatSettings:
-    keys = {
+    required_keys = {
         "boss_def",
         "core_hit_rate_pct",
         "range_bonus_pct",
@@ -979,8 +980,16 @@ def _combat_settings_from_dict(payload: Mapping[str, Any]) -> CombatSettings:
         "startup_delay_frames",
         "duration_sec",
     }
-    _require_exact_keys(payload, keys, "combat_settings")
+    optional_keys = {"min_firing_rounds_adjustment"}
+    missing = required_keys - payload.keys()
+    extra = payload.keys() - required_keys - optional_keys
+    if missing or extra:
+        details = []
+        if missing: details.append(f"missing={sorted(missing)}")
+        if extra: details.append(f"extra={sorted(extra)}")
+        raise ValueError("combat_settings has invalid fields: " + ", ".join(details))
     values = dict(payload)
+    values.setdefault("min_firing_rounds_adjustment", True)
     values["element_multiplier_by_actor"] = _require_mapping(
         values["element_multiplier_by_actor"],
         "combat_settings.element_multiplier_by_actor",

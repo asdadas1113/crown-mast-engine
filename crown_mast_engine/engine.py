@@ -466,7 +466,12 @@ class CrownMastEngine:
                     weapon=mode.weapon,
                     duration_sec=mode_duration,
                     startup_delay_frames=0,
-                    pulls_per_second_override=mode.pulls_per_second,
+                    pulls_per_second_override=(
+                        mode.pulls_per_second if mode.pulls_per_second is not None else (
+                            20.0 if mode.weapon.weapon_type == "SMG"
+                            and not self.combat_settings.min_firing_rounds_adjustment else None
+                        )
+                    ),
                 )
                 if mode.max_shots is not None:
                     generated = generated[: mode.max_shots]
@@ -545,6 +550,10 @@ class CrownMastEngine:
                     ammo_charge_by_actor_frame.get((target, round(time * FPS)), 0.0)
                 ),
                 startup_delay_frames=self.combat_settings.startup_delay_frames,
+                pulls_per_second_override=(
+                    20.0 if definition.weapon.weapon_type == "SMG"
+                    and not self.combat_settings.min_firing_rounds_adjustment else None
+                ),
                 shared_charge_modes=shared_charge_modes,
             )
             shots.extend(actor_shots)
