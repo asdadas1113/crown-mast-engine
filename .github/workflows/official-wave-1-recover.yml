@@ -1,0 +1,87 @@
+name: Recover official study wave 1
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  recover-finalize:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[official-wave1-recover]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile recovery validators
+        run: >-
+          python -m compileall -q
+          crown_mast_engine
+          scripts/audit_official_wave.py
+          scripts/finalize_official_wave.py
+
+      - name: Download immutable source shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: official-wave1-shard-*-33833623839
+          path: shard-artifacts
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 33833623839
+
+      - name: Strict contamination audit of source raw shards
+        run: >-
+          python scripts/audit_official_wave.py
+          --raw-dir shard-artifacts/official-wave1-33833623839/machine/raw
+          --run-id official-wave1-33833623839
+          --start-index 0
+          --shard-count 12
+
+      - name: Assemble original wave without recomputation
+        run: >-
+          python scripts/finalize_official_wave.py
+          --raw-dir shard-artifacts/official-wave1-33833623839/machine/raw
+          --output-dir official-output/official-wave1-33833623839
+          --run-id official-wave1-33833623839
+          --branch research/14-burst-baseline
+          --commit-sha 039426665452e18c6dd38712e4b0f63d3b81f6e6
+          --start-index 0
+          --shard-count 12
+
+      - name: Re-audit assembled raw shards and verify byte identity
+        shell: bash
+        run: |
+          python scripts/audit_official_wave.py \
+            --raw-dir official-output/official-wave1-33833623839/machine/raw \
+            --run-id official-wave1-33833623839 \
+            --start-index 0 \
+            --shard-count 12
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path("shard-artifacts/official-wave1-33833623839/machine/raw")
+          target = Path("official-output/official-wave1-33833623839/machine/raw")
+          source_files = sorted(source.glob("*.jsonl"))
+          target_files = sorted(target.glob("*.jsonl"))
+          if [path.name for path in source_files] != [path.name for path in target_files]:
+              raise AssertionError("assembled raw file set differs from source artifacts")
+          for source_path, target_path in zip(source_files, target_files):
+              if source_path.read_bytes() != target_path.read_bytes():
+                  raise AssertionError(f"assembled raw bytes changed: {source_path.name}")
+          print(f"OFFICIAL_RECOVERY_OK byte_identical_files={len(source_files)}")
+          PY
+
+      - name: Upload consolidated official wave
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-wave1-33833623839-final
+          path: official-output
+          retention-days: 30
