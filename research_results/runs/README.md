@@ -1,37 +1,21 @@
-# 공식 연구 실행 결과 폴더
+# 새 공식 연구 실행 결과 폴더
 
-이 디렉터리는 공식 연구 배치가 승인된 뒤 생성되는 run별 결과를 보관한다.
+이 디렉터리는 **엔진 재검증과 연구 설계 재동결이 끝난 뒤 사용자에게 명시 승인받은 새 연구 실행만** 저장한다.
 
-각 실행은 다음 구조를 따른다.
+기존 `crown-mast-secondary-opportunity-v1` 결과와 당시 `_template`은 다음 archive로 이동했다.
 
 ```text
-research_results/runs/<run_id>/
-  manifest.json
-  machine/
-    raw/
-      <roster_id>.jsonl
-    tables/
-      scenarios.csv
-      rosters.csv
-  human/
-    00_전체_요약.md
-    01_세컨더리_기준점_분석.md
-    02_메인_B3_분석.md
-    03_B1_분석.md
-    04_효과크기_분석.md
-    05_역전_구조_분석.md
-    06_성장_및_환경_민감도.md
-    cases/
-      몰아주기_승리_대표사례.md
-      기존운용_승리_대표사례.md
-      경계_사례.md
-      이상치_사례.md
+../../archive/pre-revalidation-2026-09-05/research_results/runs/
 ```
 
-`manifest.json`은 사람/기계 양쪽이 공유하는 provenance 원본이다.
+현재는 새 run schema를 동결하지 않았다. 과거 schema를 그대로 재사용한다고 가정하지 않는다.
 
-`machine/`은 재분석·검증·재현을 위한 구조화 원자료를 보관한다. 전체 verbose 전투 로그는 기본 저장하지 않고, compact scenario row와 roster 집계만 canonical raw로 남긴다.
+새 연구 실행 전 최소 조건:
 
-`human/`은 사람이 읽는 해석 자료다. 원자료 전체를 복사하지 않고 요약·효과크기·역전 조건·대표 사례 중심으로 구성한다.
+1. 엔진 재검증 완료
+2. 레이드 DEF exact value 근거 검증
+3. 탐색 변수와 표본 공간 동결
+4. 새 study ID / revision 확정
+5. 사용자 명시 승인
 
-공식 연구 배치는 사용자 명시 승인 전에는 실행하지 않는다.
+그 전에는 이 디렉터리에 공식 결과를 생성하지 않는다.
