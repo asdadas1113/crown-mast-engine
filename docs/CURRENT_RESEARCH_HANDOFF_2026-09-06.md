@@ -10,13 +10,13 @@ research/14-burst-baseline
 
 `main`은 수정하거나 병합하지 않는다.
 
-현재 단계는 **1연구 후보군 재동결 / 실행 gate 재검증 필요 / 실행 미승인**이다.
+현재 단계는 **1연구 후보군·성장설계 재동결 / 실행 gate 재검증 필요 / 실행 미승인**이다.
 
 공식 또는 대규모 연구 표본은 아직 실행하지 않았다.
 
 ## 2. 1연구 canonical 설계
 
-현재 canonical 문서:
+canonical 문서:
 
 ```text
 research_results/studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
@@ -59,23 +59,32 @@ helm
 snow-white-heavy-arms
 ```
 
+성장 설계:
+
+```text
+g2-ol0-sr5
+g3-ol0-sr15-e3-a3
+g4-ol5-sr15-e4-a4-ammo3
+```
+
+- `g1-base5-none`은 1연구에서 제외
+- B1/Main/Secondary 세 축을 3 × 3 × 3 완전교차
+- **27 growth points**
+- 애장품 캐릭터 SR15 canonical floor 유지
+
 표본 산술:
 
 - raw: 5 × 6 × 3 = 90 rosters
 - Rapi B1/Main 중복 3개 제외
 - **87 valid rosters**
-- B1/Main/Secondary growth 16-point pairwise screening
 - DEF 3 × core 2 × Main advantage 2 = 12 environments
-- roster당 192 scenarios
-- 전체 **16,704 scenarios**
+- roster당 **324 scenarios**
+- 전체 **28,188 scenarios**
 - Crown/Mast는 OL5 + SR15 대표 build 고정
-- 애장품 캐릭터는 SR15 canonical floor
-
-이 연구는 광범위 탐색 및 후속연구 후보 선별용이다. Crown/Mast 상대 성장, hit/spread, 특정 이상치 기전 등은 필요할 경우 후속연구로 분리한다.
 
 ## 3. 선택 캐릭터 실행 gate
 
-이번 후보 재구성으로 다음 세 캐릭터가 다시 표본에 들어왔다.
+다음 세 캐릭터는 후보군에는 포함하지만 공식 연구 실행 전에 model-specific 재검증이 필요하다.
 
 ```text
 moran-favorite-item
@@ -83,13 +92,11 @@ scarlet-black-shadow
 liberalio
 ```
 
-이들은 후보군에는 포함하지만 공식 연구 실행 전에 model-specific 재검증이 필요하다.
-
 - Moran FI: current reload source와 pinned timing 정합성
 - SBS: 특수 charge/reload/high-speed timing 정합성
 - Liberalio: reload body와 post-reload delay 분해 및 policy-sensitive timing 정합성
 
-이 세 gate가 닫히기 전에는 16,704 scenario aggregate를 실행하지 않는다.
+이 세 gate가 닫히기 전에는 28,188 scenario aggregate를 실행하지 않는다.
 
 ## 4. 재현성 / 연구 인프라 보강
 
@@ -112,63 +119,13 @@ e1dc10a31b2a70caadae5ca10a00644f8ad91b71
 - Windows CP949 startup log 문제 수정
 - setuptools package discovery 명시
 
-상세 기록:
-
-```text
-research_results/studies/01_exploratory/validation/01_연구_인프라_보강_검증_2026-09-06.md
-```
-
 ## 5. 후보군 재구성 검증
 
-상세 기록:
+기존 5 B1 / 6 Main / 3 Secondary 후보군 재구성 focused test는 9/9 통과했다.
 
-```text
-research_results/studies/01_exploratory/validation/03_1연구_후보군_재구성_검증_2026-09-06.md
-```
+이후 성장 설계는 사용자 결정에 따라 16-point pairwise에서 **3-level full27**로 변경했다. 따라서 기존 16,704 산술은 더 이상 current design이 아니다.
 
-focused Study 1 design test:
-
-```text
-9 / 9 passed
-GitHub Actions run 33991689279
-```
-
-확인 항목:
-
-- B1 5 / Main 6 / Secondary 3 후보군 exact match
-- 90 raw / 87 valid roster
-- 16 growth points
-- 12 environments
-- 16,704 expected scenarios
-- canonical study ID case label 정렬
-- Moran/SBS/Liberalio execution gate 명시
-- reload-speed ceiling guard
-- outside roster fail-closed
-
-전체 regression run `33991715546`은:
-
-```text
-318 tests
-315 passed
-3 failed
-```
-
-실패 3건은 후보군 산술이나 generator invariant가 아니라 기존 총딜 baseline을 `places=7`로 비교하는 초미세 numerical mismatch다.
-
-관측 차이:
-
-```text
-약 0.0001149 on 2.168e9 total
-약 0.0000563 on 2.020e9 total
-```
-
-따라서 현재 판정:
-
-- 새 후보군/invariant: 통과
-- full regression green: 아직 아님
-- 기존 numerical baseline/tolerance 3건: 별도 분류 필요
-
-이 세 테스트의 기대값은 후보군 변경을 이유로 임의 갱신하지 않는다.
+이전 전체 regression run `33991715546`의 318개 중 3개 실패는 총딜 20억대에서 약 `0.00005~0.00011` 차이의 기존 numerical baseline/tolerance 문제였다. 후보군 또는 성장 generator invariant 실패는 아니었다. 기대값을 임의 갱신하지 않는다.
 
 ## 6. manifest / provenance
 
@@ -184,14 +141,15 @@ research_results/studies/01_exploratory/human/02_연구_실행_재현성_및_기
 research_results/studies/01_exploratory/machine/manifest/manifest_template.json
 ```
 
-현재 manifest template도 다음으로 정렬됐다.
+현재 manifest template은 다음으로 정렬됐다.
 
 - study ID 고정
 - B1/Main/Secondary 후보 목록 고정
 - 87 valid rosters
-- 16 growth
+- `g1-base5-none` 제외
+- 3 growth levels / 27 full-cross points
 - 12 environments
-- 16,704 expected cases
+- 28,188 expected cases
 - Moran/SBS/Liberalio execution-gated actors 기록
 
 실제 run ID와 실행 commit SHA 등은 연구 실행 승인 전에는 생성하지 않는다.
@@ -201,16 +159,16 @@ research_results/studies/01_exploratory/machine/manifest/manifest_template.json
 `crown_mast_engine/wave_a_study.py`는 현재 다음을 반영했다.
 
 - canonical study ID 사용
-- 새 B1/Main 후보군 반영
+- 현재 B1/Main/Secondary 후보군
+- Study 1 전용 `WAVE_A_GROWTH_PROFILES = REALISTIC_GROWTH_PROFILES[1:]`
+- 전역 4단계 profile 정의는 보존
+- 3단계 27-point full Cartesian growth grid
 - 87 valid rosters
-- 16 growth points
 - 12 environments
-- 16,704 expected scenarios
-- case label의 `study_id` 정렬
-- Moran/SBS/Liberalio를 `execution_gated_actors`로 명시
-- Raven/Quency/Milk는 현 1연구 후보 밖으로 유지
-
-검증용 임시 workflow는 제거했다.
+- 324 scenarios/roster
+- 28,188 expected scenarios
+- case label `growth_design = full27-three-level`
+- Moran/SBS/Liberalio execution gate 명시
 
 ## 8. 저장소 정리 상태
 
@@ -228,25 +186,18 @@ tmp/rapi-b1-added-character-audit
 
 마지막 세 branch는 고유 commit이 있어 내용 확인 전까지 보존한다.
 
-과거 연구 문서는:
-
-```text
-archive/pre-revalidation-2026-09-05/
-```
-
-에 보존한다.
-
-`research_results/WAVE_A_VERIFIED_CORE_DESIGN_DRAFT.md`는 superseded pointer로 축소했고, 새 canonical 설계는 `studies/01_exploratory/` 아래에 둔다.
+과거 연구 문서는 `archive/pre-revalidation-2026-09-05/`에 보존한다.
 
 ## 9. 다음 단일 체크포인트
 
 연구 표본을 실행하지 않고 다음 순서로 진행한다.
 
-1. full regression의 초미세 numerical baseline 실패 3건을 분류하고, platform drift/부동소수점 tolerance 문제인지 확인
-2. Moran/SBS/Liberalio model gate 재검증
-3. 필요시 해당 mechanics만 좁게 수정·재검증
-4. clean full regression
-5. 87/16/12/16,704 preflight 확인
-6. manifest 실행값 동결
+1. 3-level full27 generator/invariant focused 검증
+2. 기존 초미세 numerical baseline 실패 3건 분류
+3. Moran/SBS/Liberalio model gate 재검증
+4. 필요시 해당 mechanics만 좁게 수정·재검증
+5. clean full regression
+6. 87/27/12/28,188 preflight 확인
+7. manifest 실행값 동결
 
-그 뒤에도 실제 16,704 scenario batch는 사용자 명시 승인 전까지 실행하지 않는다.
+그 뒤에도 실제 28,188 scenario batch는 사용자 명시 승인 전까지 실행하지 않는다.
