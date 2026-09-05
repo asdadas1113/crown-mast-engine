@@ -52,6 +52,24 @@ class SelectedActorReloadGateTests(unittest.TestCase):
                     expected_gap_frames,
                 )
 
+    def test_sbs_measured_reload_and_attack_cycle_are_decomposed(self) -> None:
+        weapon = STANDARD_CHARACTER_CATALOG.require("scarlet-black-shadow").weapon
+        self.assertEqual(weapon.reload_frames, 120)
+        self.assertEqual(weapon.reload_start_delay_frames, 12)
+        self.assertEqual(weapon.charge_frames, 18)
+        self.assertEqual(weapon.charge_release_recovery_frames, 26)
+
+        # 120 raw frames resolve to 130 frames under the shared reload formula;
+        # the actor-specific fixed start delay makes the measured reload 142f,
+        # or 2.3667s, matching the ~2.36s direct measurement.
+        self.assertEqual(effective_weapon_reload_frames(weapon, 0.0), 142)
+        self.assertAlmostEqual(effective_weapon_reload_frames(weapon, 0.0) / 60, 2.3666666667)
+
+        # Outside reloads, 18f charge + 26f release recovery gives the measured
+        # ~0.73s auto firing cycle.
+        self.assertEqual(weapon.charge_frames + weapon.charge_release_recovery_frames, 44)
+        self.assertAlmostEqual(44 / 60, 0.7333333333)
+
     def test_unmodified_weapon_has_no_new_fixed_delay(self) -> None:
         helm = STANDARD_CHARACTER_CATALOG.require("helm").weapon
         self.assertEqual(helm.reload_start_delay_frames, 0)
