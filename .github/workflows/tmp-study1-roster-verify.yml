@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  focused:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,3 +16,5 @@ jobs:
           python-version: '3.12'
       - name: Run Study 1 design tests
         run: python -m unittest tests.test_wave_a_study -v
+      - name: Run full regression suite
+        run: python -m unittest discover -s tests -p 'test_*.py'
