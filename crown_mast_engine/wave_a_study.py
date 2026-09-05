@@ -21,8 +21,6 @@ WAVE_A_STUDY_ID = "crown-mast-study-01-exploratory-v1"
 # use the historical Base5 point.
 WAVE_A_GROWTH_PROFILES = REALISTIC_GROWTH_PROFILES[1:]
 
-# Study 1 candidate lists. Some selected actors still carry model-specific
-# execution gates and must be revalidated before the official aggregate run.
 WAVE_A_B1_CANDIDATES = (
     "liter",
     "anis-star",
@@ -46,14 +44,9 @@ WAVE_A_SECONDARY_B3_ANCHORS = (
     "snow-white-heavy-arms",
 )
 
-# Selected actors whose model-specific gate must be closed before official run.
-WAVE_A_EXECUTION_GATED_ACTORS = frozenset(
-    {
-        "moran-favorite-item",
-        "scarlet-black-shadow",
-        "liberalio",
-    }
-)
+# SBS remains fail-closed pending independent timing decomposition. Moran FI and
+# Liberalio were revalidated and repaired during the 2026-09-06 preflight.
+WAVE_A_EXECUTION_GATED_ACTORS = frozenset({"scarlet-black-shadow"})
 
 # Actors excluded from the current Study 1 candidate space.
 WAVE_A_BLOCKED_ACTORS = frozenset(
@@ -224,7 +217,6 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
     if roster_id not in valid_roster_ids:
         raise ValueError(f"roster is outside the Study 1 candidate sample: {roster_id}")
 
-    # Re-evaluate this guard whenever the candidate list changes.
     wave_a_reload_speed_ceiling_pct()
 
     fixed_b2_build = BuildProfile.uniform(
