@@ -18,10 +18,12 @@
 | 100% 초과 Reload Speed | 조건부 비차단 | 실제 입력이 100% 미만인 연구만 허용 |
 | 공용 post-reload 미세 지연 | 비차단 | 검증된 표준 캐릭터에는 새 공용 지연을 임의 추가하지 않음 |
 | 차지 마지막 탄 recovery/reload 겹침 | 비차단 | 현행 직렬 처리 유지 |
+| 기본공격 산포 / weapon hit coefficient | 조건부 비차단 | Wave A는 ideal-hit 통제조건, 산포 의존 캐릭터는 별도 보류 |
 | Scarlet: Black Shadow 재장전 | 캐릭터별 blocker | 검증 완료 canonical 표본에서 보류 |
 | Raven 재장전 | 캐릭터별 blocker | 검증 완료 canonical 표본에서 보류 |
 | Liberalio 재장전 | 캐릭터별 blocker | 검증 완료 canonical 표본에서 보류 |
 | Moran (Favorite Item) 재장전 | 캐릭터별 blocker | 검증 완료 canonical 표본에서 보류 |
+| Quency: Escape Queen 명중/산포 의존 | 캐릭터별 조건부 blocker | ideal-hit diagnostic은 가능, 첫 canonical Wave A에서는 보류 |
 | Milk: Blooming Bunny 특수 수동 경로 | 범위 밖 / 캐릭터별 보류 | AUTO 진단 전용, 첫 검증 표본에서 제외 |
 | Raid DEF exact 단일값 | 전역 비차단 가능 | exact 하나 대신 명시적 DEF 민감도 축 사용 |
 
@@ -128,7 +130,35 @@ Prydwen의 last-shot→first-shot 계측과 Ore-game의 재장전 세분화는 �
 
 **판정: 첫 verified-core 표본 범위 밖.** 진단용으로는 사용할 수 있으나 보편 결과에 합치지 않는다.
 
-## 5. DEF exact value
+## 5. 기본공격 산포와 weapon hit coefficient
+
+현재 Crown–Mast 엔진은 기본적으로 발사된 일반탄이 목표에 명중하는 이상화된 조건을 사용한다. `core_hit_rate_pct`는 코어 배율 적용 비율을 제어하지만, 무기별 산포에 따른 body miss 확률을 별도 모델링하지 않는다.
+
+현재 DILDORO/Jgaram 계열 계산기는 Solo Raid 실측을 바탕으로 기본공격 coefficient 기본값을 다음과 같이 노출한다.
+
+```text
+AR   1.00
+SMG  0.80
+SG   0.90
+SR   1.00
+RL   1.00
+MG   1.00
+```
+
+이 값은 외부 계산기 한 계열의 실측 기반 근사이며, 보스 크기·거리·Hit Rate에 따라 달라질 수 있으므로 현재 엔진의 전역 상수로 그대로 이식하지 않는다.
+
+특히 Quency: Escape Queen은 NIKKE.gg와 Prydwen 모두 Hit Rate가 실제 DPS와 코어 명중에 매우 중요한 캐릭터라고 설명한다. 스킬 수치와 reload 자체는 현재 다중 출처와 일치하지만, 현행 엔진의 ideal-hit 조건만으로 실전 대표값을 주장하기에는 불확실성이 크다.
+
+### 연구 gate
+
+- Wave A의 기본 전투환경은 **큰 단일 보스에 일반탄이 모두 맞는 ideal-hit 통제조건**이라고 명시한다.
+- 이 가정은 실전 명중률을 재현한다는 뜻이 아니다.
+- 일반적인 AR/SR/RL/MG 캐릭터와 지원형 SMG의 first-pass 변수 탐색에는 전역 blocker로 두지 않는다.
+- Quency처럼 Hit Rate가 핵심 DPS 기전인 캐릭터는 첫 canonical Wave A에서 보류한다.
+- 추후 독립 명중/산포 근거가 확보되면 weapon coefficient 또는 boss hitbox sensitivity를 별도 축으로 추가한다.
+- ideal-hit와 실측형 coefficient 사이에서 정책 승패가 뒤집히는 조건은 확정 결론이 아니라 hit-model-sensitive 결과로 분류한다.
+
+## 6. DEF exact value
 
 NIKKE의 적 DEF는 모드/보스/레벨에 따라 달라지므로 하나의 universal exact 값을 찾는 것이 연구 1의 필수조건은 아니다.
 
@@ -140,7 +170,7 @@ NIKKE의 적 DEF는 모드/보스/레벨에 따라 달라지므로 하나의 uni
 - Crown/Mast 상대 손익의 변수 탐색에서는 여러 DEF 조건을 명시적으로 교차하면 전역 blocker가 아니다.
 - 결과 문서에는 각 DEF 점을 실제 발생확률로 해석하지 않는다고 명시한다.
 
-## 6. 다음 연구의 권장 구조
+## 7. 다음 연구의 권장 구조
 
 ### Wave A — verified-core exploratory study
 
@@ -156,9 +186,11 @@ NIKKE의 적 DEF는 모드/보스/레벨에 따라 달라지므로 하나의 uni
 
 SBS / Raven / Liberalio / Moran FI는 각 timing 이슈가 해결된 뒤 하나씩 Wave A 설계에 재진입시킨다.
 
+Quency는 timing이 아니라 hit/spread model이 재진입 조건이다.
+
 재진입 전에는 해당 캐릭터를 포함한 결과를 verified aggregate에 합치지 않는다.
 
-## 7. 해석 원칙
+## 8. 해석 원칙
 
 이 gate는 불확실성을 없앴다는 선언이 아니다.
 
