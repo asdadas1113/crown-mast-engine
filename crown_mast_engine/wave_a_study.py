@@ -44,9 +44,9 @@ WAVE_A_SECONDARY_B3_ANCHORS = (
     "snow-white-heavy-arms",
 )
 
-# SBS remains fail-closed pending independent timing decomposition. Moran FI and
-# Liberalio were revalidated and repaired during the 2026-09-06 preflight.
-WAVE_A_EXECUTION_GATED_ACTORS = frozenset({"scarlet-black-shadow"})
+# All selected actor-specific model gates were closed during the 2026-09-06
+# preflight. Official execution still requires explicit user approval.
+WAVE_A_EXECUTION_GATED_ACTORS = frozenset()
 
 # Actors excluded from the current Study 1 candidate space.
 WAVE_A_BLOCKED_ACTORS = frozenset(
@@ -325,7 +325,7 @@ def wave_a_study_definition() -> dict[str, object]:
 
     return {
         "study_id": WAVE_A_STUDY_ID,
-        "status": "design-frozen-execution-gated",
+        "status": "design-frozen-execution-unapproved",
         "execution_ready": not gated_selected,
         "b1_candidates": list(WAVE_A_B1_CANDIDATES),
         "main_b3_candidates": list(WAVE_A_MAIN_B3_CANDIDATES),
@@ -356,7 +356,7 @@ def wave_a_study_definition() -> dict[str, object]:
         "timeline": "RAID14",
         "baseline_rotation": OPENING_MAST_CROWN_MAST.name,
         "execution_policy": (
-            "case generation and validation only until execution-gated actors are "
-            "revalidated and the user explicitly approves the research run"
+            "case generation and validation are allowed, but the official research "
+            "run requires explicit user approval"
         ),
     }
