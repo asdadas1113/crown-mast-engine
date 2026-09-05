@@ -18,6 +18,10 @@ RESEARCH_STATUS_2026-09-05.md
 ../docs/SOURCE_VALIDATION_POLICY.md
 studies/README.md
 studies/01_exploratory/human/01_연구_설계_초안.md
+studies/01_exploratory/human/02_연구_실행_재현성_및_기록_규격.md
+studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
+studies/01_exploratory/validation/01_연구_인프라_보강_검증_2026-09-06.md
+studies/01_exploratory/validation/02_저장소_정리_점검_2026-09-06.md
 ```
 
 ## 새 연구 저장 원칙
@@ -47,20 +51,27 @@ studies/
 
 1연구는 보편적인 단일 임계값이나 최적 운용 규칙을 확정하는 것이 아니라, **대표적인 Crown/Mast 통제 조건에서 광범위한 조합을 탐색하고 우세 경향과 예외를 동시에 찾은 뒤 후속 연구 후보를 고르는 단계**다.
 
-주요 탐색 후보:
+현재 canonical 설계는 다음 문서다.
 
-- Main B3 identity
-- Secondary B3 identity
-- B1/Main/Secondary 성장 격차
-- core 조건
-- 우월 조건
-- boss DEF
-- Main 딜 구조와 정책 반응의 연관 후보
-- 위 변수들의 상호작용
+```text
+studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
+```
 
-현재 Crown/Mast 성장치는 1연구에서 대표 조건으로 통제한다. Crown/Mast 상대 성장 변화에 대한 일반화는 후속 연구 대상으로 남긴다.
+동결된 study ID:
 
-애장품 캐릭터는 실전 사용 전제를 반영해 **모든 성장 프로필에서 SR15를 canonical floor로 고정**한다.
+```text
+crown-mast-study-01-exploratory-v1
+```
+
+동결된 A1 설계:
+
+- 69 verified-core rosters
+- B1/Main/Secondary 16-point pairwise growth screening
+- DEF 3 × core 2 × Main advantage 2 = 12 environments
+- roster당 192 scenarios
+- 전체 13,248 scenarios
+- Crown/Mast OL5 + SR15 대표 build 고정
+- 애장품 캐릭터 SR15 canonical floor
 
 결과가 반복적으로 튀는 캐릭터/조건은 anomaly candidate로 표시하되, 엔진 재검증과 복수 환경에서 재현되기 전에는 기전 설명을 확정하지 않는다.
 
@@ -68,18 +79,22 @@ studies/
 
 기존 전역 `runs/`는 과거 active 구조의 흔적으로 남아 있다. 앞으로 승인되는 새 연구 실행은 전역 `runs/`에 저장하지 않고 각 연구의 `studies/<연구>/machine/` 아래에 저장한다.
 
-새 연구 설계가 아직 최종 동결되지 않았으므로 과거 run schema를 현행 표준으로 간주하지 않는다.
+`runs/`는 기존 링크 호환을 위한 deprecated pointer로만 유지한다.
 
 ## 현재 실행 상태
 
-현재는 **문서와 저장 구조를 준비하는 단계**다.
+현재는 **설계 동결 / 실행 미승인** 단계다.
 
-- 공식/대규모 연구 실행 미승인
-- 13,248 scenario Wave A1 batch 미실행
-- 최종 study ID 미확정
-- 최종 manifest 미작성
+- 공식/대규모 연구 실행: 미승인
+- 13,248 scenario 1연구 A1 batch: 미실행
+- study ID: `crown-mast-study-01-exploratory-v1`로 동결
+- 실제 run ID: 미생성
+- 실제 manifest: 미생성
+- 결과 파일: 없음
 
-사용자의 명시적 승인 전에는 공식/대규모 batch를 실행하지 않는다.
+현재 `crown_mast_engine/wave_a_study.py`의 case generator는 아직 과거 draft ID를 사용한다. 따라서 실제 실행 전에는 generator 식별자를 동결 study ID와 정렬하고 기존 invariant를 다시 검증해야 한다.
+
+사용자의 별도 명시 승인 전에는 공식/대규모 batch를 실행하지 않는다.
 
 ## 과거 자료
 
