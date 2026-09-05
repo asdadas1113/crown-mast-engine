@@ -23,6 +23,9 @@ class WeaponProfile:
     hits_per_shot: int
     burst_gauge_per_shot: float
     charge_release_recovery_frames: int = 22
+    # Actor-specific delay before the reload body starts. Unlike reload_frames,
+    # this is an animation/cadence delay and must not scale with reload-speed buffs.
+    reload_start_delay_frames: int = 0
     full_charge_trigger_charge_speed_pct: float = 0.0
     full_charge_trigger_resets_on_reload: bool = False
     charge_cycle_floor_frames: int = 1
