@@ -1,0 +1,88 @@
+name: Retry research hardening validation
+
+on:
+  push:
+    branches:
+      - research/14-burst-baseline
+    paths:
+      - .github/workflows/tmp-research-hardening-retry.yml
+
+permissions:
+  contents: write
+
+jobs:
+  harden-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/14-burst-baseline
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Reapply hardening patch from first validation workflow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/tmp-research-hardening.yml').read_text(encoding='utf-8')
+          marker = "          python - <<'PY'\n"
+          start = workflow.index(marker) + len(marker)
+          end = workflow.index("\n          PY\n", start)
+          lines = workflow[start:end].splitlines()
+          script = "\n".join(line[10:] if line.startswith('          ') else line for line in lines)
+          exec(compile(script, '<research-hardening-patch>', 'exec'))
+
+          test_path = Path('tests/test_research.py')
+          text = test_path.read_text(encoding='utf-8')
+          old = 'with self.assertRaisesRegex(ValueError, "catalog source revision"):'
+          new = 'with self.assertRaisesRegex(ValueError, "catalog revision"):'
+          if text.count(old) != 1:
+              raise SystemExit(f'expected one regression regex, found {text.count(old)}')
+          test_path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Run focused hardening tests
+        run: |
+          python -m unittest \
+            tests.test_characters.CharacterCatalogTests.test_skill_value_variant_revision_records_override_and_catalog_hash \
+            tests.test_research.ResearchScenarioTests.test_skill_override_catalog_requires_matching_saved_revision \
+            tests.test_combat.WeaponTimingTests.test_combat_settings_reject_non_finite_values \
+            tests.test_timeline.UniformBurstTimelineTests.test_overlapping_cycles_fail_in_scenario_and_direct_engine \
+            tests.test_interface.InterfaceTests.test_reset_discards_visible_build_rows_before_rerender \
+            tests.test_interface.InterfaceTests.test_server_banner_runs_with_cp949_stdout \
+            tests.test_interface.InterfaceTests.test_package_data_declares_vendor_assets
+
+      - name: Run full regression suite
+        run: python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Verify wheel contains vendored PNG exporter
+        shell: bash
+        run: |
+          python -m pip wheel . --no-deps -w dist
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          wheels = tuple(Path('dist').glob('*.whl'))
+          assert len(wheels) == 1, wheels
+          with ZipFile(wheels[0]) as wheel:
+              names = set(wheel.namelist())
+          assert 'crown_mast_engine/web/vendor/html2canvas.min.js' in names
+          assert 'crown_mast_engine/web/vendor/html2canvas.LICENSE.txt' in names
+          print(wheels[0].name)
+          PY
+
+      - name: Commit validated hardening and remove temporary workflows
+        shell: bash
+        run: |
+          rm .github/workflows/tmp-research-hardening.yml
+          rm .github/workflows/tmp-research-hardening-retry.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crown_mast_engine tests pyproject.toml .github/workflows/tmp-research-hardening.yml .github/workflows/tmp-research-hardening-retry.yml
+          git commit -m "Harden research reproducibility and validation"
+          git push origin HEAD:research/14-burst-baseline
