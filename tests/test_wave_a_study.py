@@ -56,17 +56,14 @@ class WaveAStudyDesignTests(unittest.TestCase):
             ("epinel", "helm", "snow-white-heavy-arms"),
         )
 
-    def test_selected_execution_gates_are_explicit(self) -> None:
+    def test_selected_execution_gates_are_closed(self) -> None:
         selected = {
             *WAVE_A_B1_CANDIDATES,
             *WAVE_A_MAIN_B3_CANDIDATES,
             *WAVE_A_SECONDARY_B3_ANCHORS,
         }
         self.assertFalse(selected.intersection(WAVE_A_BLOCKED_ACTORS))
-        self.assertEqual(
-            WAVE_A_EXECUTION_GATED_ACTORS.intersection(selected),
-            {"scarlet-black-shadow"},
-        )
+        self.assertFalse(WAVE_A_EXECUTION_GATED_ACTORS.intersection(selected))
         self.assertNotIn("raven", selected)
         self.assertNotIn("quency-escape-queen", selected)
         self.assertNotIn("milk-blooming-bunny", selected)
@@ -166,9 +163,10 @@ class WaveAStudyDesignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "outside the Study 1 candidate sample"):
             build_wave_a_roster_cases(outside)
 
-    def test_definition_is_self_consistent_and_execution_gated(self) -> None:
+    def test_definition_is_self_consistent_and_execution_unapproved(self) -> None:
         definition = wave_a_study_definition()
         self.assertEqual(definition["study_id"], WAVE_A_STUDY_ID)
+        self.assertEqual(definition["status"], "design-frozen-execution-unapproved")
         self.assertEqual(definition["valid_roster_count"], 87)
         self.assertEqual(definition["scenario_count"], 28_188)
         self.assertEqual(definition["scenarios_per_roster"], 324)
@@ -183,12 +181,9 @@ class WaveAStudyDesignTests(unittest.TestCase):
             ],
         )
         self.assertEqual(definition["environment_axes"]["hit_model"], "ideal-hit")
-        self.assertFalse(definition["execution_ready"])
-        self.assertEqual(
-            set(definition["execution_gated_actors"]),
-            {"scarlet-black-shadow"},
-        )
-        self.assertIn("explicitly approves", definition["execution_policy"])
+        self.assertTrue(definition["execution_ready"])
+        self.assertEqual(definition["execution_gated_actors"], [])
+        self.assertIn("explicit user approval", definition["execution_policy"])
 
 
 if __name__ == "__main__":
