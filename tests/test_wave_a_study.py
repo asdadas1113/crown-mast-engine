@@ -65,11 +65,7 @@ class WaveAStudyDesignTests(unittest.TestCase):
         self.assertFalse(selected.intersection(WAVE_A_BLOCKED_ACTORS))
         self.assertEqual(
             WAVE_A_EXECUTION_GATED_ACTORS.intersection(selected),
-            {
-                "moran-favorite-item",
-                "scarlet-black-shadow",
-                "liberalio",
-            },
+            {"scarlet-black-shadow"},
         )
         self.assertNotIn("raven", selected)
         self.assertNotIn("quency-escape-queen", selected)
@@ -160,16 +156,8 @@ class WaveAStudyDesignTests(unittest.TestCase):
             },
         )
 
-        neutral = [
-            case
-            for case in cases
-            if case.labels["main_advantage"] == "off"
-        ]
-        advantaged = [
-            case
-            for case in cases
-            if case.labels["main_advantage"] == "on"
-        ]
+        neutral = [case for case in cases if case.labels["main_advantage"] == "off"]
+        advantaged = [case for case in cases if case.labels["main_advantage"] == "on"]
         self.assertTrue(all(case.scenario.combat_settings.boss_element is None for case in neutral))
         self.assertTrue(all(case.scenario.combat_settings.boss_element is not None for case in advantaged))
 
@@ -198,7 +186,7 @@ class WaveAStudyDesignTests(unittest.TestCase):
         self.assertFalse(definition["execution_ready"])
         self.assertEqual(
             set(definition["execution_gated_actors"]),
-            {"moran-favorite-item", "scarlet-black-shadow", "liberalio"},
+            {"scarlet-black-shadow"},
         )
         self.assertIn("explicitly approves", definition["execution_policy"])
 
