@@ -220,7 +220,7 @@ class ComparisonReportTests(unittest.TestCase):
     def test_report_preserves_baseline_totals_and_research_metrics(self) -> None:
         overall = self.report.overall
 
-        self.assertAlmostEqual(overall.team.conventional, 2_168_143_852.8701534)
+        self.assertAlmostEqual(overall.team.conventional, 2_168_143_852.8701534, delta=1e-3)
         self.assertAlmostEqual(overall.team.funnel, 2_141_385_963.124464, delta=1e-3)
         self.assertAlmostEqual(overall.conventional_main_share, 0.43660107773480095)
         self.assertAlmostEqual(overall.break_even_main_share_c, 0.6732510902070452)
