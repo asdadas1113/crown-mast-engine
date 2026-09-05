@@ -1,21 +1,21 @@
-# 새 공식 연구 실행 결과 폴더
+# 전역 runs 영역 — 신규 연구에서는 사용하지 않음
 
-이 디렉터리는 **엔진 재검증과 연구 설계 재동결이 끝난 뒤 사용자에게 명시 승인받은 새 연구 실행만** 저장한다.
+이 디렉터리는 과거 active 구조의 호환성과 기록 추적을 위해 남겨둔다.
 
-기존 `crown-mast-secondary-opportunity-v1` 결과와 당시 `_template`은 다음 archive로 이동했다.
+앞으로 승인되는 새 연구 실행 결과는 이 전역 `runs/`에 저장하지 않는다.
+
+새 저장 위치:
+
+```text
+../studies/<연구>/machine/
+```
+
+각 연구의 manifest, scenario 정의, raw 결과, 집계 결과, provenance는 해당 연구 디렉터리 안에서 완전히 분리해 보관한다.
+
+과거 `crown-mast-secondary-opportunity-v1` 결과와 당시 `_template`은 다음 archive에 있다.
 
 ```text
 ../../archive/pre-revalidation-2026-09-05/research_results/runs/
 ```
 
-현재는 새 run schema를 동결하지 않았다. 과거 schema를 그대로 재사용한다고 가정하지 않는다.
-
-새 연구 실행 전 최소 조건:
-
-1. 엔진 재검증 완료
-2. 레이드 DEF exact value 근거 검증
-3. 탐색 변수와 표본 공간 동결
-4. 새 study ID / revision 확정
-5. 사용자 명시 승인
-
-그 전에는 이 디렉터리에 공식 결과를 생성하지 않는다.
+현재 공식/대규모 연구 실행은 승인되지 않았다. 사용자 명시 승인 전에는 새 batch를 실행하거나 이 디렉터리에 결과를 생성하지 않는다.
