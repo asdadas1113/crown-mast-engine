@@ -10,7 +10,7 @@ from .combat import (
     WeaponShot,
     effective_charge_frames,
     effective_max_ammo,
-    effective_reload_frames,
+    effective_weapon_reload_frames,
     generate_weapon_shots as _base_generate_weapon_shots,
     js_round,
 )
@@ -35,9 +35,9 @@ def generate_weapon_shots(
 ) -> tuple[WeaponShot, ...]:
     """Generate weapon shots, with optional full-charge-triggered charge cadence.
 
-    Most characters delegate unchanged to the baseline combat generator.  Original
+    Most characters delegate unchanged to the baseline combat generator. Original
     Cinderella needs one extra state: the first full-charge attack grants +100%
-    charge speed until a real reload reaches max ammunition.  Her weapon is also
+    charge speed until a real reload reaches max ammunition. Her weapon is also
     capped at three shots per second, represented by ``charge_cycle_floor_frames``.
 
     Ammo-charge effects are intentionally not treated as a reload reset because the
@@ -120,8 +120,8 @@ def generate_weapon_shots(
 
         if reloading:
             reload_progress += 1
-            needed_reload = effective_reload_frames(
-                weapon.reload_frames,
+            needed_reload = effective_weapon_reload_frames(
+                weapon,
                 reload_speed_at(time),
             )
             if reload_progress >= needed_reload:
