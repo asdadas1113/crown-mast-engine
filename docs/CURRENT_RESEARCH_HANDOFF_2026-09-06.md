@@ -119,13 +119,43 @@ e1dc10a31b2a70caadae5ca10a00644f8ad91b71
 - Windows CP949 startup log 문제 수정
 - setuptools package discovery 명시
 
-## 5. 후보군 재구성 검증
+## 5. 후보군 및 성장설계 검증
 
-기존 5 B1 / 6 Main / 3 Secondary 후보군 재구성 focused test는 9/9 통과했다.
+후보군 재구성 focused test는 9/9 통과했다.
 
-이후 성장 설계는 사용자 결정에 따라 16-point pairwise에서 **3-level full27**로 변경했다. 따라서 기존 16,704 산술은 더 이상 current design이 아니다.
+이후 성장 설계를 16-point pairwise에서 **3-level full27**로 변경했다.
 
-이전 전체 regression run `33991715546`의 318개 중 3개 실패는 총딜 20억대에서 약 `0.00005~0.00011` 차이의 기존 numerical baseline/tolerance 문제였다. 후보군 또는 성장 generator invariant 실패는 아니었다. 기대값을 임의 갱신하지 않는다.
+focused full27 검증:
+
+```text
+GitHub Actions run: 33993083518
+job: 101378675955
+result: success
+```
+
+확인 항목:
+
+- Study 1 성장 프로필이 정확히 g2/g3/g4 세 단계
+- `g1-base5-none` generated case 미포함
+- 27 growth points가 3×3×3 전체 Cartesian product와 일치
+- 87 valid rosters
+- 12 environments
+- 324 scenarios/roster
+- 28,188 expected scenarios
+- case ID uniqueness
+- canonical study ID 및 `full27-three-level` label
+- RAID14 timeline
+- Moran/SBS/Liberalio execution gate 유지
+
+검증용 임시 workflow는 제거했다.
+
+직전 전체 regression run `33991715546`의 318개 중 3개 실패는 총딜 20억대에서 약 `0.00005~0.00011` 차이의 기존 numerical baseline/tolerance 문제였다. 후보군 또는 성장 generator invariant 실패는 아니었다. 기대값을 임의 갱신하지 않는다.
+
+상세 기록:
+
+```text
+research_results/studies/01_exploratory/validation/04_성장설계_3단계_완전교차_검증_2026-09-06.md
+```
 
 ## 6. manifest / provenance
 
@@ -149,6 +179,7 @@ research_results/studies/01_exploratory/machine/manifest/manifest_template.json
 - `g1-base5-none` 제외
 - 3 growth levels / 27 full-cross points
 - 12 environments
+- 324 scenarios/roster
 - 28,188 expected cases
 - Moran/SBS/Liberalio execution-gated actors 기록
 
@@ -192,12 +223,11 @@ tmp/rapi-b1-added-character-audit
 
 연구 표본을 실행하지 않고 다음 순서로 진행한다.
 
-1. 3-level full27 generator/invariant focused 검증
-2. 기존 초미세 numerical baseline 실패 3건 분류
-3. Moran/SBS/Liberalio model gate 재검증
-4. 필요시 해당 mechanics만 좁게 수정·재검증
-5. clean full regression
-6. 87/27/12/28,188 preflight 확인
-7. manifest 실행값 동결
+1. 기존 초미세 numerical baseline 실패 3건 분류
+2. Moran/SBS/Liberalio model gate 재검증
+3. 필요시 해당 mechanics만 좁게 수정·재검증
+4. clean full regression
+5. 87/27/12/28,188 final preflight 확인
+6. manifest 실행값 동결
 
 그 뒤에도 실제 28,188 scenario batch는 사용자 명시 승인 전까지 실행하지 않는다.
