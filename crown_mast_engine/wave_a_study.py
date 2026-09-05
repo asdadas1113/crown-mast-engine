@@ -14,24 +14,25 @@ from .samples import SampleCase
 from .timeline import RAID14_TIMELINE
 
 
-WAVE_A_DRAFT_ID = "wave-a-verified-core-draft-v1"
+WAVE_A_STUDY_ID = "crown-mast-study-01-exploratory-v1"
 
-# Verified-core allowlists only. Unresolved timing actors and hit/spread-sensitive
-# Quency remain diagnostic-only until their corresponding model gate is cleared.
+# Study 1 candidate lists. Some selected actors still carry model-specific
+# execution gates and must be revalidated before the official aggregate run.
 WAVE_A_B1_CANDIDATES = (
     "liter",
     "anis-star",
+    "moran-favorite-item",
     "little-mermaid",
     "rapi-red-hood",
 )
 
 WAVE_A_MAIN_B3_CANDIDATES = (
     "rapi-red-hood",
+    "scarlet-black-shadow",
     "cinderella",
     "cinderella-crystal-wave",
+    "liberalio",
     "neon-vision-eye",
-    "phantom",
-    "bready",
 )
 
 WAVE_A_SECONDARY_B3_ANCHORS = (
@@ -40,11 +41,18 @@ WAVE_A_SECONDARY_B3_ANCHORS = (
     "snow-white-heavy-arms",
 )
 
-WAVE_A_BLOCKED_ACTORS = frozenset(
+# Selected actors whose model-specific gate must be closed before official run.
+WAVE_A_EXECUTION_GATED_ACTORS = frozenset(
     {
         "moran-favorite-item",
         "scarlet-black-shadow",
         "liberalio",
+    }
+)
+
+# Actors excluded from the current Study 1 candidate space.
+WAVE_A_BLOCKED_ACTORS = frozenset(
+    {
         "raven",
         "quency-escape-queen",
         "milk-blooming-bunny",
@@ -72,7 +80,7 @@ WAVE_A_RAW_ROSTER_COUNT = (
     * len(WAVE_A_SECONDARY_B3_ANCHORS)
 )
 WAVE_A_INVALID_DUPLICATE_ROSTER_COUNT = 3
-WAVE_A_VALID_ROSTER_COUNT = 69
+WAVE_A_VALID_ROSTER_COUNT = 87
 WAVE_A_ENVIRONMENT_COUNT = (
     len(WAVE_A_DEFENSE_ANCHORS)
     * len(WAVE_A_CORE_HIT_RATE_PCT)
@@ -110,7 +118,7 @@ def wave_a_roster_id(roster: TeamRoster) -> str:
 
 
 def iter_wave_a_rosters() -> Iterator[TeamRoster]:
-    """Yield verified-core rosters, excluding duplicate actors before construction."""
+    """Yield Study 1 rosters, excluding duplicate actors before construction."""
     for b1 in WAVE_A_B1_CANDIDATES:
         for main_b3 in WAVE_A_MAIN_B3_CANDIDATES:
             for secondary_b3 in WAVE_A_SECONDARY_B3_ANCHORS:
@@ -148,11 +156,10 @@ def _extra_reload_speed_sources(actors: tuple[str, ...]) -> tuple[tuple[str, str
 
 
 def wave_a_reload_speed_ceiling_pct() -> float:
-    """Return the certified Crown+Mast reload-speed ceiling for Wave A.
+    """Return the certified Crown+Mast reload-speed ceiling for Study 1.
 
-    The verified-core allowlist must not contain any additional modeled
-    reload-speed skill source. If one is later added, this function fails until
-    the >100% behavior is explicitly revalidated.
+    The candidate list must not add another modeled reload-speed source without
+    reopening the >100% reload gate.
     """
     study_actors = tuple(
         dict.fromkeys(
@@ -166,7 +173,7 @@ def wave_a_reload_speed_ceiling_pct() -> float:
     extra_sources = _extra_reload_speed_sources(study_actors)
     if extra_sources:
         raise AssertionError(
-            "Wave A allowlist adds reload-speed sources outside Crown/Mast: "
+            "Study 1 candidate list adds reload-speed sources outside Crown/Mast: "
             f"{extra_sources}"
         )
 
@@ -178,7 +185,7 @@ def wave_a_reload_speed_ceiling_pct() -> float:
     )
     if ceiling >= 100:
         raise AssertionError(
-            f"Wave A modeled reload-speed ceiling is not certified below 100%: {ceiling}"
+            f"Study 1 modeled reload-speed ceiling is not certified below 100%: {ceiling}"
         )
     return ceiling
 
@@ -214,13 +221,13 @@ def _combat_settings_for(
 
 
 def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
-    """Build one 192-case Wave A roster shard without executing simulations."""
+    """Build one 192-case Study 1 roster shard without executing simulations."""
     valid_roster_ids = {wave_a_roster_id(item) for item in iter_wave_a_rosters()}
     roster_id = wave_a_roster_id(roster)
     if roster_id not in valid_roster_ids:
-        raise ValueError(f"roster is outside the Wave A verified-core sample: {roster_id}")
+        raise ValueError(f"roster is outside the Study 1 candidate sample: {roster_id}")
 
-    # Re-evaluate this guard whenever the candidate allowlist changes.
+    # Re-evaluate this guard whenever the candidate list changes.
     wave_a_reload_speed_ceiling_pct()
 
     fixed_b2_build = BuildProfile.uniform(
@@ -255,7 +262,7 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
             main_profile = growth_profiles[main_index]
             secondary_profile = growth_profiles[secondary_index]
             case_id = (
-                f"{WAVE_A_DRAFT_ID}--{roster_id}--{environment_id}"
+                f"{WAVE_A_STUDY_ID}--{roster_id}--{environment_id}"
                 f"--oa-{point_index:02d}"
             )
             scenario = ResearchScenario(
@@ -279,7 +286,7 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
                     case_id=case_id,
                     scenario=scenario,
                     labels={
-                        "study_draft_id": WAVE_A_DRAFT_ID,
+                        "study_id": WAVE_A_STUDY_ID,
                         "roster_id": roster_id,
                         "b1_candidate": roster.b1,
                         "main_b3_candidate": roster.main_b3,
@@ -292,7 +299,7 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
                         "def_condition": defense_condition,
                         "boss_def": str(combat_settings.boss_def),
                         "core_condition": core_condition,
-                        "core_hit_rate_pct": str(core_hit_rate_pct := combat_settings.core_hit_rate_pct),
+                        "core_hit_rate_pct": str(combat_settings.core_hit_rate_pct),
                         "main_advantage": main_advantage,
                         "boss_element": combat_settings.boss_element or "neutral",
                         "hit_model": "ideal-hit",
@@ -301,38 +308,40 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
             )
 
     if len(cases) != WAVE_A_SCENARIOS_PER_ROSTER:
-        raise AssertionError("Wave A roster shard size does not match definition")
+        raise AssertionError("Study 1 roster shard size does not match definition")
     if len({case.case_id for case in cases}) != len(cases):
-        raise AssertionError("Wave A case ids must be unique within a roster shard")
+        raise AssertionError("Study 1 case ids must be unique within a roster shard")
     return tuple(cases)
 
 
 def wave_a_study_definition() -> dict[str, object]:
     valid_rosters = tuple(iter_wave_a_rosters())
     if len(valid_rosters) != WAVE_A_VALID_ROSTER_COUNT:
-        raise AssertionError("Wave A valid roster count does not match definition")
+        raise AssertionError("Study 1 valid roster count does not match definition")
 
-    blocked_overlap = WAVE_A_BLOCKED_ACTORS.intersection(
-        {
-            *WAVE_A_B1_CANDIDATES,
-            *WAVE_A_MAIN_B3_CANDIDATES,
-            *WAVE_A_SECONDARY_B3_ANCHORS,
-        }
-    )
+    selected = {
+        *WAVE_A_B1_CANDIDATES,
+        *WAVE_A_MAIN_B3_CANDIDATES,
+        *WAVE_A_SECONDARY_B3_ANCHORS,
+    }
+    blocked_overlap = WAVE_A_BLOCKED_ACTORS.intersection(selected)
     if blocked_overlap:
         raise AssertionError(
-            f"blocked actors entered the Wave A verified-core allowlist: {sorted(blocked_overlap)}"
+            f"blocked actors entered the Study 1 candidate list: {sorted(blocked_overlap)}"
         )
 
+    gated_selected = sorted(WAVE_A_EXECUTION_GATED_ACTORS.intersection(selected))
     growth_triples = wave_a_growth_index_triples()
     reload_speed_ceiling = wave_a_reload_speed_ceiling_pct()
 
     return {
-        "study_draft_id": WAVE_A_DRAFT_ID,
-        "status": "draft-do-not-run-without-user-approval",
+        "study_id": WAVE_A_STUDY_ID,
+        "status": "design-frozen-execution-gated",
+        "execution_ready": not gated_selected,
         "b1_candidates": list(WAVE_A_B1_CANDIDATES),
         "main_b3_candidates": list(WAVE_A_MAIN_B3_CANDIDATES),
         "secondary_b3_anchors": list(WAVE_A_SECONDARY_B3_ANCHORS),
+        "execution_gated_actors": gated_selected,
         "blocked_actors": sorted(WAVE_A_BLOCKED_ACTORS),
         "raw_roster_count": WAVE_A_RAW_ROSTER_COUNT,
         "invalid_duplicate_rosters": WAVE_A_INVALID_DUPLICATE_ROSTER_COUNT,
@@ -356,5 +365,8 @@ def wave_a_study_definition() -> dict[str, object]:
         "scenario_count": WAVE_A_SCENARIO_COUNT,
         "timeline": "RAID14",
         "baseline_rotation": OPENING_MAST_CROWN_MAST.name,
-        "execution_policy": "case generation only until explicit user approval",
+        "execution_policy": (
+            "case generation and validation only until execution-gated actors are "
+            "revalidated and the user explicitly approves the research run"
+        ),
     }
