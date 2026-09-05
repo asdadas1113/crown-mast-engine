@@ -118,7 +118,59 @@ e1dc10a31b2a70caadae5ca10a00644f8ad91b71
 research_results/studies/01_exploratory/validation/01_연구_인프라_보강_검증_2026-09-06.md
 ```
 
-## 5. manifest / provenance
+## 5. 후보군 재구성 검증
+
+상세 기록:
+
+```text
+research_results/studies/01_exploratory/validation/03_1연구_후보군_재구성_검증_2026-09-06.md
+```
+
+focused Study 1 design test:
+
+```text
+9 / 9 passed
+GitHub Actions run 33991689279
+```
+
+확인 항목:
+
+- B1 5 / Main 6 / Secondary 3 후보군 exact match
+- 90 raw / 87 valid roster
+- 16 growth points
+- 12 environments
+- 16,704 expected scenarios
+- canonical study ID case label 정렬
+- Moran/SBS/Liberalio execution gate 명시
+- reload-speed ceiling guard
+- outside roster fail-closed
+
+전체 regression run `33991715546`은:
+
+```text
+318 tests
+315 passed
+3 failed
+```
+
+실패 3건은 후보군 산술이나 generator invariant가 아니라 기존 총딜 baseline을 `places=7`로 비교하는 초미세 numerical mismatch다.
+
+관측 차이:
+
+```text
+약 0.0001149 on 2.168e9 total
+약 0.0000563 on 2.020e9 total
+```
+
+따라서 현재 판정:
+
+- 새 후보군/invariant: 통과
+- full regression green: 아직 아님
+- 기존 numerical baseline/tolerance 3건: 별도 분류 필요
+
+이 세 테스트의 기대값은 후보군 변경을 이유로 임의 갱신하지 않는다.
+
+## 6. manifest / provenance
 
 규격 문서:
 
@@ -132,9 +184,19 @@ research_results/studies/01_exploratory/human/02_연구_실행_재현성_및_기
 research_results/studies/01_exploratory/machine/manifest/manifest_template.json
 ```
 
-실제 run ID와 manifest는 연구 실행 승인 전에는 생성하지 않는다.
+현재 manifest template도 다음으로 정렬됐다.
 
-## 6. generator 정렬 상태
+- study ID 고정
+- B1/Main/Secondary 후보 목록 고정
+- 87 valid rosters
+- 16 growth
+- 12 environments
+- 16,704 expected cases
+- Moran/SBS/Liberalio execution-gated actors 기록
+
+실제 run ID와 실행 commit SHA 등은 연구 실행 승인 전에는 생성하지 않는다.
+
+## 7. generator 정렬 상태
 
 `crown_mast_engine/wave_a_study.py`는 현재 다음을 반영했다.
 
@@ -148,9 +210,9 @@ research_results/studies/01_exploratory/machine/manifest/manifest_template.json
 - Moran/SBS/Liberalio를 `execution_gated_actors`로 명시
 - Raven/Quency/Milk는 현 1연구 후보 밖으로 유지
 
-공식 실행 전에는 이 구조를 focused regression으로 다시 확인한다.
+검증용 임시 workflow는 제거했다.
 
-## 7. 저장소 정리 상태
+## 8. 저장소 정리 상태
 
 불필요 branch 정리는 사용자에 의해 완료됐다.
 
@@ -176,14 +238,14 @@ archive/pre-revalidation-2026-09-05/
 
 `research_results/WAVE_A_VERIFIED_CORE_DESIGN_DRAFT.md`는 superseded pointer로 축소했고, 새 canonical 설계는 `studies/01_exploratory/` 아래에 둔다.
 
-## 8. 다음 단일 체크포인트
+## 9. 다음 단일 체크포인트
 
-연구 표본을 실행하지 않고 다음을 수행한다.
+연구 표본을 실행하지 않고 다음 순서로 진행한다.
 
-1. 새 후보군 기준 focused generator/invariant 테스트
+1. full regression의 초미세 numerical baseline 실패 3건을 분류하고, platform drift/부동소수점 tolerance 문제인지 확인
 2. Moran/SBS/Liberalio model gate 재검증
 3. 필요시 해당 mechanics만 좁게 수정·재검증
-4. full regression
+4. clean full regression
 5. 87/16/12/16,704 preflight 확인
 6. manifest 실행값 동결
 
