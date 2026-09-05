@@ -18,13 +18,31 @@ jobs:
         run: |
           python -m unittest \
             tests.test_analysis.RotationAnalysisTests.test_default_liter_baseline_has_standard_break_even \
-            tests.test_research.ComparisonReportTests.test_report_preserves_baseline_totals_and_research_metrics \
-            tests.test_scarlet_black_shadow.ScarletBlackShadowAnalysisTests.test_strong_distributed_secondary_still_favors_conventional -v
-      - name: Verify selected reload gates
+            tests.test_research.ComparisonReportTests.test_report_preserves_baseline_totals_and_research_metrics -v
+      - name: Print SBS repaired-model diagnostics
+        run: |
+          python - <<'PY'
+          from crown_mast_engine import analyze_rotations
+          from crown_mast_engine.models import DamageCategory, TeamRoster
+          result = analyze_rotations(roster=TeamRoster(secondary_b3='scarlet-black-shadow'))
+          o = result.overall
+          print('team_c', repr(o.team_c))
+          print('team_f', repr(o.team_f))
+          print('team_relative_change', repr(o.team_relative_change))
+          print('break_even_main_share_c', repr(o.break_even_main_share_c))
+          print('conventional_main_share', repr(o.conventional_main_share))
+          print('winner', o.observed_winner.value)
+          for label, sim in [('C', result.conventional_result), ('F', result.funnel_result)]:
+              normals = sim.damage_events_for(actor='scarlet-black-shadow', category=DamageCategory.NORMAL)
+              print(label, 'sbs_normal_count', len(normals))
+              print(label, 'sbs_last_normal_time', repr(normals[-1].time if normals else None))
+          PY
+      - name: Verify selected reload gates and actor mechanics
         run: |
           python -m unittest \
             tests.test_selected_actor_reload_gates \
             tests.test_b1_characters \
+            tests.test_scarlet_black_shadow.ScarletBlackShadowMechanicsTests \
             tests.test_liberalio \
             tests.test_combat \
             tests.test_wave_a_study -v
