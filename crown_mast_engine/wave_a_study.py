@@ -16,6 +16,11 @@ from .timeline import RAID14_TIMELINE
 
 WAVE_A_STUDY_ID = "crown-mast-study-01-exploratory-v1"
 
+# Study 1 uses the three practical growth states beginning at OL0. The global
+# four-profile checkpoint set is left unchanged because other diagnostics still
+# use the historical Base5 point.
+WAVE_A_GROWTH_PROFILES = REALISTIC_GROWTH_PROFILES[1:]
+
 # Study 1 candidate lists. Some selected actors still carry model-specific
 # execution gates and must be revalidated before the official aggregate run.
 WAVE_A_B1_CANDIDATES = (
@@ -73,7 +78,7 @@ WAVE_A_CORE_HIT_RATE_PCT = {
 }
 WAVE_A_MAIN_ADVANTAGE_LEVELS = ("off", "on")
 
-WAVE_A_GROWTH_POINT_COUNT = 16
+WAVE_A_GROWTH_POINT_COUNT = len(WAVE_A_GROWTH_PROFILES) ** 3
 WAVE_A_RAW_ROSTER_COUNT = (
     len(WAVE_A_B1_CANDIDATES)
     * len(WAVE_A_MAIN_B3_CANDIDATES)
@@ -91,21 +96,13 @@ WAVE_A_SCENARIO_COUNT = WAVE_A_VALID_ROSTER_COUNT * WAVE_A_SCENARIOS_PER_ROSTER
 
 
 def wave_a_growth_index_triples() -> tuple[tuple[int, int, int], ...]:
-    """Return the 16-point OA(16, 3, 4, 2)-style growth screening design.
-
-    Each pair of role axes covers every 4x4 combination exactly once while the
-    three-way 4x4x4 growth cube is intentionally reduced from 64 to 16 points.
-    """
-    size = len(REALISTIC_GROWTH_PROFILES)
-    if size != 4:
-        raise AssertionError("Wave A growth OA requires exactly four profiles")
-    triples = tuple(
-        (b1_index, main_index, (b1_index + main_index) % size)
-        for b1_index in range(size)
-        for main_index in range(size)
-    )
+    """Return the fully crossed 3x3x3 Study 1 growth design."""
+    size = len(WAVE_A_GROWTH_PROFILES)
+    if size != 3:
+        raise AssertionError("Study 1 growth grid requires exactly three profiles")
+    triples = tuple(product(range(size), repeat=3))
     if len(triples) != WAVE_A_GROWTH_POINT_COUNT:
-        raise AssertionError("Wave A growth OA size does not match definition")
+        raise AssertionError("Study 1 growth grid size does not match definition")
     return triples
 
 
@@ -221,7 +218,7 @@ def _combat_settings_for(
 
 
 def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
-    """Build one 192-case Study 1 roster shard without executing simulations."""
+    """Build one 324-case Study 1 roster shard without executing simulations."""
     valid_roster_ids = {wave_a_roster_id(item) for item in iter_wave_a_rosters()}
     roster_id = wave_a_roster_id(roster)
     if roster_id not in valid_roster_ids:
@@ -234,7 +231,7 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
         GearState.OL5,
         collection=SR15_COLLECTION,
     )
-    growth_profiles = REALISTIC_GROWTH_PROFILES
+    growth_profiles = WAVE_A_GROWTH_PROFILES
     cases: list[SampleCase] = []
 
     for defense_condition, core_condition, main_advantage in product(
@@ -263,7 +260,7 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
             secondary_profile = growth_profiles[secondary_index]
             case_id = (
                 f"{WAVE_A_STUDY_ID}--{roster_id}--{environment_id}"
-                f"--oa-{point_index:02d}"
+                f"--growth-{point_index:02d}"
             )
             scenario = ResearchScenario(
                 roster=roster,
@@ -291,8 +288,8 @@ def build_wave_a_roster_cases(roster: TeamRoster) -> tuple[SampleCase, ...]:
                         "b1_candidate": roster.b1,
                         "main_b3_candidate": roster.main_b3,
                         "secondary_anchor": roster.secondary_b3,
-                        "growth_design": "oa16-pairwise",
-                        "growth_point": f"oa-{point_index:02d}",
+                        "growth_design": "full27-three-level",
+                        "growth_point": f"growth-{point_index:02d}",
                         "b1_profile": b1_profile.profile_id,
                         "main_profile": main_profile.profile_id,
                         "secondary_profile": secondary_profile.profile_id,
@@ -347,11 +344,12 @@ def wave_a_study_definition() -> dict[str, object]:
         "invalid_duplicate_rosters": WAVE_A_INVALID_DUPLICATE_ROSTER_COUNT,
         "valid_roster_count": WAVE_A_VALID_ROSTER_COUNT,
         "growth_design": {
-            "name": "oa16-pairwise",
-            "profiles_per_role": len(REALISTIC_GROWTH_PROFILES),
+            "name": "full27-three-level",
+            "profiles_per_role": len(WAVE_A_GROWTH_PROFILES),
+            "profile_ids": [profile.profile_id for profile in WAVE_A_GROWTH_PROFILES],
             "points": len(growth_triples),
-            "index_rule": "secondary=(b1+main) mod 4",
-            "three_way_complete": False,
+            "index_rule": "full Cartesian product of 3 levels across B1/Main/Secondary",
+            "three_way_complete": True,
         },
         "environment_axes": {
             "defense": dict(WAVE_A_DEFENSE_ANCHORS),
