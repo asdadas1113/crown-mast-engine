@@ -1,6 +1,7 @@
 import unittest
 
 from crown_mast_engine import (
+    BurstCycle,
     CROWN_CROWN_MAST,
     CUSTOM_ROTATION,
     RAID14_FIRST_B1_TIME,
@@ -82,6 +83,16 @@ class UniformBurstTimelineTests(unittest.TestCase):
         self.assertEqual(result.snapshots[-1].cycle, 14)
         self.assertEqual(result.macro_cycle_at(RAID14_TIMELINE[-1].b1_time), 5)
         self.assertEqual(len(scenario.timeline), 14)
+
+    def test_overlapping_cycles_fail_in_scenario_and_direct_engine(self) -> None:
+        overlapping = (
+            BurstCycle(1, 1.0, 1.1, 1.2, 1.2, 11.2, "main_b3"),
+            BurstCycle(2, 10.0, 10.1, 10.2, 10.2, 20.2, "secondary_b3"),
+        )
+        with self.assertRaisesRegex(ValueError, "overlap"):
+            replace(ResearchScenario.standard(), timeline=overlapping)
+        with self.assertRaisesRegex(ValueError, "overlap"):
+            simulate_rotation(CROWN_CROWN_MAST, timeline=overlapping)
 
     def test_invalid_builder_inputs_fail_fast(self) -> None:
         with self.assertRaises(ValueError):

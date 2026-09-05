@@ -194,6 +194,11 @@ class CrownMastEngine:
         self.policy = policy
         self.roster = roster or TeamRoster()
         self.timeline = timeline
+        for previous, current in zip(self.timeline, self.timeline[1:]):
+            if current.b1_time < previous.full_burst_end:
+                raise ValueError(
+                    f"burst cycles overlap: {previous.cycle} and {current.cycle}"
+                )
         self.catalog = catalog
         self.builds = MappingProxyType(dict(builds or {}))
         self.combat_settings = combat_settings

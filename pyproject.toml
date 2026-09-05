@@ -6,7 +6,9 @@ requires-python = ">=3.11"
 dependencies = []
 
 [tool.setuptools.package-data]
-crown_mast_engine = ["data/*.json", "web/*.html", "web/*.css", "web/*.js"]
+crown_mast_engine = ["data/*.json", "web/*.html", "web/*.css", "web/*.js", "web/vendor/*.js", "web/vendor/*.txt"]
 
 [tool.unittest]
 start-directory = "tests"
+[tool.setuptools.packages.find]
+include = ["crown_mast_engine*"]

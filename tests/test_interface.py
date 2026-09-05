@@ -1,4 +1,7 @@
+import io
+import tomllib
 import unittest
+from unittest.mock import patch
 
 from crown_mast_engine.interface import (
     WEB_ROOT,
@@ -6,6 +9,7 @@ from crown_mast_engine.interface import (
     calculate_interface_payload,
     build_checkpoint_cases,
     interface_metadata,
+    run_server,
 )
 
 
@@ -68,6 +72,35 @@ class InterfaceTests(unittest.TestCase):
         self.assertIn("baseline_rotation", script)
         self.assertGreater((WEB_ROOT / "vendor" / "html2canvas.min.js").stat().st_size, 100_000)
         self.assertTrue((WEB_ROOT / "vendor" / "html2canvas.LICENSE.txt").is_file())
+
+    def test_reset_discards_visible_build_rows_before_rerender(self) -> None:
+        script = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+        start = script.index("function setDefaults()")
+        end = script.index("function collectPayload()", start)
+        reset_block = script[start:end]
+        self.assertIn("state.builds.clear();", reset_block)
+        self.assertIn("buildRows.replaceChildren();", reset_block)
+        self.assertLess(
+            reset_block.index("buildRows.replaceChildren();"),
+            reset_block.index("syncB3Options"),
+        )
+
+    def test_server_banner_runs_with_cp949_stdout(self) -> None:
+        buffer = io.BytesIO()
+        stdout = io.TextIOWrapper(buffer, encoding="cp949")
+        with patch("crown_mast_engine.interface.ThreadingHTTPServer") as server_type:
+            server_type.return_value.serve_forever.side_effect = KeyboardInterrupt
+            with patch("sys.stdout", stdout):
+                run_server()
+                stdout.flush()
+        self.assertIn(b"Crown-Mast interface:", buffer.getvalue())
+
+    def test_package_data_declares_vendor_assets(self) -> None:
+        pyproject = WEB_ROOT.parents[1] / "pyproject.toml"
+        payload = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        patterns = payload["tool"]["setuptools"]["package-data"]["crown_mast_engine"]
+        self.assertIn("web/vendor/*.js", patterns)
+        self.assertIn("web/vendor/*.txt", patterns)
 
     def test_checkpoint_aggregate_preserves_ranges_groups_and_extremes(self) -> None:
         def result(case_id, b1, dealer, change, share, break_even, c_share, f_share):

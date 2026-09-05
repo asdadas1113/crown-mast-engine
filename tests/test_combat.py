@@ -44,6 +44,14 @@ class WeaponTimingTests(unittest.TestCase):
     def test_default_combat_settings_use_generic_raid_defense(self) -> None:
         self.assertEqual(CombatSettings().boss_def, 12_000)
 
+    def test_combat_settings_reject_non_finite_values(self) -> None:
+        with self.assertRaisesRegex(ValueError, "boss_def"):
+            CombatSettings(boss_def=float("nan"))
+        with self.assertRaisesRegex(ValueError, "boss_def"):
+            CombatSettings(boss_def=float("inf"))
+        with self.assertRaisesRegex(ValueError, "duration_sec"):
+            CombatSettings(duration_sec=float("nan"))
+
     def test_min_firing_rounds_adjustment_defaults_on_and_can_be_disabled(self) -> None:
         self.assertTrue(CombatSettings().min_firing_rounds_adjustment)
         on = simulate_rotation(CROWN_CROWN_MAST, combat_settings=CombatSettings(duration_sec=1, startup_delay_frames=0))

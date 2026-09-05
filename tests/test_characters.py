@@ -82,6 +82,29 @@ class CharacterCatalogTests(unittest.TestCase):
             0,
         )
 
+    def test_skill_value_variant_revision_records_override_and_catalog_hash(self) -> None:
+        standard_revision = STANDARD_CHARACTER_CATALOG.scope.source_revision
+        first = STANDARD_CHARACTER_CATALOG.with_skill_value(
+            "mast-romantic-maid",
+            "skill1",
+            "expected_normal_damage_loss_per_stack_pct",
+            18,
+        )
+        second = STANDARD_CHARACTER_CATALOG.with_skill_value(
+            "mast-romantic-maid",
+            "skill1",
+            "expected_normal_damage_loss_per_stack_pct",
+            18,
+        )
+
+        self.assertIn("catalog-sha256:", standard_revision)
+        self.assertNotEqual(first.scope.source_revision, standard_revision)
+        self.assertEqual(first.scope.source_revision, second.scope.source_revision)
+        self.assertIn(
+            "skill-override:mast-romantic-maid.skill1.expected_normal_damage_loss_per_stack_pct=18",
+            first.scope.source_revision,
+        )
+
     def test_rapi_red_hood_standard_stats(self) -> None:
         rapi = STANDARD_CHARACTER_CATALOG.require("rapi-red-hood")
         self.assertEqual(rapi.progression_atk, 109_209)

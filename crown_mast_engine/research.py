@@ -912,6 +912,11 @@ def _validate_timeline(timeline: tuple[BurstCycle, ...], duration_sec: float) ->
             raise ValueError(f"cycle {cycle.cycle} exceeds combat duration")
         if cycle.b3_slot not in {"main_b3", "secondary_b3"}:
             raise ValueError(f"cycle {cycle.cycle} has unsupported b3_slot")
+    for previous, current in zip(timeline, timeline[1:]):
+        if current.b1_time < previous.full_burst_end:
+            raise ValueError(
+                f"burst cycles overlap: {previous.cycle} and {current.cycle}"
+            )
 
 
 def _build_to_dict(build: BuildProfile) -> dict[str, Any]:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from dataclasses import dataclass, replace
 from importlib.resources import files
 from math import isfinite
@@ -115,7 +116,12 @@ class CharacterCatalog:
             replacement if item.slug == slug else item
             for item in self.definitions
         )
-        return CharacterCatalog(definitions, self.scope)
+        override = f"skill-override:{slug}.{skill}.{key}={value:.17g}"
+        scope = replace(
+            self.scope,
+            source_revision=f"{self.scope.source_revision}; {override}",
+        )
+        return CharacterCatalog(definitions, scope)
 
 
 def _scope_signature(scope_data: Mapping[str, object]) -> tuple[object, ...]:
@@ -144,6 +150,14 @@ def load_character_catalog() -> CharacterCatalog:
         json.loads(path.read_text(encoding="utf-8"))
         for path in (base_path, *extra_paths)
     )
+    catalog_digest = sha256(
+        json.dumps(
+            payloads,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
     for payload in payloads:
         if payload.get("schema_version") != 1:
             raise ValueError(
@@ -161,12 +175,14 @@ def load_character_catalog() -> CharacterCatalog:
         for payload in payloads
         if payload["scope"].get("source_revision")
     )
+    source_revision = "; ".join(dict.fromkeys(source_revisions))
+    source_revision = f"{source_revision}; catalog-sha256:{catalog_digest}"
     scope = CharacterDataScope(
         level=int(base_scope_data["level"]),
         gear=str(base_scope_data["gear"]),
         core=int(base_scope_data["core"]),
         skill_levels=tuple(int(value) for value in base_scope_data["skill_levels"]),
-        source_revision="; ".join(dict.fromkeys(source_revisions)),
+        source_revision=source_revision,
     )
 
     definitions: list[CharacterDefinition] = []

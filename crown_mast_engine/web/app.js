@@ -147,6 +147,7 @@ function setDefaults() {
   const baseline = document.querySelector(`input[name="baseline-rotation"][value="${defaults.baseline_rotation}"]`);
   if (baseline) baseline.checked = true;
   state.builds.clear();
+  buildRows.replaceChildren();
   syncB3Options($("#main-b3-select"));
 }
 

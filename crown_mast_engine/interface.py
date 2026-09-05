@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import replace
+from math import isfinite
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -709,7 +710,10 @@ def _baseline_label(name: str) -> str:
 def _number(value: Any, path: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise TypeError(f"{path} must be numeric")
-    return float(value)
+    number = float(value)
+    if not isfinite(number):
+        raise ValueError(f"{path} must be finite")
+    return number
 
 
 def _non_negative_int(value: Any, path: str) -> int:
@@ -783,7 +787,7 @@ class InterfaceRequestHandler(BaseHTTPRequestHandler):
 
 def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
     server = ThreadingHTTPServer((host, port), InterfaceRequestHandler)
-    print(f"Crown–Mast interface: http://{host}:{port}")
+    print(f"Crown-Mast interface: http://{host}:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

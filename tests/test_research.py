@@ -12,6 +12,7 @@ from crown_mast_engine import (
     analyze_first_burst_entry_choice,
     run_research_scenario,
 )
+from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
 from tests.simulation_fixtures import standard_rotation_comparison
 
 
@@ -138,6 +139,28 @@ class ResearchScenarioTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "engine revision"):
             run_research_scenario(scenario)
+
+    def test_skill_override_catalog_requires_matching_saved_revision(self) -> None:
+        base = ResearchScenario.standard()
+        variant = STANDARD_CHARACTER_CATALOG.with_skill_value(
+            "mast-romantic-maid",
+            "skill1",
+            "expected_normal_damage_loss_per_stack_pct",
+            18,
+        )
+        with self.assertRaisesRegex(ValueError, "catalog revision"):
+            run_research_scenario(base, catalog=variant)
+
+        scenario = replace(
+            base,
+            timeline=(base.timeline[0],),
+            combat_settings=replace(base.combat_settings, duration_sec=16),
+            expected_catalog_source_revision=variant.scope.source_revision,
+        )
+        report = run_research_scenario(scenario, catalog=variant)
+        saved = report.to_dict()["scenario"]["expected_revisions"]["catalog_source"]
+        self.assertEqual(saved, variant.scope.source_revision)
+        self.assertIn("skill-override:", saved)
 
     def test_unknown_baseline_rotation_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "unsupported baseline rotation"):

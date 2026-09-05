@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from math import ceil, floor
+from math import ceil, floor, isfinite
 from types import MappingProxyType
 from typing import Callable, Mapping
 
@@ -101,14 +101,23 @@ class CombatSettings:
     duration_sec: float = STANDARD_BATTLE_DURATION_SEC
 
     def __post_init__(self) -> None:
-        if self.boss_def < 0:
-            raise ValueError("boss_def must be non-negative")
-        if not 0 <= self.core_hit_rate_pct <= 100:
-            raise ValueError("core_hit_rate_pct must be between 0 and 100")
-        if self.element_multiplier <= 0:
-            raise ValueError("element_multiplier must be positive")
-        if any(value <= 0 for value in self.element_multiplier_by_actor.values()):
-            raise ValueError("actor element multipliers must be positive")
+        if not isfinite(self.boss_def) or self.boss_def < 0:
+            raise ValueError("boss_def must be finite and non-negative")
+        if not isfinite(self.core_hit_rate_pct) or not 0 <= self.core_hit_rate_pct <= 100:
+            raise ValueError("core_hit_rate_pct must be finite and between 0 and 100")
+        if not isfinite(self.range_bonus_pct):
+            raise ValueError("range_bonus_pct must be finite")
+        if not isfinite(self.element_multiplier) or self.element_multiplier <= 0:
+            raise ValueError("element_multiplier must be finite and positive")
+        if any(
+            not isfinite(value) or value <= 0
+            for value in self.element_multiplier_by_actor.values()
+        ):
+            raise ValueError("actor element multipliers must be finite and positive")
+        if not isfinite(self.full_burst_bonus_pct):
+            raise ValueError("full_burst_bonus_pct must be finite")
+        if not isfinite(self.boss_damage_taken_pct):
+            raise ValueError("boss_damage_taken_pct must be finite")
         if self.boss_element is not None and self.boss_element not in ELEMENTS:
             raise ValueError(f"unsupported boss element: {self.boss_element}")
         object.__setattr__(
@@ -116,10 +125,14 @@ class CombatSettings:
             "element_multiplier_by_actor",
             MappingProxyType(dict(self.element_multiplier_by_actor)),
         )
-        if self.startup_delay_frames < 0:
-            raise ValueError("startup_delay_frames must be non-negative")
-        if self.duration_sec <= 0:
-            raise ValueError("duration_sec must be positive")
+        if (
+            isinstance(self.startup_delay_frames, bool)
+            or not isinstance(self.startup_delay_frames, int)
+            or self.startup_delay_frames < 0
+        ):
+            raise ValueError("startup_delay_frames must be a non-negative integer")
+        if not isfinite(self.duration_sec) or self.duration_sec <= 0:
+            raise ValueError("duration_sec must be finite and positive")
 
     def element_multiplier_for(
         self,
