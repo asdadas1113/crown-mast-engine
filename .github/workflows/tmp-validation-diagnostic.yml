@@ -14,30 +14,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify cross-version numerical tolerance
+      - name: Verify repaired numerical baselines
         run: |
           python -m unittest \
             tests.test_analysis.RotationAnalysisTests.test_default_liter_baseline_has_standard_break_even \
             tests.test_research.ComparisonReportTests.test_report_preserves_baseline_totals_and_research_metrics \
             tests.test_scarlet_black_shadow.ScarletBlackShadowAnalysisTests.test_strong_distributed_secondary_still_favors_conventional -v
-      - name: Run existing actor mechanics tests
+      - name: Verify selected reload gates
         run: |
           python -m unittest \
-            tests.test_b1_characters.B1CharacterCatalogTests.test_moran_favorite_item_standard_data_models_swap_at_24_per_second \
-            tests.test_b1_characters.B1CharacterMechanicsTests.test_moran_applies_favorite_item_buff_and_weapon_swap_damage \
-            tests.test_b1_characters.B1CharacterMechanicsTests.test_moran_base_weapon_returns_full_when_swap_ends \
-            tests.test_scarlet_black_shadow.ScarletBlackShadowMechanicsTests \
-            tests.test_liberalio.LiberalioMechanicsTests -v
-      - name: Print timing model diagnostics
-        run: |
-          python - <<'PY'
-          from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
-          for actor in ('moran-favorite-item','scarlet-black-shadow','liberalio'):
-              w = STANDARD_CHARACTER_CATALOG.require(actor).weapon
-              print(actor)
-              print(' weapon_type=', w.weapon_type)
-              print(' ammo=', w.ammo)
-              print(' reload_frames=', w.reload_frames, 'seconds=', w.reload_frames/60)
-              print(' charge_frames=', w.charge_frames, 'recovery=', w.charge_release_recovery_frames)
-          PY
-          grep -R -n "def effective_reload_frames\|reload_frames\|post_reload" crown_mast_engine | head -120
+            tests.test_selected_actor_reload_gates \
+            tests.test_b1_characters \
+            tests.test_liberalio \
+            tests.test_combat \
+            tests.test_wave_a_study -v
