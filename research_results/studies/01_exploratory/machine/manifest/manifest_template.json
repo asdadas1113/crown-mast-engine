@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "study_id": "TO_BE_FINALIZED_BEFORE_RUN",
+  "run_id": "TO_BE_ASSIGNED_PER_RUN",
+  "status": "draft-do-not-run",
+  "generated_at": null,
+  "git": {
+    "branch": "research/14-burst-baseline",
+    "commit": null
+  },
+  "mechanics": {
+    "engine_rule_revision": null,
+    "skill_hook_revision": null,
+    "skill_hook_factories": []
+  },
+  "catalog": {
+    "catalog_source_revision": null,
+    "catalog_sha256": null,
+    "skill_overrides": []
+  },
+  "study_definition": {
+    "purpose": "1연구 광범위 탐색 및 후속 연구 후보 선별",
+    "candidate_rosters": null,
+    "blocked_actors": null,
+    "growth_design": null,
+    "environment_axes": null,
+    "expected_case_count": null
+  },
+  "timeline_definition": {
+    "timeline_id": null,
+    "duration_sec": null,
+    "cycles": []
+  },
+  "output": {
+    "report_schema_version": null,
+    "scenario_schema_version": null,
+    "raw_path": "../raw/",
+    "aggregate_path": "../aggregate/"
+  },
+  "validation_references": [],
+  "notes": [
+    "실제 연구 실행 전 모든 null 및 TO_BE_* 값을 확정해야 한다.",
+    "애장품 캐릭터는 1연구 성장 설계에서 SR15 canonical floor를 적용한다.",
+    "이 템플릿 파일 자체는 연구 실행 또는 표본 생성을 의미하지 않는다."
+  ]
+}
