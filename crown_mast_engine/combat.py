@@ -251,6 +251,19 @@ def effective_reload_frames(base_frames: int, reload_speed_pct: float) -> int:
     return js_round(scaled) + RELOAD_TAIL_FRAMES
 
 
+def effective_weapon_reload_frames(weapon: WeaponProfile, reload_speed_pct: float) -> int:
+    """Resolve reload body plus actor-specific fixed start delay.
+
+    ``weapon.reload_frames`` is the displayed/raw body affected by reload-speed
+    buffs. ``reload_start_delay_frames`` is a fixed animation/cadence delay and
+    therefore remains outside the reload-speed multiplier.
+    """
+    return (
+        effective_reload_frames(weapon.reload_frames, reload_speed_pct)
+        + weapon.reload_start_delay_frames
+    )
+
+
 def effective_charge_frames(base_frames: int, charge_speed_pct: float) -> int:
     charge_speed_pct = min(100.0, charge_speed_pct)
     return max(1, js_round(base_frames * (1 - charge_speed_pct / 100)))
@@ -352,8 +365,8 @@ def generate_weapon_shots(
 
             if reloading:
                 reload_progress += 1
-                needed = effective_reload_frames(
-                    weapon.reload_frames,
+                needed = effective_weapon_reload_frames(
+                    weapon,
                     reload_speed_at(time),
                 )
                 if reload_progress >= needed:
@@ -494,8 +507,8 @@ def generate_weapon_shots(
             if weapon.weapon_type == "MG":
                 mg_idle_frames += 1
             reload_progress += 1
-            needed = effective_reload_frames(
-                weapon.reload_frames,
+            needed = effective_weapon_reload_frames(
+                weapon,
                 reload_speed_at(time),
             )
             if reload_progress >= needed:
