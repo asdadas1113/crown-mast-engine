@@ -74,21 +74,33 @@ Secondary B3
 - snow-white-heavy-arms
 ```
 
-현재 A1 설계:
+현재 성장 설계:
+
+```text
+g2-ol0-sr5
+g3-ol0-sr15-e3-a3
+g4-ol5-sr15-e4-a4-ammo3
+```
+
+- `g1-base5-none`은 1연구에서 제외
+- 세 성장 단계는 B1/Main/Secondary에 완전교차
+- 3 × 3 × 3 = **27 growth points**
+- 애장품 캐릭터는 SR15 canonical floor 유지
+
+현재 전체 설계:
 
 - raw roster 90
 - Rapi B1/Main 중복 3개 제외
 - **87 valid rosters**
-- B1/Main/Secondary 16-point pairwise growth screening
+- B1/Main/Secondary 27-point full growth grid
 - DEF 3 × core 2 × Main advantage 2 = 12 environments
-- roster당 192 scenarios
-- 전체 **16,704 scenarios**
+- roster당 **324 scenarios**
+- 전체 **28,188 scenarios**
 - Crown/Mast OL5 + SR15 대표 build 고정
-- 애장품 캐릭터 SR15 canonical floor
 
 ## 실행 전 model gate
 
-이번 후보 재구성으로 다음 선택 캐릭터는 공식 실행 전 model-specific 재검증이 필요하다.
+다음 선택 캐릭터는 공식 실행 전 model-specific 재검증이 필요하다.
 
 ```text
 moran-favorite-item
@@ -104,12 +116,12 @@ liberalio
 
 ## 현재 실행 상태
 
-현재는 **후보군 재동결 / 실행 gate 재검증 필요 / 실행 미승인** 단계다.
+현재는 **후보군·성장설계 재동결 / 실행 gate 재검증 필요 / 실행 미승인** 단계다.
 
 - 공식/대규모 연구 실행: 미승인
-- 16,704 scenario 1연구 A1 batch: 미실행
+- 28,188 scenario 1연구 batch: 미실행
 - study ID: 동결
-- generator 후보군 및 study ID: 갱신
+- generator 후보군 및 성장 grid: 갱신
 - 실제 run ID: 미생성
 - 실제 manifest: 미생성
 - 결과 파일: 없음
@@ -121,7 +133,7 @@ liberalio
 
 ```text
 ../archive/README.md
-../archive/pre-revalidation-2026-09-05/research_results/
+../archive/pre-revalidation-2026-09-05/
 ```
 
 과거 케이스 스터디, Secondary anchor 초안, 공식 v1 설계, 폐기된 공식 결과는 역사·감사·가설 출처 확인용으로만 사용한다.
