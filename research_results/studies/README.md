@@ -1,75 +1,56 @@
 # 연구별 결과 저장 구조
 
-이 디렉터리는 앞으로 진행하는 Crown–Mast 연구를 **연구 단위로 완전히 분리**해 보관하기 위한 최상위 영역이다.
+이 디렉터리는 Crown–Mast 연구를 **연구 단위로 분리**해 보관하는 최상위 영역이다.
 
-## 기본 원칙
-
-각 연구는 하나의 독립된 디렉터리를 사용한다.
+## 기본 구조
 
 ```text
 studies/
 ├─ 01_exploratory/
 │  ├─ human/
+│  │  └─ reports/<run_id>/
 │  ├─ machine/
+│  │  └─ runs/<run_id>/
 │  └─ validation/
+│     └─ runs/<run_id>/
 ├─ 02_followup_placeholder/
-│  ├─ human/
-│  ├─ machine/
-│  └─ validation/
 └─ README.md
 ```
 
 ### `human/`
 
-사람이 읽고 판단하기 위한 문서를 저장한다.
-
-- 연구 목적과 가설
-- 실험 설계
-- 변수 정의
-- 결과 요약
-- 해석과 한계
-- 후속 연구 후보
-
-사람용 문서의 제목과 본문은 한글을 기본으로 한다.
+연구 목적·설계와 사람이 읽는 한글 결과 보고서를 저장한다. 공식 실행 결과는 `human/reports/<run_id>/` 아래에 둔다.
 
 ### `machine/`
 
-실행 가능한 연구가 승인된 뒤 생성되는 기계 판독용 자료를 저장한다.
-
-- manifest
-- scenario 정의
-- raw 결과
-- 집계 결과
-- 실행 provenance
-
-연구별 실행 데이터는 반드시 해당 연구의 `machine/` 아래에만 저장한다. 서로 다른 연구의 결과를 공용 `runs/`에 섞지 않는다.
+manifest, scenario 정의, raw 결과, aggregate, provenance를 저장한다. 공식 실행 데이터는 반드시 `machine/runs/<run_id>/` 아래에 분리하며 다른 연구나 다른 run과 섞지 않는다.
 
 ### `validation/`
 
-해당 연구의 설계와 결과를 검증하기 위한 자료를 저장한다.
+설계 검증, 표본 수 검증, 회귀 검증, 실행 후 완전성·재현성·이상치 확인을 보관한다. 실행 후 검증은 `validation/runs/<run_id>/`에 둔다.
 
-- 케이스 생성 검증 기록
-- 표본 수 검증
-- 민감도 점검 결과
-- 연구별 회귀 검증 결과
-- 이상치 재현 기록
+프로젝트 전체 테스트 코드는 루트 `tests/`에 유지한다.
 
-프로젝트 전체 엔진의 pytest 테스트 코드는 CI 검색과 유지보수를 위해 루트 `tests/`에 그대로 둔다. `validation/`은 특정 연구에 귀속되는 검증 자료와 결과를 보관하는 곳이다.
+## 저장 원칙
 
-## 연구 번호
+- 하나의 공식 실행은 하나의 고유 `run_id`를 가진다.
+- 기계 데이터·사람용 보고서·validation은 같은 `run_id`로 연결한다.
+- 재실행은 기존 run을 덮어쓰지 않는다.
+- scenario/raw는 수만 개의 개별 Git 파일 대신 shard 단위 JSONL/CSV를 사용하며 필요하면 압축한다.
+- 과거 archive 결과를 새 연구 결과에 혼합하지 않는다.
 
-연구 번호는 결과가 서로 섞이지 않도록 고정한다.
+## 현재 1연구 상태
 
-- `01_exploratory`: 1연구. 광범위 탐색 및 후속 연구 후보 선별.
-- `02_...`, `03_...`: 1연구에서 발견한 현상을 정밀 검증하는 후속 연구.
+```text
+study_id = crown-mast-study-01-exploratory-v1
+87 rosters × 27 growth × 12 environments = 28,188 scenarios
+execution model gates = 0
+execution_ready = true
+status = design-frozen-execution-unapproved
+```
 
-후속 연구의 실제 주제가 확정되면 placeholder 대신 주제를 반영한 디렉터리를 새로 만든다.
+최종 실행 전 검증은 완료됐으나 공식 28,188 scenario 전투 batch는 아직 실행하지 않았다.
 
 ## 실행 정책
 
-현재는 **저장 구조와 문서 틀만 준비하는 단계**다.
-
-- 공식/대규모 연구 실행 금지
-- 사용자 명시 승인 전 scenario batch 실행 금지
-- 과거 archive 결과를 새 연구의 근거값으로 재사용 금지
-- `main` 수정 또는 병합 금지
+사용자의 명시 승인 전에는 공식 batch를 실행하지 않는다. 승인 후 실행 commit SHA와 `run_id`, manifest를 먼저 동결하고 그 다음 전투 계산을 시작한다. `main`은 수정하거나 병합하지 않는다.
