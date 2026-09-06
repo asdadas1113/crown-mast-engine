@@ -125,7 +125,8 @@ class CharacterCatalogTests(unittest.TestCase):
         self.assertEqual(scarlet.weapon.weapon_type, "RL")
         self.assertEqual(scarlet.weapon.normal_attack_pct, 57.29)
         self.assertEqual(scarlet.weapon.ammo, 9)
-        self.assertEqual(scarlet.weapon.reload_frames, 152)
+        self.assertEqual(scarlet.weapon.reload_frames, 120)
+        self.assertEqual(scarlet.weapon.reload_start_delay_frames, 12)
         self.assertEqual(scarlet.weapon.charge_frames, 18)
         self.assertEqual(scarlet.weapon.charge_multiplier_pct, 150)
         self.assertEqual(scarlet.weapon.charge_release_recovery_frames, 26)
@@ -208,7 +209,6 @@ class CharacterCatalogTests(unittest.TestCase):
 
         main_buffs = result.resolved_offensive_buffs(6.0, main)
         secondary_buffs = result.resolved_offensive_buffs(6.0, secondary)
-
         crown_flat = 78_707 * 0.6451
         mast_flat = 98_367 * 0.3502
         self.assertAlmostEqual(main_buffs.caster_atk_flat, crown_flat + mast_flat)

@@ -464,10 +464,9 @@ class BreakEvenCaseTests(unittest.TestCase):
         self.assertIsNone(result.break_even_main_share_c)
         self.assertFalse(result.has_scaling_break_even)
         self.assertFalse(result.has_share_break_even)
-        with self.assertRaisesRegex(ValueError, "does not have a standard break-even"):
+        with self.assertRaisesRegex(ValueError, "break-even main share is unavailable"):
             result.require_break_even_main_share_c()
-        with self.assertRaisesRegex(ValueError, "does not have a standard break-even"):
-            _ = result.funnel_wins_above_break_even
+        self.assertIsNone(result.funnel_wins_above_break_even)
 
     def test_conventional_dominates(self) -> None:
         result = compare_damage_totals(r_c=100, r_f=90, o_c=100, o_f=95)
@@ -480,7 +479,7 @@ class BreakEvenCaseTests(unittest.TestCase):
 
     def test_tied_policy_response_without_global_tie(self) -> None:
         result = compare_damage_totals(r_c=100, r_f=100, o_c=110, o_f=100)
-        self.assertEqual(result.comparison_case, ComparisonCase.NO_SCALING_BREAK_EVEN)
+        self.assertEqual(result.comparison_case, ComparisonCase.CONVENTIONAL_DOMINATES)
         self.assertEqual(result.observed_winner, RotationWinner.CONVENTIONAL)
         self.assertIsNone(result.lambda_star)
         self.assertIsNone(result.break_even_main_share_c)
@@ -490,30 +489,39 @@ class BreakEvenCaseTests(unittest.TestCase):
     def test_equal_rotations(self) -> None:
         result = compare_damage_totals(r_c=100, r_f=100, o_c=100, o_f=100)
         self.assertEqual(result.comparison_case, ComparisonCase.EQUAL)
-        self.assertEqual(result.observed_winner, RotationWinner.EQUAL)
+        self.assertEqual(result.observed_winner, RotationWinner.TIE)
         self.assertIsNone(result.lambda_star)
         self.assertIsNone(result.break_even_main_share_c)
 
     def test_scaling_break_even_without_valid_share_break_even(self) -> None:
         result = compare_damage_totals(r_c=0, r_f=10, o_c=100, o_f=90)
-        self.assertEqual(result.comparison_case, ComparisonCase.SCALING_BREAK_EVEN_ONLY)
+        self.assertEqual(result.comparison_case, ComparisonCase.STANDARD_BREAK_EVEN)
         self.assertEqual(result.lambda_star, 1)
         self.assertIsNone(result.break_even_main_share_c)
         self.assertTrue(result.has_scaling_break_even)
         self.assertFalse(result.has_share_break_even)
+        self.assertEqual(
+            result.break_even_direction,
+            BreakEvenDirection.FUNNEL_ABOVE,
+        )
 
     def test_observed_tie_uses_explicit_epsilon(self) -> None:
         result = compare_damage_totals(r_c=100, r_f=100 + 1e-10, o_c=0, o_f=0)
-        self.assertEqual(result.observed_winner, RotationWinner.EQUAL)
+        self.assertEqual(result.observed_winner, RotationWinner.TIE)
 
-    def test_negative_scaling_is_rejected(self) -> None:
+    def test_reverse_break_even_is_explicit(self) -> None:
         result = compare_damage_totals(r_c=100, r_f=90, o_c=100, o_f=120)
-        self.assertEqual(result.comparison_case, ComparisonCase.NO_SCALING_BREAK_EVEN)
+        self.assertEqual(result.comparison_case, ComparisonCase.REVERSE_BREAK_EVEN)
         self.assertEqual(result.observed_winner, RotationWinner.FUNNEL)
-        self.assertIsNone(result.lambda_star)
-        self.assertIsNone(result.break_even_main_share_c)
-        self.assertFalse(result.has_scaling_break_even)
-        self.assertFalse(result.has_share_break_even)
+        self.assertEqual(result.lambda_star, 2)
+        self.assertAlmostEqual(result.break_even_main_share_c, 2 / 3)
+        self.assertTrue(result.has_scaling_break_even)
+        self.assertTrue(result.has_share_break_even)
+        self.assertEqual(
+            result.break_even_direction,
+            BreakEvenDirection.FUNNEL_BELOW,
+        )
+        self.assertFalse(result.funnel_wins_above_break_even)
 
 
 if __name__ == "__main__":
