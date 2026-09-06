@@ -13,16 +13,16 @@ archive/pre-revalidation-2026-09-05/research_results/
 ## 현재 읽을 것
 
 ```text
-RESEARCH_STATUS_2026-09-05.md
 ../docs/CURRENT_RESEARCH_HANDOFF_2026-09-06.md
 ../docs/SOURCE_VALIDATION_POLICY.md
 studies/README.md
 studies/01_exploratory/human/01_연구_설계_초안.md
 studies/01_exploratory/human/02_연구_실행_재현성_및_기록_규격.md
 studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
-studies/01_exploratory/validation/01_연구_인프라_보강_검증_2026-09-06.md
-studies/01_exploratory/validation/02_저장소_정리_점검_2026-09-06.md
+studies/01_exploratory/validation/05_최종_실행전_검증_2026-09-06.md
 ```
+
+`RESEARCH_STATUS_2026-09-05.md`는 9월 5일 당시의 역사적 checkpoint이며 현재 실행 설계의 canonical 상태 문서가 아니다.
 
 ## 새 연구 저장 원칙
 
@@ -32,13 +32,13 @@ studies/01_exploratory/validation/02_저장소_정리_점검_2026-09-06.md
 - `machine/`: manifest, scenario, raw, aggregate, provenance
 - `validation/`: 표본 검증, 민감도 점검, 이상치 재현, focused regression 기록
 
-프로젝트 전체 pytest 코드는 루트 `tests/`에 유지한다.
+프로젝트 전체 테스트 코드는 루트 `tests/`에 유지한다.
 
 ## 1연구의 역할
 
 1연구는 보편적인 단일 임계값이나 최적 운용 규칙을 확정하는 것이 아니라, **대표적인 Crown/Mast 통제 조건에서 광범위한 조합을 탐색하고 우세 경향과 예외를 찾은 뒤 후속 연구 후보를 고르는 단계**다.
 
-현재 canonical 설계:
+canonical 설계:
 
 ```text
 studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
@@ -98,9 +98,9 @@ g4-ol5-sr15-e4-a4-ammo3
 - 전체 **28,188 scenarios**
 - Crown/Mast OL5 + SR15 대표 build 고정
 
-## 실행 전 model gate
+## model gate 상태
 
-다음 선택 캐릭터는 공식 실행 전 model-specific 재검증이 필요하다.
+공식 실행 전 재검증 대상으로 지정했던 다음 세 캐릭터의 gate는 모두 닫혔다.
 
 ```text
 moran-favorite-item
@@ -108,7 +108,36 @@ scarlet-black-shadow
 liberalio
 ```
 
-후보군에는 포함하지만 이 gate가 닫히기 전에는 공식 aggregate를 실행하지 않는다.
+현재:
+
+```text
+execution_gated_actors = []
+execution_ready = true
+status = design-frozen-execution-unapproved
+```
+
+`execution_ready=true`는 사용자 승인과 별개다.
+
+## 최종 실행 전 검증
+
+```text
+GitHub Actions run: 34002759044
+job: 101404457366
+result: success
+```
+
+- focused: **68/68**
+- full regression: **322/322**
+- no-simulation case-generation preflight: **28,188/28,188**
+- 87 rosters / 27 growth / 12 environments
+- execution model gates: 0
+- simulation executed: **no**
+
+상세:
+
+```text
+studies/01_exploratory/validation/05_최종_실행전_검증_2026-09-06.md
+```
 
 ## 기존 `runs/` 영역
 
@@ -116,16 +145,15 @@ liberalio
 
 ## 현재 실행 상태
 
-현재는 **후보군·성장설계 재동결 / 실행 gate 재검증 필요 / 실행 미승인** 단계다.
+현재는 **설계 동결 / model gate 종료 / 실행 준비 완료 / 실행 미승인** 단계다.
 
 - 공식/대규모 연구 실행: 미승인
-- 28,188 scenario 1연구 batch: 미실행
+- 28,188 scenario 1연구 전투 batch: 미실행
 - study ID: 동결
-- generator 후보군 및 성장 grid: 갱신
-- 실제 run ID: 미생성
+- generator 후보군 및 성장 grid: 검증 완료
+- 실제 공식 run ID: 미생성
 - 실제 manifest: 미생성
 - 결과 파일: 없음
-- Moran/SBS/Liberalio 재검증: 필요
 
 사용자의 별도 명시 승인 전에는 공식/대규모 batch를 실행하지 않는다.
 
