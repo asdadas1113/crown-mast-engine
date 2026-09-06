@@ -205,7 +205,12 @@ class CollectionProfile:
     def __post_init__(self) -> None:
         if self.stage == "none":
             return
-        grade = "SR" if self.stage.startswith("SR") else "R"
+        if self.stage.startswith("SR"):
+            grade = "SR"
+        elif self.stage.startswith("R"):
+            grade = "R"
+        else:
+            raise ValueError("collection stage must be none, R0~R15, or SR0~SR15")
         level_text = self.stage[len(grade):]
         if not level_text.isdigit() or not 0 <= int(level_text) <= 15:
             raise ValueError("collection stage must be none, R0~R15, or SR0~SR15")
@@ -214,7 +219,11 @@ class CollectionProfile:
     def grade(self) -> str | None:
         if self.stage == "none":
             return None
-        return "SR" if self.stage.startswith("SR") else "R"
+        if self.stage.startswith("SR"):
+            return "SR"
+        if self.stage.startswith("R"):
+            return "R"
+        raise ValueError("collection stage must be none, R0~R15, or SR0~SR15")
 
     @property
     def level(self) -> int | None:

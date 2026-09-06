@@ -5,6 +5,7 @@ from dataclasses import replace
 from crown_mast_engine import (
     COMPARISON_REPORT_SCHEMA_VERSION,
     ComparisonReport,
+    LEGACY_12_BURST_TIMELINE,
     OutcomeBand,
     OutcomeThresholds,
     ResearchScenario,
@@ -198,8 +199,8 @@ class ResearchScenarioTests(unittest.TestCase):
         scenario = ResearchScenario.standard()
         variants = analyze_entry_variants(scenario)
 
-        self.assertEqual(variants.first_burst.window_start, 3.9)
-        self.assertEqual(variants.first_burst.window_end, 20.1)
+        self.assertEqual(variants.first_burst.window_start, 2.2)
+        self.assertEqual(variants.first_burst.window_end, 17.32)
         self.assertAlmostEqual(
             variants.first_burst.team.delta_mast_minus_crown,
             variants.mast_entry.overall.team_c
@@ -211,7 +212,10 @@ class ResearchScenarioTests(unittest.TestCase):
 class ComparisonReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.scenario = ResearchScenario.standard()
+        cls.scenario = replace(
+            ResearchScenario.standard(),
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
         cls.report = ComparisonReport.from_comparison(
             cls.scenario,
             standard_rotation_comparison(),

@@ -40,7 +40,7 @@ from .mechanics import (
 )
 from .models import BattleEvent, CycleSnapshot, DamageCategory, EventType, TeamRoster
 from .rotations import RotationPolicy
-from .timeline import STANDARD_TIMELINE, BurstCycle
+from .timeline import RAID14_TIMELINE, BurstCycle
 
 
 @dataclass
@@ -185,7 +185,7 @@ class CrownMastEngine:
         self,
         policy: RotationPolicy,
         roster: TeamRoster | None = None,
-        timeline: tuple[BurstCycle, ...] = STANDARD_TIMELINE,
+        timeline: tuple[BurstCycle, ...] = RAID14_TIMELINE,
         catalog: CharacterCatalog = STANDARD_CHARACTER_CATALOG,
         builds: Mapping[str, BuildProfile] | None = None,
         combat_settings: CombatSettings = STANDARD_COMBAT_SETTINGS,
@@ -1042,7 +1042,7 @@ class CrownMastEngine:
 def simulate_rotation(
     policy: RotationPolicy,
     roster: TeamRoster | None = None,
-    timeline: tuple[BurstCycle, ...] = STANDARD_TIMELINE,
+    timeline: tuple[BurstCycle, ...] = RAID14_TIMELINE,
     catalog: CharacterCatalog = STANDARD_CHARACTER_CATALOG,
     builds: Mapping[str, BuildProfile] | None = None,
     combat_settings: CombatSettings = STANDARD_COMBAT_SETTINGS,

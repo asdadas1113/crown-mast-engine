@@ -102,6 +102,13 @@ class InterfaceTests(unittest.TestCase):
         self.assertIn("web/vendor/*.js", patterns)
         self.assertIn("web/vendor/*.txt", patterns)
 
+    def test_interface_copy_does_not_present_legacy_twelve_burst_as_active(self) -> None:
+        for asset in ("index.html", "app.js"):
+            with self.subTest(asset=asset):
+                payload = (WEB_ROOT / asset).read_text(encoding="utf-8")
+                self.assertNotIn("12버스트", payload)
+                self.assertIn("14버스트", payload)
+
     def test_checkpoint_aggregate_preserves_ranges_groups_and_extremes(self) -> None:
         def result(case_id, b1, dealer, change, share, break_even, c_share, f_share):
             margin = share - break_even

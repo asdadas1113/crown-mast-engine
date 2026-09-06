@@ -29,6 +29,15 @@ simulation executed: no
 
 즉 모델·회귀·case generator의 기술적 gate는 닫혔지만 공식 28,188 scenario 전투 batch는 아직 실행하지 않았다.
 
+## 활성 시간축
+
+- 엔진과 연구 API의 기본 시간축은 `RAID14_TIMELINE`이며 180초·14버스트를 사용한다.
+- `STANDARD_TIMELINE`도 `RAID14_TIMELINE`의 호환 별칭이다.
+- 폐기된 12버스트 시간축은 과거 결과 재현 전용 `LEGACY_12_BURST_TIMELINE`으로만 남긴다.
+- 사용자가 현재 요청에서 12버스트 재현을 명시적으로 지시하지 않는 한 어떤 분석·연구·테스트·신규 코드에서도 `LEGACY_12_BURST_TIMELINE`을 절대 사용하지 않는다.
+- 12버스트 재현이 명시적으로 요청된 경우에만 `timeline=LEGACY_12_BURST_TIMELINE`을 직접 지정한다.
+- `archive/` 아래의 코드와 문서는 활성 엔진 기준으로 사용하지 않는다.
+
 ## 1연구 목적
 
 1연구는 하나의 보편적 최적 운용 규칙을 확정하는 연구가 아니다.

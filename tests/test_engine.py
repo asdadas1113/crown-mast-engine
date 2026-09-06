@@ -8,6 +8,7 @@ from crown_mast_engine.rotations import (
     OPENING_MAST_SUSTAINED_FUNNEL,
     SUSTAINED_FUNNEL,
 )
+from crown_mast_engine.timeline import LEGACY_12_BURST_TIMELINE
 from tests.simulation_fixtures import (
     standard_conventional_result,
     standard_funnel_result,
@@ -37,7 +38,10 @@ class CrownMastEngineTests(unittest.TestCase):
             + ("crown", "crown", "mast") * 3
             + ("crown", "mast"),
         )
-        result = simulate_rotation(OPENING_MAST_CROWN_MAST)
+        result = simulate_rotation(
+            OPENING_MAST_CROWN_MAST,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
         mast_casts = [snapshot for snapshot in result.snapshots if snapshot.b2_actor == result.roster.mast]
         self.assertEqual([snapshot.cycle for snapshot in mast_casts], [1, 3, 6, 9, 12])
         self.assertEqual([snapshot.mast_stack_at_b2 for snapshot in mast_casts], [1, 3, 3, 3, 3])

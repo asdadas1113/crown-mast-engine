@@ -1,6 +1,6 @@
 import unittest
 
-from crown_mast_engine import simulate_rotation
+from crown_mast_engine import LEGACY_12_BURST_TIMELINE, simulate_rotation
 from crown_mast_engine.character_mechanics import STANDARD_SKILL_HOOKS
 from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
@@ -15,7 +15,11 @@ class CinderellaMechanicsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.actor = "cinderella"
-        cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=CINDERELLA_ROSTER)
+        cls.result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=CINDERELLA_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
 
     def test_catalog_matches_audited_original_cinderella(self) -> None:
         definition = STANDARD_CHARACTER_CATALOG.require(self.actor)

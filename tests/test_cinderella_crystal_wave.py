@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import replace
 
-from crown_mast_engine import simulate_rotation
+from crown_mast_engine import LEGACY_12_BURST_TIMELINE, simulate_rotation
 from crown_mast_engine.combat import STANDARD_COMBAT_SETTINGS
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
@@ -13,7 +13,11 @@ CCW_ROSTER = TeamRoster(main_b3="cinderella-crystal-wave")
 class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=CCW_ROSTER)
+        cls.result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=CCW_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
         cls.actor = "cinderella-crystal-wave"
 
     def test_standard_data_matches_cross_checked_mg_basis(self) -> None:
@@ -61,6 +65,7 @@ class CinderellaCrystalWaveMechanicsTests(unittest.TestCase):
         core_result = simulate_rotation(
             CROWN_CROWN_MAST,
             roster=CCW_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
             combat_settings=replace(STANDARD_COMBAT_SETTINGS, core_hit_rate_pct=100.0),
         )
         normal = next(

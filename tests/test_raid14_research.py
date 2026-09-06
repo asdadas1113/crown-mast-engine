@@ -2,6 +2,7 @@ import unittest
 from dataclasses import replace
 
 from crown_mast_engine import (
+    LEGACY_12_BURST_TIMELINE,
     RAID14_TIMELINE,
     ResearchScenario,
     analyze_entry_variants,
@@ -55,7 +56,11 @@ class Raid14ResearchTests(unittest.TestCase):
         self.assertAlmostEqual(funnel_delta, entry_delta, delta=1e-4)
 
     def test_raid14_changes_break_even_without_changing_winner(self) -> None:
-        legacy = analyze_entry_variants(ResearchScenario.standard()).crown_entry.overall
+        legacy_scenario = replace(
+            ResearchScenario.standard(),
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
+        legacy = analyze_entry_variants(legacy_scenario).crown_entry.overall
         raid14 = analyze_entry_variants(self.scenario()).crown_entry.overall
 
         self.assertLess(legacy.team_relative_change, 0.0)

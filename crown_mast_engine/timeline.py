@@ -16,7 +16,9 @@ class BurstCycle:
     b3_slot: str
 
 
-STANDARD_TIMELINE: tuple[BurstCycle, ...] = (
+# Historical reproduction only. Never use this timeline for analysis, research,
+# tests, or new code unless the user explicitly requests a 12-burst reproduction.
+LEGACY_12_BURST_TIMELINE: tuple[BurstCycle, ...] = (
     BurstCycle(1, 3.9, 4.3, 4.8, 5.1, 15.1, "main_b3"),
     BurstCycle(2, 18.3, 18.7, 19.3, 19.6, 29.6, "secondary_b3"),
     BurstCycle(3, 32.7, 33.3, 33.9, 34.3, 44.3, "main_b3"),
@@ -36,7 +38,7 @@ def build_uniform_burst_timeline(
     *,
     cycle_count: int,
     interval_sec: float,
-    first_cycle: BurstCycle = STANDARD_TIMELINE[0],
+    first_cycle: BurstCycle | None = None,
     b3_slots: Sequence[str] = ("main_b3", "secondary_b3"),
 ) -> tuple[BurstCycle, ...]:
     """Build a timeline by shifting one measured first cycle at a fixed interval.
@@ -53,6 +55,11 @@ def build_uniform_burst_timeline(
         raise ValueError("cycle_count must be a positive integer")
     if not isfinite(interval_sec) or interval_sec <= 0:
         raise ValueError("interval_sec must be finite and positive")
+
+    # Omitting the anchor must follow the active RAID14 baseline. The legacy
+    # 12-burst anchor remains available only through an explicit argument.
+    if first_cycle is None:
+        first_cycle = RAID14_FIRST_CYCLE
 
     slots = tuple(b3_slots)
     if not slots:
@@ -106,3 +113,7 @@ RAID14_TIMELINE: tuple[BurstCycle, ...] = build_uniform_burst_timeline(
     interval_sec=RAID14_INTERVAL_SEC,
     first_cycle=RAID14_FIRST_CYCLE,
 )
+
+# Public defaults use the sole active research baseline. Keep the old timeline
+# under an unmistakably explicit name for reproducibility of archived results.
+STANDARD_TIMELINE: tuple[BurstCycle, ...] = RAID14_TIMELINE

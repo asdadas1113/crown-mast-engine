@@ -16,6 +16,7 @@ from crown_mast_engine.engine import simulate_rotation
 from crown_mast_engine.mechanics import SkillHookRegistry
 from crown_mast_engine.models import DamageCategory
 from crown_mast_engine.rotations import CROWN_CROWN_MAST, SUSTAINED_FUNNEL
+from crown_mast_engine.timeline import LEGACY_12_BURST_TIMELINE
 from tests.simulation_fixtures import standard_rotation_comparison
 
 
@@ -297,6 +298,7 @@ class RotationAnalysisTests(unittest.TestCase):
     def test_common_damage_scalar_preserves_relative_analysis(self) -> None:
         scalar = 1.37
         scaled = analyze_rotations(
+            timeline=LEGACY_12_BURST_TIMELINE,
             combat_settings=replace(
                 self.analysis.conventional_result.combat_settings,
                 element_multiplier=scalar,
@@ -406,7 +408,9 @@ class RotationAnalysisTests(unittest.TestCase):
 class MastExpectedHitLossSensitivityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.results = analyze_mast_expected_hit_loss_sensitivity()
+        cls.results = analyze_mast_expected_hit_loss_sensitivity(
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
 
     def test_default_sweep_preserves_baseline_and_order(self) -> None:
         self.assertEqual(tuple(self.results), (0.0, 18.0, 20.0, 22.0))

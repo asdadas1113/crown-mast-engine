@@ -1,6 +1,6 @@
 import unittest
 
-from crown_mast_engine import CombatSettings, simulate_rotation
+from crown_mast_engine import CombatSettings, LEGACY_12_BURST_TIMELINE, simulate_rotation
 from crown_mast_engine.models import DamageCategory, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
 
@@ -15,11 +15,13 @@ class NeonVisionEyeMechanicsTests(unittest.TestCase):
         cls.result = simulate_rotation(
             CROWN_CROWN_MAST,
             roster=ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
             combat_settings=CombatSettings(boss_def=0),
         )
         cls.secondary_result = simulate_rotation(
             CROWN_CROWN_MAST,
             roster=TeamRoster(secondary_b3=ACTOR),
+            timeline=LEGACY_12_BURST_TIMELINE,
             combat_settings=CombatSettings(boss_def=0),
         )
 

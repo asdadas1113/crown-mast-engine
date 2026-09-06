@@ -3,6 +3,7 @@ import unittest
 from crown_mast_engine import (
     BuildProfile,
     GearState,
+    LEGACY_12_BURST_TIMELINE,
     OverloadProfile,
     RotationWinner,
     analyze_rotations,
@@ -40,6 +41,7 @@ class OverloadIntegrationTests(unittest.TestCase):
         cls.results = {
             name: analyze_rotations(
                 roster=cls.roster,
+                timeline=LEGACY_12_BURST_TIMELINE,
                 builds=builds,
                 combat_settings=settings,
                 main_actor="rapi-red-hood",

@@ -37,7 +37,7 @@ from .rotations import (
     SUSTAINED_FUNNEL,
     baseline_rotation as resolve_baseline_rotation,
 )
-from .timeline import STANDARD_TIMELINE, BurstCycle
+from .timeline import RAID14_TIMELINE, BurstCycle
 
 
 RESEARCH_SCENARIO_SCHEMA_VERSION = 2
@@ -109,7 +109,7 @@ class ResearchScenario:
     combat_settings: CombatSettings
     main_actor: str
     baseline_rotation: str = CROWN_CROWN_MAST.name
-    timeline: tuple[BurstCycle, ...] = STANDARD_TIMELINE
+    timeline: tuple[BurstCycle, ...] = RAID14_TIMELINE
     thresholds: OutcomeThresholds = OutcomeThresholds()
     expected_engine_rule_revision: str = ENGINE_RULE_REVISION
     expected_skill_hook_revision: str = (

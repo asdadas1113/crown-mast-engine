@@ -4,6 +4,7 @@ from crown_mast_engine.characters import STANDARD_CHARACTER_CATALOG
 from crown_mast_engine.engine import simulate_rotation
 from crown_mast_engine.equipment import BuildProfile, GearState, OverloadProfile
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
+from crown_mast_engine.timeline import LEGACY_12_BURST_TIMELINE
 from tests.simulation_fixtures import (
     standard_conventional_result,
     standard_funnel_result,
@@ -224,6 +225,7 @@ class CharacterCatalogTests(unittest.TestCase):
     def test_ol5_gear_changes_caster_atk_flat_from_resolved_static_atk(self) -> None:
         result = simulate_rotation(
             CROWN_CROWN_MAST,
+            timeline=LEGACY_12_BURST_TIMELINE,
             builds={"crown": BuildProfile.uniform(GearState.OL5)},
         )
         expected_static = 72_828 + 10_935
@@ -236,6 +238,7 @@ class CharacterCatalogTests(unittest.TestCase):
     def test_caster_atk_flat_does_not_include_caster_overload_atk_lines(self) -> None:
         result = simulate_rotation(
             CROWN_CROWN_MAST,
+            timeline=LEGACY_12_BURST_TIMELINE,
             builds={
                 "crown": BuildProfile.uniform(
                     GearState.OL5,

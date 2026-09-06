@@ -115,6 +115,7 @@ from .samples import (
     run_sample_batch,
 )
 from .timeline import (
+    LEGACY_12_BURST_TIMELINE,
     RAID14_CYCLE_COUNT,
     RAID14_FIRST_B1_TIME,
     RAID14_FIRST_CYCLE,
@@ -174,6 +175,7 @@ __all__ = [
     "LiberalioSkillHook",
     "LiterSkillHook",
     "LittleMermaidSkillHook",
+    "LEGACY_12_BURST_TIMELINE",
     "MechanicsSignature",
     "MoranFavoriteItemSkillHook",
     "NeonVisionEyeSkillHook",

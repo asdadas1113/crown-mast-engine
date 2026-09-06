@@ -1,7 +1,7 @@
 import unittest
 from collections import Counter
 
-from crown_mast_engine import simulate_rotation
+from crown_mast_engine import LEGACY_12_BURST_TIMELINE, simulate_rotation
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
 
@@ -12,7 +12,11 @@ RAVEN_ROSTER = TeamRoster(main_b3="raven")
 class RavenMechanicsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=RAVEN_ROSTER)
+        cls.result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=RAVEN_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
         cls.actor = "raven"
 
     def test_standard_data_matches_pinned_raven_datamine(self) -> None:

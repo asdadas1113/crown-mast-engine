@@ -1,6 +1,6 @@
 import unittest
 
-from crown_mast_engine import CombatSettings, simulate_rotation
+from crown_mast_engine import CombatSettings, LEGACY_12_BURST_TIMELINE, simulate_rotation
 from crown_mast_engine.models import DamageCategory, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
 
@@ -15,6 +15,7 @@ class EpinelMechanicsTests(unittest.TestCase):
         cls.result = simulate_rotation(
             CROWN_CROWN_MAST,
             roster=ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
             combat_settings=CombatSettings(boss_def=0, duration_sec=40),
         )
         cls.normals = cls.result.damage_events_for(

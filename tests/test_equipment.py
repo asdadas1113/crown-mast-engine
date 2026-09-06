@@ -24,7 +24,7 @@ class EquipmentTests(unittest.TestCase):
         )
 
     def test_collection_stage_rejects_unknown_grade_or_level(self) -> None:
-        for stage in ("SSR15", "R16", "SR-1", "unknown"):
+        for stage in ("SSR15", "X15", "R16", "SR-1", "unknown"):
             with self.subTest(stage=stage):
                 with self.assertRaises(ValueError):
                     CollectionProfile(stage)

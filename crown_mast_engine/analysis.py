@@ -20,7 +20,7 @@ from .rotations import (
     SUSTAINED_FUNNEL,
     RotationPolicy,
 )
-from .timeline import STANDARD_TIMELINE, BurstCycle
+from .timeline import RAID14_TIMELINE, BurstCycle
 
 
 class ComparisonCase(str, Enum):
@@ -498,7 +498,7 @@ def compare_rotation_results(
 def analyze_rotations(
     *,
     roster: TeamRoster | None = None,
-    timeline: tuple[BurstCycle, ...] = STANDARD_TIMELINE,
+    timeline: tuple[BurstCycle, ...] = RAID14_TIMELINE,
     catalog: CharacterCatalog = STANDARD_CHARACTER_CATALOG,
     builds: Mapping[str, BuildProfile] | None = None,
     combat_settings: CombatSettings = STANDARD_COMBAT_SETTINGS,
@@ -534,7 +534,7 @@ def analyze_mast_expected_hit_loss_sensitivity(
     loss_per_stack_values: tuple[float, ...] = (0.0, 18.0, 20.0, 22.0),
     *,
     roster: TeamRoster | None = None,
-    timeline: tuple[BurstCycle, ...] = STANDARD_TIMELINE,
+    timeline: tuple[BurstCycle, ...] = RAID14_TIMELINE,
     catalog: CharacterCatalog = STANDARD_CHARACTER_CATALOG,
     builds: Mapping[str, BuildProfile] | None = None,
     combat_settings: CombatSettings = STANDARD_COMBAT_SETTINGS,

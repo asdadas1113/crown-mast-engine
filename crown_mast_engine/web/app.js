@@ -551,7 +551,7 @@ async function calculateBatch() {
     $("#error-state").hidden = false;
   } finally {
     $("#loading-state").hidden = true;
-    $("#loading-state p").textContent = "12버스트 구간을 계산하고 있습니다.";
+    $("#loading-state p").textContent = "14버스트 RAID14 구간을 계산하고 있습니다.";
     batchButton.disabled = false;
     calculateButton.disabled = false;
   }

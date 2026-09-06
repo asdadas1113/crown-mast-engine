@@ -1,6 +1,10 @@
 import unittest
 
-from crown_mast_engine import analyze_rotations, simulate_rotation
+from crown_mast_engine import (
+    LEGACY_12_BURST_TIMELINE,
+    analyze_rotations,
+    simulate_rotation,
+)
 from crown_mast_engine.combat import FPS
 from crown_mast_engine.models import DamageCategory, EventType, TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
@@ -12,7 +16,11 @@ SBS_ROSTER = TeamRoster(secondary_b3="scarlet-black-shadow")
 class ScarletBlackShadowMechanicsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.result = simulate_rotation(CROWN_CROWN_MAST, roster=SBS_ROSTER)
+        cls.result = simulate_rotation(
+            CROWN_CROWN_MAST,
+            roster=SBS_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
 
     def test_skill1_cycles_three_distinct_phases_outside_own_burst(self) -> None:
         procs = [
@@ -108,7 +116,10 @@ class ScarletBlackShadowMechanicsTests(unittest.TestCase):
 class ScarletBlackShadowAnalysisTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.analysis = analyze_rotations(roster=SBS_ROSTER)
+        cls.analysis = analyze_rotations(
+            roster=SBS_ROSTER,
+            timeline=LEGACY_12_BURST_TIMELINE,
+        )
 
     def test_strong_distributed_secondary_still_favors_conventional(self) -> None:
         overall = self.analysis.overall

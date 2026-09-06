@@ -5,7 +5,7 @@ from crown_mast_engine.combat import CombatSettings
 from crown_mast_engine.engine import simulate_rotation
 from crown_mast_engine.models import TeamRoster
 from crown_mast_engine.rotations import CROWN_CROWN_MAST
-from crown_mast_engine.timeline import BurstCycle
+from crown_mast_engine.timeline import BurstCycle, LEGACY_12_BURST_TIMELINE
 
 
 def simulate_b1(slug: str, *, catalog=STANDARD_CHARACTER_CATALOG):
@@ -13,6 +13,7 @@ def simulate_b1(slug: str, *, catalog=STANDARD_CHARACTER_CATALOG):
         CROWN_CROWN_MAST,
         roster=TeamRoster(b1=slug),
         catalog=catalog,
+        timeline=LEGACY_12_BURST_TIMELINE,
     )
 
 
