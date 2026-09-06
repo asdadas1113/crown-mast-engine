@@ -1,0 +1,509 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "level": 400,
+    "gear": "Base-5",
+    "core": 7,
+    "skill_levels": [10, 10, 10],
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3; nikke.gg+moris-cross-check@2026-08-31; neon-vision-eye@nikkesim.app+nikke.gg+Jgaram/nikke-calc@2026-08-31"
+  },
+  "characters": [
+    {
+      "slug": "liter",
+      "name": "Liter",
+      "unit_class": "Supporter",
+      "burst_stage": "I",
+      "burst_cooldown_sec": 20.0,
+      "element": "Iron",
+      "progression_atk": 91018.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SMG",
+        "normal_attack_pct": 8.73,
+        "core_attack_pct": 200.0,
+        "ammo": 120,
+        "reload_frames": 111,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.1
+      },
+      "skills": {
+        "skill1": {
+          "burst_cdr_once_sec": 2.34,
+          "burst_cdr_twice_sec": 2.7,
+          "burst_cdr_three_sec": 3.17,
+          "max_ammo_pct": 45.17,
+          "crit_damage_pct": 12.46,
+          "atk_pct": 14.42,
+          "duration_sec": 5.0
+        },
+        "skill2": {
+          "cover_hp_recovery_pct": 52.5
+        },
+        "burst": {
+          "atk_pct": 66.0,
+          "duration_sec": 5.0
+        }
+      }
+    },
+    {
+      "slug": "crown",
+      "name": "Crown",
+      "unit_class": "Defender",
+      "burst_stage": "II",
+      "burst_cooldown_sec": 20.0,
+      "element": "Iron",
+      "progression_atk": 72828.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "MG",
+        "normal_attack_pct": 5.57,
+        "core_attack_pct": 200.0,
+        "ammo": 300,
+        "reload_frames": 171,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.05
+      },
+      "skills": {
+        "skill1": {
+          "caster_atk_pct": 64.51,
+          "reload_speed_pct": 44.35,
+          "duration_sec": 15.0
+        },
+        "skill2": {
+          "relax_hits_per_stack": 43.0,
+          "max_relax_stacks": 20.0,
+          "heal_received_per_stack_pct": 4.06,
+          "self_recovery_max_hp_pct": 5.23,
+          "attack_damage_pct": 20.99,
+          "duration_sec": 7.0
+        },
+        "burst": {
+          "attack_damage_pct": 36.24,
+          "duration_sec": 15.0
+        }
+      }
+    },
+    {
+      "slug": "mast-romantic-maid",
+      "name": "Mast: Romantic Maid",
+      "unit_class": "Supporter",
+      "burst_stage": "II",
+      "burst_cooldown_sec": 40.0,
+      "element": "Water",
+      "progression_atk": 91018.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "MG",
+        "normal_attack_pct": 5.57,
+        "core_attack_pct": 200.0,
+        "ammo": 300,
+        "reload_frames": 171,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.05
+      },
+      "skills": {
+        "skill1": {
+          "max_drunken_stacks": 3.0,
+          "hit_rate_down_per_stack_pct": 20.0,
+          "expected_normal_damage_loss_per_stack_pct": 20.0,
+          "crit_rate_pct": 20.05,
+          "caster_atk_pct": 35.02
+        },
+        "skill2": {
+          "distributed_per_stack_pct": 15.03,
+          "reload_per_stack_pct": 15.04,
+          "duration_sec": 10.0,
+          "hangover_duration_sec": 10.0
+        },
+        "burst": {
+          "crit_damage_pct": 40.04,
+          "attack_damage_pct": 15.04,
+          "caster_atk_per_stack_pct": 20.06,
+          "duration_sec": 10.0
+        }
+      }
+    },
+    {
+      "slug": "scarlet-black-shadow",
+      "name": "Scarlet: Black Shadow",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Wind",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "RL",
+        "normal_attack_pct": 57.29,
+        "core_attack_pct": 200.0,
+        "ammo": 9,
+        "reload_frames": 152,
+        "charge_frames": 18,
+        "charge_multiplier_pct": 150.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 1.25
+      },
+      "skills": {
+        "skill1": {
+          "outside_phase_charge_count": 3.0,
+          "own_burst_phase_charge_count": 1.0,
+          "phase1_damage_pct": 283.03,
+          "phase2_distributed_damage_pct": 565.0,
+          "phase3_distributed_damage_pct": 848.03
+        },
+        "skill2": {
+          "max_ammo_pct": 60.0,
+          "duration_sec": 10.0,
+          "instant_reload_fraction_pct": 100.0
+        },
+        "burst": {
+          "atk_pct": 115.12,
+          "charge_damage_pct": 169.63,
+          "duration_sec": 10.0
+        }
+      }
+    },
+    {
+      "slug": "rapi-red-hood",
+      "name": "Rapi: Red Hood",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Fire",
+      "extra_advantage_against": ["Electric"],
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "MG",
+        "normal_attack_pct": 5.57,
+        "core_attack_pct": 200.0,
+        "ammo": 300,
+        "reload_frames": 171,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.05
+      },
+      "skills": {
+        "skill1": {
+          "atk_pct": 95.04,
+          "duration_sec": 10.0
+        },
+        "skill2": {
+          "normal_attack_count": 120.0,
+          "own_burst_attack_count": 60.0,
+          "attachment_damage_pct": 88.11,
+          "explosion_damage_pct": 88.11,
+          "projectile_attachment_pct": 150.72,
+          "projectile_explosion_pct": 100.6
+        },
+        "burst": {
+          "damage_pct": 2808.0,
+          "delay_sec": 0.4,
+          "required_pulls": 120.0,
+          "projectile_attachment_pct": 421.2,
+          "duration_sec": 10.0
+        }
+      }
+    },
+    {
+      "slug": "helm",
+      "name": "Helm (애장품)",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Water",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SR",
+        "normal_attack_pct": 69.04,
+        "core_attack_pct": 200.0,
+        "ammo": 6,
+        "reload_frames": 141,
+        "charge_frames": 60,
+        "charge_multiplier_pct": 250.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 2.8
+      },
+      "skills": {
+        "skill1": {
+          "crit_rate_normal_pct": 14.64,
+          "crit_duration_sec": 5.0
+        },
+        "skill2": {
+          "parts_damage_pct": 3.08,
+          "attack_damage_pct": 27.87,
+          "attack_damage_duration_sec": 10.0,
+          "full_charge_damage_pct": 178.98
+        },
+        "burst": {
+          "damage_pct": 8236.8,
+          "charge_damage_mult_pct": 158.4,
+          "charge_damage_rounds": 10.0,
+          "recovery_ticks": 10.0,
+          "recovery_interval_sec": 1.0
+        }
+      }
+    },
+    {
+      "slug": "anis-star",
+      "name": "Anis: Star",
+      "unit_class": "Defender",
+      "burst_stage": "I",
+      "burst_cooldown_sec": 20.0,
+      "element": "Electric",
+      "progression_atk": 72828.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "RL",
+        "normal_attack_pct": 61.3,
+        "core_attack_pct": 200.0,
+        "ammo": 6,
+        "reload_frames": 141,
+        "charge_frames": 60,
+        "charge_multiplier_pct": 250.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 1.25,
+        "charge_release_recovery_frames": 0
+      },
+      "skills": {
+        "skill1": {
+          "self_atk_pct": 40.01,
+          "full_charge_damage_pct": 120.13
+        },
+        "skill2": {
+          "caster_atk_pct": 35.01,
+          "projectile_explosion_pct": 92.03,
+          "attack_damage_pct": 34.0,
+          "duration_sec": 10.0
+        },
+        "burst": {
+          "shooting_star_damage_pct": 40.01,
+          "shooting_star_tick_interval_sec": 0.25,
+          "duration_sec": 10.0,
+          "fixed_charge_frames": 42.0,
+          "self_attack_damage_pct": 35.2
+        }
+      }
+    },
+    {
+      "slug": "moran-favorite-item",
+      "name": "Moran (Favorite Item)",
+      "unit_class": "Defender",
+      "burst_stage": "I",
+      "burst_cooldown_sec": 20.0,
+      "element": "Electric",
+      "progression_atk": 72828.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "AR",
+        "normal_attack_pct": 14.71,
+        "core_attack_pct": 200.0,
+        "ammo": 60,
+        "reload_frames": 111,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.1
+      },
+      "skills": {
+        "skill1": {
+          "weapon_swap_fifth_hit_damage_pct": 47.18
+        },
+        "burst": {
+          "weapon_swap_damage_pct": 14.7,
+          "weapon_swap_fire_rate": 24.0,
+          "caster_atk_pct": 42.57,
+          "duration_sec": 10.0,
+          "weapon_swap_modeled": 1.0
+        }
+      }
+    },
+    {
+      "slug": "little-mermaid",
+      "name": "Little Mermaid",
+      "unit_class": "Supporter",
+      "burst_stage": "I",
+      "burst_cooldown_sec": 20.0,
+      "element": "Wind",
+      "progression_atk": 91018.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SMG",
+        "normal_attack_pct": 10.12,
+        "core_attack_pct": 250.0,
+        "ammo": 120,
+        "reload_frames": 81,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.1
+      },
+      "skills": {
+        "skill1": {
+          "attack_damage_pct": 4.0,
+          "duration_sec": 10.0
+        },
+        "skill2": {
+          "damage_taken_pct": 5.05,
+          "bubble_wave_damage_pct": 63.36,
+          "bubble_wave_hits": 4.0,
+          "bubble_wave_interval_sec": 1.0,
+          "bubble_wave_ticks": 10.0,
+          "team_ammo_threshold": 500.0,
+          "bubble_barrage_damage_pct": 85.0,
+          "bubble_barrage_hits": 10.0
+        },
+        "burst": {
+          "attack_damage_pct": 10.13,
+          "ammo_charge_pct": 33.26,
+          "self_caster_atk_pct": 17.28,
+          "duration_sec": 10.0
+        }
+      }
+    },
+    {
+      "slug": "snow-white-heavy-arms",
+      "name": "Snow White: Heavy Arms",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Water",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SR",
+        "normal_attack_pct": 69.04,
+        "core_attack_pct": 200.0,
+        "ammo": 6,
+        "reload_frames": 141,
+        "charge_frames": 72,
+        "charge_multiplier_pct": 250.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 2.8
+      },
+      "skills": {
+        "skill1": {
+          "damage_taken_pct": 4.2,
+          "auto_fire_aoe_damage_pct": 41.9,
+          "auto_fire_sequential_damage_pct": 527.95,
+          "fully_active_extra_sequential_damage_pct": 1055.9
+        },
+        "skill2": {
+          "fixed_charge_frames": 72.0,
+          "full_charge_atk_pct": 46.84,
+          "full_charge_duration_sec": 5.0,
+          "b3_atk_pct": 73.92,
+          "b3_atk_duration_sec": 10.0,
+          "fully_active_charge_damage_pct": 528.0,
+          "fully_active_sequential_damage_pct": 158.4
+        },
+        "burst": {
+          "attack_damage_pct": 84.48,
+          "fully_active_charge_frames": 192.0,
+          "fully_active_shots": 2.0,
+          "duration_sec": 10.0
+        }
+      }
+    },
+    {
+      "slug": "epinel",
+      "name": "Epinel",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Wind",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "SMG",
+        "normal_attack_pct": 10.12,
+        "core_attack_pct": 250.0,
+        "ammo": 120,
+        "reload_frames": 81,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.1
+      },
+      "skills": {
+        "skill1": {
+          "total_noob_atk_pct_per_stack": 13.86,
+          "total_noob_max_stacks": 5.0,
+          "total_noob_duration_sec": 15.0,
+          "single_boss_kill_trigger_active": 0.0
+        },
+        "skill2": {
+          "crit_rate_pct": 5.05,
+          "crit_damage_pct": 6.4,
+          "duration_sec": 5.0
+        },
+        "burst": {
+          "damage_pct": 457.87,
+          "max_stack_extra_damage_pct": 457.87,
+          "single_boss_extra_hit_active": 0.0
+        }
+      }
+    },
+    {
+      "slug": "neon-vision-eye",
+      "name": "Neon: Vision Eye",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Electric",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "RL",
+        "normal_attack_pct": 61.3,
+        "core_attack_pct": 200.0,
+        "ammo": 6,
+        "reload_frames": 111,
+        "charge_frames": 60,
+        "charge_multiplier_pct": 250.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 1.5,
+        "charge_release_recovery_frames": 0
+      },
+      "skills": {
+        "skill1": {
+          "firepower_explosion_damage_pct": 437.98,
+          "super_firepower_extra_damage_pct": 262.79
+        },
+        "skill2": {
+          "normal_attack_gauge_gain": 2.0,
+          "charge_end_gauge_gain": 45.0,
+          "maximum_firepower_atk_pct": 80.04,
+          "super_firepower_atk_pct": 35.05,
+          "maximum_firepower_duration_sec": 10.0
+        },
+        "burst": {
+          "charge_start_gauge_gain": 1.0,
+          "super_firepower_attack_damage_pct": 45.03,
+          "attack_damage_pct": 110.21,
+          "duration_sec": 10.0
+        }
+      }
+    }
+  ]
+}

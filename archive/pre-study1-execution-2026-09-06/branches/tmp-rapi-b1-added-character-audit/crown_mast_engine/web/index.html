@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crown / Mast Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true">C/M</div>
+      <div>
+        <h1>Crown / Mast Lab</h1>
+        <p>크라운·메스트 운용 비교 엔진</p>
+      </div>
+    </div>
+    <div class="engine-state">
+      <span class="state-dot" aria-hidden="true"></span>
+      <span id="revision-label">엔진 불러오는 중</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="control-panel" aria-label="계산 조건">
+      <form id="calculator-form">
+        <section class="control-section">
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>파티 구성</h2>
+            </div>
+            <button class="icon-button" id="reset-button" type="button" title="기본값으로 초기화" aria-label="기본값으로 초기화">↺</button>
+          </div>
+          <div class="field-grid roster-fields">
+            <label>
+              <span>버스트 I</span>
+              <select id="b1-select" required></select>
+            </label>
+            <label>
+              <span>메인 딜러</span>
+              <select id="main-b3-select" required></select>
+            </label>
+            <label>
+              <span>서브 딜러</span>
+              <select id="secondary-b3-select" required></select>
+            </label>
+          </div>
+          <div class="fixed-line">
+            <span>고정</span>
+            <strong>Crown</strong>
+            <span class="separator">+</span>
+            <strong>Mast: Romantic Maid</strong>
+          </div>
+          <fieldset class="baseline-mode">
+            <legend>기준점 지도 기준 운용</legend>
+            <div id="baseline-options" class="segmented-control"></div>
+          </fieldset>
+        </section>
+
+        <section class="control-section build-section">
+          <div class="section-heading">
+            <div>
+              <span class="section-index">02</span>
+              <h2>장비와 오버로드</h2>
+            </div>
+          </div>
+          <div class="build-column-head" aria-hidden="true">
+            <span>캐릭터</span><span>소장품</span><span>공</span><span>우</span><span>장</span>
+          </div>
+          <div id="build-rows" class="build-rows"></div>
+        </section>
+
+        <section class="control-section">
+          <div class="section-heading">
+            <div>
+              <span class="section-index">03</span>
+              <h2>보스 조건</h2>
+            </div>
+          </div>
+          <div class="field-grid combat-fields">
+            <label>
+              <span>방어력</span>
+              <input id="boss-def" type="number" min="0" step="1" required>
+            </label>
+            <label>
+              <span>속성</span>
+              <select id="boss-element">
+                <option value="">속성 없음</option>
+              </select>
+            </label>
+            <label>
+              <span>코어 적중률 (%)</span>
+              <input id="core-rate" type="number" min="0" max="100" step="1" required>
+            </label>
+            <label>
+              <span>적정 사거리 보너스 (%)</span>
+              <input id="range-bonus" type="number" step="0.1" required>
+            </label>
+          </div>
+        </section>
+
+        <div class="action-buttons">
+          <button id="calculate-button" class="primary-button" type="submit">
+            <span class="button-label">네 운용 비교</span>
+            <span class="button-status" aria-hidden="true">계산</span>
+          </button>
+          <button id="batch-button" class="batch-button" type="button">
+            <span>기준점 지도</span><span aria-hidden="true">12점</span>
+          </button>
+        </div>
+      </form>
+    </aside>
+
+    <section class="results-panel" aria-live="polite">
+      <div id="loading-state" class="loading-state" hidden>
+        <div class="loading-line"></div>
+        <p>14버스트 RAID14 구간을 계산하고 있습니다.</p>
+      </div>
+
+      <div id="error-state" class="error-state" hidden>
+        <strong>계산을 완료하지 못했습니다.</strong>
+        <p id="error-message"></p>
+      </div>
+
+      <div id="results" hidden>
+        <div class="result-toolbar">
+          <div>
+            <p class="result-eyebrow">180초 · 14버스트 RAID14 이론 비교</p>
+            <h2 id="result-title">결과</h2>
+          </div>
+          <button id="download-button" class="secondary-button" type="button">JSON 저장</button>
+        </div>
+
+        <section class="rotation-overview">
+          <div class="report-section-heading">
+            <div><span>14버스트 총합</span><h3>네 운용 결과</h3></div>
+            <span>동일 편성 · 동일 시간축</span>
+          </div>
+          <div class="rotation-grid">
+            <div><span>크크메</span><strong id="crown-conventional-total"></strong><small id="crown-conventional-share"></small></div>
+            <div><span>진입 메크메</span><strong id="mast-conventional-total"></strong><small id="mast-conventional-share"></small></div>
+            <div><span>기본 몰아주기</span><strong id="crown-funnel-total"></strong><small id="crown-funnel-share"></small></div>
+            <div><span>진입 메스트 몰아주기</span><strong id="mast-funnel-total"></strong><small id="mast-funnel-share"></small></div>
+          </div>
+        </section>
+
+        <section class="strategy-comparison-section">
+          <div class="report-section-heading">
+            <div><span>동일 진입 조건</span><h3>몰아주기 손익</h3></div>
+          </div>
+          <div class="strategy-comparison-grid">
+            <article id="crown-comparison-card" class="strategy-comparison-card">
+              <div><span>첫 B2 Crown</span><strong id="crown-verdict"></strong></div>
+              <dl><div><dt>몰아주기 증감</dt><dd id="crown-funnel-change"></dd></div><div><dt>메인 비중</dt><dd id="crown-main-share"></dd></div><div><dt>손익분기</dt><dd id="crown-break-even"></dd></div></dl>
+            </article>
+            <article id="mast-comparison-card" class="strategy-comparison-card">
+              <div><span>첫 B2 Mast</span><strong id="mast-verdict"></strong></div>
+              <dl><div><dt>몰아주기 증감</dt><dd id="mast-funnel-change"></dd></div><div><dt>메인 비중</dt><dd id="mast-main-share"></dd></div><div><dt>손익분기</dt><dd id="mast-break-even"></dd></div></dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="entry-effect-section">
+          <div class="report-section-heading">
+            <div><span>14버스트 총합</span><h3>진입 메스트 효과</h3></div>
+            <span>Mast 진입 - Crown 진입</span>
+          </div>
+          <div class="entry-effect-grid">
+            <div><span>비몰아주기</span><strong id="conventional-entry-change"></strong><small id="conventional-entry-delta"></small></div>
+            <div><span>몰아주기</span><strong id="funnel-entry-change"></strong><small id="funnel-entry-delta"></small></div>
+          </div>
+        </section>
+
+        <section class="first-burst-section">
+          <div class="report-section-heading">
+            <div><span>보조 진단</span><h3>첫 B2 선택 총영향</h3></div>
+            <span id="first-burst-window"></span>
+          </div>
+          <div class="first-burst-metrics">
+            <div><span>Crown 선택 팀딜</span><strong id="first-crown-total"></strong></div>
+            <div><span>Mast 선택 팀딜</span><strong id="first-mast-total"></strong></div>
+            <div><span>Mast - Crown</span><strong id="first-entry-delta"></strong></div>
+            <div><span>Mast 진입 증감</span><strong id="first-entry-change"></strong></div>
+          </div>
+          <div class="table-wrap first-burst-table">
+            <table>
+              <thead><tr><th>캐릭터</th><th>Crown 선택</th><th>Mast 선택</th><th>차이</th><th>증감</th></tr></thead>
+              <tbody id="first-burst-character-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="four-character-section">
+          <div class="report-section-heading"><div><span>14버스트 총합</span><h3>캐릭터별 피해와 비중</h3></div></div>
+          <div class="table-wrap four-character-table">
+            <table>
+              <thead><tr><th>캐릭터</th><th>크크메</th><th>진입 메크메</th><th>기본 몰아주기</th><th>진입 메스트 몰아주기</th></tr></thead>
+              <tbody id="four-character-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="macro-comparison-section">
+          <div class="report-section-heading"><div><span>3버스트 × 4 + 종결 2버스트</span><h3>매크로 사이클별 손익</h3></div></div>
+          <div class="macro-comparison-grid">
+            <div class="table-wrap"><table><caption>첫 B2 Crown</caption><thead><tr><th>구간</th><th>크크메</th><th>몰아주기</th><th>증감</th></tr></thead><tbody id="crown-cycle-body"></tbody></table></div>
+            <div class="table-wrap"><table><caption>첫 B2 Mast</caption><thead><tr><th>구간</th><th>진입 메크메</th><th>진입 몰아주기</th><th>증감</th></tr></thead><tbody id="mast-cycle-body"></tbody></table></div>
+          </div>
+        </section>
+
+        <footer class="result-footer">
+          <span id="mechanics-revision"></span>
+          <span>S1~S4는 장비 슬롯, OL 수치는 T11 옵션 줄 수입니다.</span>
+        </footer>
+      </div>
+
+      <div id="batch-results" hidden>
+        <div class="result-toolbar">
+          <div>
+            <p class="result-eyebrow">B1 육성 3단계 × 딜러 기준점 4개</p>
+            <h2 id="batch-title">기준점 표본 지도</h2>
+          </div>
+          <div class="report-actions export-exclude">
+            <button id="batch-png-button" class="secondary-button" type="button">보고서 PNG 저장</button>
+            <button id="batch-download-button" class="secondary-button" type="button">배치 JSON 저장</button>
+          </div>
+        </div>
+
+        <section class="batch-summary-band">
+          <div><span>표본 수</span><strong id="batch-count">12</strong></div>
+          <div><span data-baseline-template="{baseline} 우세">크크메 우세</span><strong id="batch-c-count"></strong></div>
+          <div><span>몰아주기 우세</span><strong id="batch-f-count"></strong></div>
+          <div><span>동률권</span><strong id="batch-tie-count"></strong></div>
+        </section>
+
+        <section class="report-scope">
+          <div class="report-section-heading">
+            <div><span>연구 조건</span><h3>비교 범위와 고정값</h3></div>
+            <span id="batch-revision" class="revision-chip"></span>
+          </div>
+          <div class="scope-grid">
+            <div><span>편성</span><strong id="scope-roster"></strong></div>
+            <div><span>몰아주기 대상</span><strong id="scope-main"></strong></div>
+            <div><span>보스</span><strong id="scope-boss"></strong></div>
+            <div><span>전투 조건</span><strong id="scope-combat"></strong></div>
+          </div>
+          <div class="definition-grid">
+            <div><span>1버스트 육성 기준</span><ul id="b1-definitions"></ul></div>
+            <div><span>딜러 장비 격차 기준</span><ul id="dealer-definitions"></ul></div>
+            <div><span>공통 고정</span><p>Crown·Mast는 OL5 bare+SR15, Main·Secondary는 SR15를 사용한다. OL 옵션은 T11 줄 수이며 우코는 보스 속성 상성일 때만 적용된다.</p></div>
+          </div>
+        </section>
+
+        <section class="batch-conclusion">
+          <div class="conclusion-copy">
+            <span>12점 종합 판정</span>
+            <h3 id="batch-conclusion-title"></h3>
+            <p id="batch-conclusion-text"></p>
+          </div>
+          <div class="aggregate-grid">
+            <div><span>총딜 증감 범위</span><strong id="aggregate-change-range"></strong><small id="aggregate-change-average"></small></div>
+            <div><span>Main 비중 범위</span><strong id="aggregate-share-range"></strong><small id="aggregate-share-average"></small></div>
+            <div><span>손익분기 범위</span><strong id="aggregate-break-even-range"></strong><small id="aggregate-break-even-average"></small></div>
+            <div><span>분기까지 간극</span><strong id="aggregate-margin-range"></strong><small id="aggregate-margin-average"></small></div>
+          </div>
+        </section>
+
+        <section class="extreme-section">
+          <div class="report-section-heading"><div><span>핵심 사례</span><h3>극단값과 최근접점</h3></div></div>
+          <div id="extreme-cases" class="extreme-grid"></div>
+        </section>
+
+        <section class="scatter-section">
+          <div class="scatter-heading">
+            <div>
+              <strong>육성 기준점 분포</strong>
+              <span>점 선택 시 상세 보고서 표시</span>
+            </div>
+            <div class="sample-legend">
+              <span><i class="b1-low"></i>B1 Low</span>
+              <span><i class="b1-standard"></i>B1 Standard</span>
+              <span><i class="b1-high"></i>B1 High</span>
+            </div>
+          </div>
+          <div class="scatter-layout">
+            <div class="y-axis-title" data-baseline-template="몰아주기 - {baseline} 총딜 (%)">몰아주기 - 크크메 총딜 (%)</div>
+            <div id="scatter-plot" class="scatter-plot" role="img" aria-label="메인 딜 비중과 몰아주기 총딜 증감 산점도"></div>
+          </div>
+          <div class="x-axis-title" data-baseline-template="{baseline} 기준 Main B3 딜 비중 (%)">크크메 기준 Main B3 딜 비중 (%)</div>
+          <div class="shape-legend">
+            <span><i class="shape-equal"></i>동급 O5</span>
+            <span><i class="shape-gap"></i>O5 / O0</span>
+            <span><i class="shape-atk"></i>공3 / B5</span>
+            <span><i class="shape-ammo"></i>장2 / O5</span>
+          </div>
+        </section>
+
+        <section class="cross-section">
+          <div class="report-section-heading">
+            <div><span>조건 교차</span><h3>B1 육성 × 딜러 격차 총딜 증감</h3></div>
+            <span>양수는 몰아주기 우세</span>
+          </div>
+          <div class="table-wrap">
+            <table class="cross-table">
+              <thead id="cross-table-head"></thead>
+              <tbody id="cross-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="group-section">
+          <div class="report-section-heading"><div><span>조건별 영향</span><h3>육성 축별 집계</h3></div></div>
+          <div class="group-tables">
+            <div class="table-wrap">
+              <table>
+                <caption>1버스트 육성별</caption>
+                <thead><tr><th>조건</th><th>평균 증감</th><th>범위</th><th>평균 Main</th><th>기준/F/동률</th></tr></thead>
+                <tbody id="b1-group-body"></tbody>
+              </table>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption>딜러 장비 격차별</caption>
+                <thead><tr><th>조건</th><th>평균 증감</th><th>범위</th><th>평균 Main</th><th>기준/F/동률</th></tr></thead>
+                <tbody id="dealer-group-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="character-aggregate-section">
+          <div class="report-section-heading"><div><span>12점 캐릭터 집계</span><h3>운용별 평균 딜비중과 범위</h3></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>캐릭터</th><th data-baseline-template="{baseline} 평균">크크메 평균</th><th data-baseline-template="{baseline} 범위">크크메 범위</th><th>몰아주기 평균</th><th>몰아주기 범위</th></tr></thead>
+              <tbody id="character-aggregate-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sample-detail">
+          <div class="sample-detail-heading">
+            <div><span>선택 표본</span><h3 id="sample-detail-title"></h3></div>
+            <span id="sample-detail-outcome" class="outcome-chip"></span>
+          </div>
+          <div class="sample-metrics">
+            <div><span>Main 비중</span><strong id="sample-x"></strong></div>
+            <div><span>총딜 증감</span><strong id="sample-y"></strong></div>
+            <div><span>손익분기 비중</span><strong id="sample-break-even"></strong></div>
+            <div><span>분기까지 간극</span><strong id="sample-margin"></strong></div>
+          </div>
+          <div id="batch-detail-shares" class="detail-shares"></div>
+          <div class="diagnostic-grid">
+            <div><span data-baseline-template="{baseline} 총딜">크크메 총딜</span><strong id="sample-c-total"></strong></div>
+            <div><span>몰아주기 총딜</span><strong id="sample-f-total"></strong></div>
+            <div><span>메인 증가율 g</span><strong id="sample-g"></strong></div>
+            <div><span>나머지 손실률 l</span><strong id="sample-l"></strong></div>
+            <div><span>local slope</span><strong id="sample-slope"></strong></div>
+            <div><span>lambda*</span><strong id="sample-lambda"></strong></div>
+          </div>
+          <div class="table-wrap selected-character-table">
+            <table>
+              <thead><tr><th>캐릭터</th><th data-baseline-template="{baseline} 피해">크크메 피해</th><th>비중</th><th>몰아주기 피해</th><th>비중</th><th>증감</th></tr></thead>
+              <tbody id="selected-character-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="table-wrap batch-table-wrap">
+          <table>
+            <caption>전체 12점 원시 비교표</caption>
+            <thead><tr><th>B1 육성</th><th>딜러 기준점</th><th data-baseline-template="{baseline} 총딜">크크메 총딜</th><th>몰아주기 총딜</th><th>Main 비중</th><th>총딜 증감</th><th>손익분기</th><th>간극</th><th>판정</th></tr></thead>
+            <tbody id="batch-table-body"></tbody>
+          </table>
+        </div>
+
+        <section class="methodology-note">
+          <strong>해석 범위</strong>
+          <p>이 보고서는 동일한 180초·14버스트 RAID14 시간축에서 지정한 편성과 보스 조건을 비교한 이론값이다. 12점은 통계 표본이 아니라 사전에 정한 육성 기준점이며, 평균은 각 점에 같은 가중치를 둔 산술평균이다. 보스 패턴·조작·리트라이는 포함하지 않는다. 손익분기 비중과 lambda*는 현재 피해 사건을 고정한 국소 스케일링 진단값이므로 캐릭터 스펙을 그 배수로 바꾼 실제 재계산과 동일하지 않다.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/vendor/html2canvas.min.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

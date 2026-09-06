@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "level": 400,
+    "gear": "Base-5",
+    "core": 7,
+    "skill_levels": [10, 10, 10],
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:cinderella-crystal-wave validated override+datamine; MG-only research scope"
+  },
+  "characters": [
+    {
+      "slug": "cinderella-crystal-wave",
+      "name": "Cinderella: Crystal Wave",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Iron",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "MG",
+        "normal_attack_pct": 5.57,
+        "core_attack_pct": 200.0,
+        "ammo": 300,
+        "reload_frames": 171,
+        "charge_frames": 0,
+        "charge_multiplier_pct": 0.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 0.05,
+        "charge_release_recovery_frames": 0
+      },
+      "skills": {
+        "skill1": {
+          "beauty_full_attack_damage_pct": 24.0,
+          "interval_damage_pct": 900.0,
+          "interval_sec": 5.0,
+          "team_ammo_count": 200.0,
+          "team_burst_gauge_pct": 12.0
+        },
+        "skill2": {
+          "passive_atk_pct": 29.0,
+          "mg_core_damage_pct": 26.0,
+          "mg_full_burst_core_strike_pct": 833.79
+        },
+        "burst": {
+          "attack_damage_pct": 92.0,
+          "atk_pct": 65.0,
+          "duration_sec": 10.0,
+          "damage_pct": 6000.0
+        }
+      }
+    }
+  ]
+}

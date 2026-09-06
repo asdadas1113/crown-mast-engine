@@ -1,0 +1,41 @@
+name: RAID14 batch verification
+
+on:
+  pull_request:
+    branches:
+      - research/14-burst-baseline
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m compileall -q crown_mast_engine tests scripts
+      - name: Sample batch regression tests
+        run: python -m unittest discover -s tests -p 'test_samples.py' -v
+      - name: Checkpoint v2 structure tests
+        run: python -m unittest discover -s tests -p 'test_checkpoints_v2.py' -v
+      - name: Checkpoint v3 structure tests
+        run: python -m unittest discover -s tests -p 'test_checkpoints_v3.py' -v
+
+  benchmark:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: RAID14 12-point serial versus parallel benchmark
+        run: python scripts/benchmark_sample_batch.py
+      - name: RAID14 36-point serial versus parallel benchmark
+        run: python scripts/benchmark_checkpoint_v2.py
+      - name: RAID14 64-point serial versus parallel benchmark
+        run: python scripts/benchmark_checkpoint_v3.py

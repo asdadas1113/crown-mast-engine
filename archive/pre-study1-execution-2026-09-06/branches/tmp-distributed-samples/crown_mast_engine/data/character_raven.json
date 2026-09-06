@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "level": 400,
+    "gear": "Base-5",
+    "core": 7,
+    "skill_levels": [10, 10, 10],
+    "source_revision": "nikke-sim@43308bd02276a476660e44af730785c2ae91eea3:raven validated override+datamine; Prydwen cross-check@2026-09-02"
+  },
+  "characters": [
+    {
+      "slug": "raven",
+      "name": "Raven",
+      "unit_class": "Attacker",
+      "burst_stage": "III",
+      "burst_cooldown_sec": 40.0,
+      "element": "Iron",
+      "progression_atk": 109209.0,
+      "base_crit_rate_pct": 15.0,
+      "base_crit_damage_pct": 150.0,
+      "weapon": {
+        "weapon_type": "RL",
+        "normal_attack_pct": 61.3,
+        "core_attack_pct": 200.0,
+        "ammo": 6,
+        "reload_frames": 141,
+        "charge_frames": 60,
+        "charge_multiplier_pct": 250.0,
+        "hits_per_shot": 1,
+        "burst_gauge_per_shot": 1.4,
+        "charge_release_recovery_frames": 22
+      },
+      "skills": {
+        "skill1": {
+          "sustained_damage_pct": 68.46,
+          "sustained_interval_sec": 1.0,
+          "sustained_duration_sec": 5.0,
+          "sustained_max_stacks": 10.0,
+          "full_burst_caster_atk_pct": 47.52,
+          "full_burst_duration_sec": 10.0
+        },
+        "skill2": {
+          "parts_damage_pct": 21.12,
+          "parts_damage_duration_sec": 5.0,
+          "single_point_sustained_damage_pct": 47.32,
+          "single_point_duration_sec": 15.0
+        },
+        "burst": {
+          "damage_pct": 492.3,
+          "sustained_damage_pct": 89.44,
+          "duration_sec": 10.0
+        }
+      }
+    }
+  ]
+}
