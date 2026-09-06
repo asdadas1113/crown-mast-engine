@@ -4,41 +4,54 @@
 
 1연구는 Crown/Mast 운용의 보편적 최종 규칙을 확정하는 연구가 아니라, **대표적인 통제 조건에서 광범위한 조합을 탐색하여 우세 경향과 예외를 동시에 찾고 후속 연구 대상을 선별하는 연구**다.
 
-## 현재 canonical 설계
+## canonical 설계
 
 ```text
 human/03_1연구_실행_설계_확정본.md
 ```
 
-현재 후보군은 B1 5명 / Main B3 6명 / Secondary B3 3명이며, 라피 B1/Main 중복을 제외해 87 roster를 사용한다.
-
-성장축은 `g1-base5-none`을 제외하고 다음 세 단계만 사용한다.
+study ID:
 
 ```text
-g2-ol0-sr5
-g3-ol0-sr15-e3-a3
-g4-ol5-sr15-e4-a4-ammo3
+crown-mast-study-01-exploratory-v1
 ```
 
-B1/Main/Secondary를 3 × 3 × 3 완전교차하여 27 growth points를 구성한다. 환경축 12개와 결합하면 roster당 324 scenarios, 전체 28,188 scenarios다.
+현재 표본:
 
-애장품 캐릭터는 SR15 canonical floor를 유지한다.
+- B1 5명 / Main B3 6명 / Secondary B3 3명
+- Rapi B1/Main 중복 제외 후 **87 valid rosters**
+- 성장 `g2/g3/g4`를 B1/Main/Secondary에 완전교차: **27 growth points**
+- 환경축: DEF 3 × core 2 × Main advantage 2 = **12 environments**
+- roster당 **324 scenarios**
+- 총 **28,188 scenarios**
+- 애장품 캐릭터 SR15 canonical floor
+
+## 현재 상태
+
+```text
+execution model gates = 0
+execution_ready = true
+status = design-frozen-execution-unapproved
+```
+
+최종 preflight `34002759044`에서 focused 68/68, full regression 322/322, case-generation 28,188/28,188이 통과했다. 이 과정에서 공식 전투 시뮬레이션은 실행하지 않았다.
 
 ## 디렉터리
 
 ```text
 01_exploratory/
-├─ human/       사람이 읽는 연구 문서
-├─ machine/     승인 후 생성될 실행·원시·집계 데이터
-└─ validation/  이 연구에 귀속되는 검증 자료
+├─ human/
+│  ├─ 02_연구_실행_재현성_및_기록_규격.md
+│  ├─ 03_1연구_실행_설계_확정본.md
+│  └─ reports/<run_id>/       실행 후 한글 보고서
+├─ machine/
+│  ├─ manifest/               실행 전 템플릿
+│  └─ runs/<run_id>/          실행별 기계 데이터
+└─ validation/
+   ├─ 실행 전 검증 기록
+   └─ runs/<run_id>/          실행 후 검증
 ```
 
-## 현재 상태
+공식 run에서는 scenario/raw 데이터를 수만 개의 작은 Git 파일로 쪼개지 않고 **shard 단위 JSONL/CSV 또는 압축 파일**로 저장한다. aggregate와 보고서는 별도 파일로 유지한다.
 
-- 후보군·성장설계 재동결
-- 실행 미승인
-- 공식/대규모 batch 미실행
-- Moran/SBS/Liberalio 실행 전 model gate 재검증 필요
-- 실제 run ID 및 결과 파일 없음
-
-사용자의 별도 명시 승인 전에는 28,188 scenario batch를 실행하지 않는다.
+사용자의 별도 명시 승인 전에는 28,188 scenario 공식 전투 batch를 실행하지 않는다.
