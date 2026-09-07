@@ -34,7 +34,7 @@ execution_ready = true
 status = design-frozen-execution-unapproved
 ```
 
-최종 preflight `34002759044`에서 focused 68/68, full regression 322/322, case-generation 28,188/28,188이 통과했다. 이 과정에서 공식 전투 시뮬레이션은 실행하지 않았다.
+검증된 engine commit `801cab5fa3b0d64150ea0ebd9558acce6bce47ba`에서 focused 19/19, full regression 327/327, case-generation 28,188/28,188이 통과했다. 이 과정에서 공식 전투 시뮬레이션은 실행하지 않았다. 이전 GitHub Actions `34002759044`는 2026-09-06 검증 시점 기록이다.
 
 ## 디렉터리
 
@@ -53,5 +53,7 @@ status = design-frozen-execution-unapproved
 ```
 
 공식 run에서는 scenario/raw 데이터를 수만 개의 작은 Git 파일로 쪼개지 않고 **shard 단위 JSONL/CSV 또는 압축 파일**로 저장한다. aggregate와 보고서는 별도 파일로 유지한다.
+
+1차 연구 이후 코드 변경은 기존 run을 덮어쓰지 않는다. 새 가설을 문서화한 뒤 별도 브랜치와 새 `run_id`에서 진행하고, 설계가 달라지면 새 study ID와 별도 연구 디렉터리를 사용한다.
 
 사용자의 별도 명시 승인 전에는 28,188 scenario 공식 전투 batch를 실행하지 않는다.

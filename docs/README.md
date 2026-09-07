@@ -6,13 +6,17 @@
 
 ```text
 CURRENT_RESEARCH_HANDOFF.md
+CURRENT_RESEARCH_HANDOFF_2026-09-07.md
 CURRENT_RESEARCH_HANDOFF_2026-09-06.md
+AI_HANDOFF_PROTOCOL.md
 SOURCE_VALIDATION_POLICY.md
 PROVENANCE.md
 ```
 
 - `CURRENT_RESEARCH_HANDOFF.md`: 항상 최신 인계문서를 가리키는 포인터
-- `CURRENT_RESEARCH_HANDOFF_2026-09-06.md`: 현재 실행 직전 상태의 canonical 인계문서
+- `CURRENT_RESEARCH_HANDOFF_2026-09-07.md`: 현재 실행 직전 상태의 canonical 인계문서
+- `CURRENT_RESEARCH_HANDOFF_2026-09-06.md`: 이전 인계 시점 기록
+- `AI_HANDOFF_PROTOCOL.md`: 맥락 없는 새 AI의 읽기 순서·권한 경계·실행 불변성·후속 변경 규칙
 - `SOURCE_VALIDATION_POLICY.md`: 외부 근거 검증 정책
 - `PROVENANCE.md`: 코드·데이터 provenance 원칙
 

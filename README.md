@@ -2,7 +2,19 @@
 
 NIKKE의 Crown + Mast: Romantic Maid 운용을 통제 조건에서 비교하기 위한 개인 연구용 엔진이다.
 
-## 현재 상태 — 2026-09-06
+## AI 인계 시작점
+
+사전 대화가 없는 AI는 코드 수정이나 연구 실행 전에 다음을 순서대로 읽는다.
+
+```text
+AGENTS.md
+docs/CURRENT_RESEARCH_HANDOFF.md
+docs/AI_HANDOFF_PROTOCOL.md
+```
+
+현재 상태를 추정하거나 `archive/`에서 실행 절차를 가져오지 않는다.
+
+## 현재 상태 — 2026-09-07
 
 기존 29,952 scenario 연구와 이전 설계는 폐기/superseded 상태이며 `archive/pre-revalidation-2026-09-05/`에 보존한다. 현재 1연구는 새 설계로 다시 동결됐다.
 
@@ -17,15 +29,17 @@ execution_ready = true
 status = design-frozen-execution-unapproved
 ```
 
-최종 실행 전 검증:
+최신 로컬 검증 기준:
 
 ```text
-GitHub Actions run 34002759044
-focused 68/68
-full regression 322/322
+verified engine commit 801cab5fa3b0d64150ea0ebd9558acce6bce47ba
+focused current Study 1/writer 19/19
+full regression 327/327
 case-generation preflight 28,188/28,188
 simulation executed: no
 ```
+
+GitHub Actions `34002759044`의 focused 68/68·full 322/322는 2026-09-06 이전 검증 시점 기록이다.
 
 즉 모델·회귀·case generator의 기술적 gate는 닫혔지만 공식 28,188 scenario 전투 batch는 아직 실행하지 않았다.
 
@@ -50,13 +64,12 @@ simulation executed: no
 
 ```text
 docs/CURRENT_RESEARCH_HANDOFF.md
-docs/CURRENT_RESEARCH_HANDOFF_2026-09-06.md
+docs/CURRENT_RESEARCH_HANDOFF_2026-09-07.md
+docs/AI_HANDOFF_PROTOCOL.md
 docs/SOURCE_VALIDATION_POLICY.md
 research_results/README.md
-research_results/RESEARCH_STATUS_2026-09-06.md
 research_results/studies/01_exploratory/human/02_연구_실행_재현성_및_기록_규격.md
 research_results/studies/01_exploratory/human/03_1연구_실행_설계_확정본.md
-research_results/studies/01_exploratory/validation/05_최종_실행전_검증_2026-09-06.md
 ```
 
 공식 실행 직전 정리에서 active 영역에서 제거한 역사 문서와 옛 실험 브랜치 snapshot은 다음에 보존한다.
