@@ -1,9 +1,11 @@
 import unittest
 
-from crown_mast_engine.checkpoints_v3 import CHECKPOINT_V3_POINT_COUNT
 from crown_mast_engine.official_study import (
     OFFICIAL_B1_CANDIDATES,
     OFFICIAL_CORE_HIT_RATE_PCT,
+    OFFICIAL_DEFENSE_ANCHORS,
+    OFFICIAL_ENVIRONMENT_COUNT,
+    OFFICIAL_GROWTH_POINT_COUNT,
     OFFICIAL_INVALID_DUPLICATE_ROSTER_COUNT,
     OFFICIAL_MAIN_B3_CANDIDATES,
     OFFICIAL_RAW_ROSTER_COUNT,
@@ -40,8 +42,6 @@ class OfficialStudyTests(unittest.TestCase):
                 "cinderella-crystal-wave",
                 "liberalio",
                 "neon-vision-eye",
-                "phantom",
-                "raven",
             ),
         )
         self.assertEqual(
@@ -82,7 +82,7 @@ class OfficialStudyTests(unittest.TestCase):
 
         rosters = tuple(iter_official_rosters())
         self.assertEqual(len(rosters), OFFICIAL_VALID_ROSTER_COUNT)
-        self.assertEqual(len({official_roster_id(roster) for roster in rosters}), 117)
+        self.assertEqual(len({official_roster_id(roster) for roster in rosters}), 87)
         self.assertTrue(
             all(len(set(roster.members)) == len(roster.members) for roster in rosters)
         )
@@ -95,14 +95,15 @@ class OfficialStudyTests(unittest.TestCase):
         )
 
     def test_official_scenario_arithmetic(self) -> None:
-        self.assertEqual(CHECKPOINT_V3_POINT_COUNT, 64)
-        self.assertEqual(OFFICIAL_RAW_ROSTER_COUNT, 120)
-        self.assertEqual(OFFICIAL_VALID_ROSTER_COUNT, 117)
-        self.assertEqual(OFFICIAL_SCENARIOS_PER_ROSTER, 64 * 2 * 2)
-        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 117 * 64 * 2 * 2)
-        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 29_952)
+        self.assertEqual(OFFICIAL_GROWTH_POINT_COUNT, 27)
+        self.assertEqual(OFFICIAL_ENVIRONMENT_COUNT, 12)
+        self.assertEqual(OFFICIAL_RAW_ROSTER_COUNT, 90)
+        self.assertEqual(OFFICIAL_VALID_ROSTER_COUNT, 87)
+        self.assertEqual(OFFICIAL_SCENARIOS_PER_ROSTER, 27 * 3 * 2 * 2)
+        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 87 * 27 * 3 * 2 * 2)
+        self.assertEqual(OFFICIAL_SCENARIO_COUNT, 28_188)
 
-    def test_one_roster_shard_contains_256_unique_scenarios(self) -> None:
+    def test_one_roster_shard_contains_324_unique_scenarios(self) -> None:
         roster = TeamRoster(
             b1="liter",
             main_b3="cinderella",
@@ -111,32 +112,33 @@ class OfficialStudyTests(unittest.TestCase):
         cases = build_official_roster_cases(roster)
 
         self.assertEqual(len(cases), OFFICIAL_SCENARIOS_PER_ROSTER)
-        self.assertEqual(len({case.case_id for case in cases}), 256)
+        self.assertEqual(len({case.case_id for case in cases}), 324)
         environment_counts = {}
         for case in cases:
             key = (
+                case.labels["def_condition"],
                 case.labels["core_condition"],
                 case.labels["main_advantage"],
             )
             environment_counts[key] = environment_counts.get(key, 0) + 1
-            self.assertEqual(case.labels["study_id"], "crown-mast-secondary-opportunity-v1")
+            self.assertEqual(case.labels["study_id"], "crown-mast-study-01-exploratory-v1")
             self.assertEqual(case.labels["secondary_anchor"], "helm")
             self.assertEqual(case.labels["main_b3_candidate"], "cinderella")
-        self.assertEqual(
-            environment_counts,
-            {
-                ("off", "off"): 64,
-                ("off", "on"): 64,
-                ("on", "off"): 64,
-                ("on", "on"): 64,
-            },
-        )
+        self.assertEqual(len(environment_counts), 12)
+        self.assertTrue(all(count == 27 for count in environment_counts.values()))
 
         core_rates = {
             case.labels["core_condition"]: case.scenario.combat_settings.core_hit_rate_pct
             for case in cases
         }
         self.assertEqual(core_rates, OFFICIAL_CORE_HIT_RATE_PCT)
+        self.assertEqual(
+            {
+                case.labels["def_condition"]: case.scenario.combat_settings.boss_def
+                for case in cases
+            },
+            OFFICIAL_DEFENSE_ANCHORS,
+        )
 
     def test_out_of_sample_roster_is_rejected_before_case_generation(self) -> None:
         with self.assertRaises(ValueError):
@@ -158,9 +160,11 @@ class OfficialStudyTests(unittest.TestCase):
 
     def test_definition_matches_frozen_design(self) -> None:
         definition = official_study_definition()
-        self.assertEqual(definition["valid_roster_count"], 117)
-        self.assertEqual(definition["scenarios_per_roster"], 256)
-        self.assertEqual(definition["scenario_count"], 29_952)
+        self.assertEqual(definition["study_id"], "crown-mast-study-01-exploratory-v1")
+        self.assertEqual(definition["valid_roster_count"], 87)
+        self.assertEqual(definition["scenarios_per_roster"], 324)
+        self.assertEqual(definition["scenario_count"], 28_188)
+        self.assertEqual(definition["timeline"], "RAID14")
         self.assertEqual(definition["environment_axes"]["core"], {"off": 0.0, "on": 100.0})
 
 

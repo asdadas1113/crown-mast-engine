@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
+from string import hexdigits
 from typing import Any, Iterable, Literal, Mapping
 
 from .character_mechanics import STANDARD_SKILL_HOOKS
 from .characters import STANDARD_CHARACTER_CATALOG
-from .checkpoints_v3 import CHECKPOINT_V3_ID, REALISTIC_GROWTH_PROFILES
+from .checkpoints_v3 import CHECKPOINT_V3_ID
 from .mechanics import ENGINE_RULE_REVISION
 from .official_study import (
     OFFICIAL_SCENARIOS_PER_ROSTER,
@@ -16,8 +18,12 @@ from .official_study import (
     official_roster_id,
     official_study_definition,
 )
+from .research import (
+    COMPARISON_REPORT_SCHEMA_VERSION,
+    RESEARCH_SCENARIO_SCHEMA_VERSION,
+)
 from .rotations import OPENING_MAST_CROWN_MAST
-from .samples import SampleBatchResult, SampleResult
+from .samples import SampleBatchResult, SampleCase, SampleResult
 from .timeline import (
     RAID14_CYCLE_COUNT,
     RAID14_FIRST_B1_TIME,
@@ -26,11 +32,18 @@ from .timeline import (
     RAID14_STAGE_INPUT_GAP_SEC,
     RAID14_TIMELINE,
 )
+from .wave_a_study import (
+    WAVE_A_CORE_HIT_RATE_PCT,
+    WAVE_A_DEFENSE_ANCHORS,
+    WAVE_A_GROWTH_PROFILES,
+    WAVE_A_MAIN_ADVANTAGE_LEVELS,
+)
 
 
 OFFICIAL_RAW_ROW_SCHEMA_VERSION = 1
+OFFICIAL_SCENARIO_ROW_SCHEMA_VERSION = 1
 OFFICIAL_MANIFEST_SCHEMA_VERSION = 1
-RunKind = Literal["smoke", "official"]
+RunKind = Literal["preflight", "official"]
 
 
 def _required_label(result: SampleResult, key: str) -> str:
@@ -115,10 +128,13 @@ def compact_official_row(
             "secondary_b3": _required_label(result, "secondary_profile"),
         },
         "environment": {
+            "defense_condition": _required_label(result, "def_condition"),
+            "boss_def": scenario.combat_settings.boss_def,
             "core_condition": _required_label(result, "core_condition"),
             "core_hit_rate_pct": scenario.combat_settings.core_hit_rate_pct,
             "main_advantage": _required_label(result, "main_advantage"),
             "boss_element": scenario.combat_settings.boss_element or "neutral",
+            "hit_model": _required_label(result, "hit_model"),
         },
         "revisions": {
             "engine_rule": result.report.mechanics_signature.engine_rule_revision,
@@ -183,11 +199,14 @@ def _validate_official_batch(batch: SampleBatchResult) -> str:
 
     case_ids = tuple(result.case_id for result in batch.results)
     if len(set(case_ids)) != OFFICIAL_SCENARIOS_PER_ROSTER:
-        raise ValueError("official roster raw writer requires 256 unique case ids")
+        raise ValueError(
+            "official roster raw writer requires "
+            f"{OFFICIAL_SCENARIOS_PER_ROSTER} unique case ids"
+        )
 
-    profile_ids = {profile.profile_id for profile in REALISTIC_GROWTH_PROFILES}
+    profile_ids = {profile.profile_id for profile in WAVE_A_GROWTH_PROFILES}
     coverage_keys = set()
-    environment_counts: Counter[tuple[str, str]] = Counter()
+    environment_counts: Counter[tuple[str, str, str]] = Counter()
     for result in batch.results:
         growth = (
             _required_label(result, "b1_profile"),
@@ -197,22 +216,25 @@ def _validate_official_batch(batch: SampleBatchResult) -> str:
         if any(profile not in profile_ids for profile in growth):
             raise ValueError("official roster raw writer received an unknown growth profile")
         environment = (
+            _required_label(result, "def_condition"),
             _required_label(result, "core_condition"),
             _required_label(result, "main_advantage"),
         )
+        if _required_label(result, "hit_model") != "ideal-hit":
+            raise ValueError("official roster raw writer requires the ideal-hit model")
         environment_counts[environment] += 1
         coverage_keys.add((*growth, *environment))
 
     expected_environment_counts = Counter(
         {
-            ("off", "off"): 64,
-            ("off", "on"): 64,
-            ("on", "off"): 64,
-            ("on", "on"): 64,
+            (defense, core, advantage): len(WAVE_A_GROWTH_PROFILES) ** 3
+            for defense in WAVE_A_DEFENSE_ANCHORS
+            for core in WAVE_A_CORE_HIT_RATE_PCT
+            for advantage in WAVE_A_MAIN_ADVANTAGE_LEVELS
         }
     )
     if environment_counts != expected_environment_counts:
-        raise ValueError("official roster raw writer requires the full 4-environment grid")
+        raise ValueError("official roster raw writer requires the full 12-environment grid")
     if len(coverage_keys) != OFFICIAL_SCENARIOS_PER_ROSTER:
         raise ValueError("official roster raw writer requires the full growth/environment grid")
     return roster_id
@@ -224,11 +246,11 @@ def write_official_roster_jsonl(
     *,
     run_id: str,
 ) -> Path:
-    """Write exactly one 256-scenario roster shard to machine/raw."""
+    """Write exactly one 324-scenario result shard to ``run_dir/raw``."""
     roster_id = _validate_official_batch(batch)
     rows = tuple(compact_official_row(result, run_id=run_id) for result in batch.results)
 
-    raw_dir = Path(run_dir) / "machine" / "raw"
+    raw_dir = Path(run_dir) / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
     path = raw_dir / f"{roster_id}.jsonl"
     payload = "".join(
@@ -241,8 +263,9 @@ def write_official_roster_jsonl(
 
 def _growth_grid_manifest() -> dict[str, Any]:
     return {
-        "checkpoint_id": CHECKPOINT_V3_ID,
-        "axes": {"b1": 4, "main_b3": 4, "secondary_b3": 4},
+        "design": "full27-three-level",
+        "source_profile_set": CHECKPOINT_V3_ID,
+        "axes": {"b1": 3, "main_b3": 3, "secondary_b3": 3},
         "profiles": [
             {
                 "id": profile.profile_id,
@@ -255,7 +278,7 @@ def _growth_grid_manifest() -> dict[str, Any]:
                     "ammo_lines": profile.overload.ammo_lines,
                 },
             }
-            for profile in REALISTIC_GROWTH_PROFILES
+            for profile in WAVE_A_GROWTH_PROFILES
         ],
         "favorite_item_policy": (
             "favorite-item actors force SR15 collection while preserving "
@@ -294,7 +317,9 @@ def build_official_manifest(
     branch: str,
     commit_sha: str,
     completed_shard_ids: Iterable[str] = (),
-    run_kind: RunKind = "official",
+    run_kind: RunKind = "preflight",
+    execution_approved: bool = False,
+    generated_at: str | None = None,
 ) -> dict[str, Any]:
     if not isinstance(run_id, str) or not run_id:
         raise ValueError("run_id must be a non-empty string")
@@ -302,8 +327,22 @@ def build_official_manifest(
         raise ValueError("branch must be a non-empty string")
     if not isinstance(commit_sha, str) or not commit_sha:
         raise ValueError("commit_sha must be a non-empty string")
-    if run_kind not in ("smoke", "official"):
+    if len(commit_sha) != 40 or any(
+        character not in hexdigits for character in commit_sha
+    ):
+        raise ValueError("commit_sha must be a 40-character hexadecimal Git SHA")
+    if run_kind not in ("preflight", "official"):
         raise ValueError(f"unsupported run kind: {run_kind}")
+    if not isinstance(execution_approved, bool):
+        raise TypeError("execution_approved must be a bool")
+    if run_kind == "official" and not execution_approved:
+        raise ValueError("official run preparation requires explicit execution approval")
+    if branch != "research/14-burst-baseline":
+        raise ValueError("official Study 1 must be prepared from research/14-burst-baseline")
+    if generated_at is None:
+        generated_at = datetime.now(timezone.utc).isoformat()
+    if not isinstance(generated_at, str) or not generated_at:
+        raise ValueError("generated_at must be a non-empty ISO-8601 string")
 
     definition = official_study_definition()
     valid_shards = {
@@ -326,9 +365,17 @@ def build_official_manifest(
         "study_id": OFFICIAL_STUDY_ID,
         "run_id": run_id,
         "run_kind": run_kind,
-        "official_result": run_kind == "official",
+        "generated_at": generated_at,
+        "status": (
+            "prepared-execution-approved"
+            if run_kind == "official"
+            else "design-frozen-execution-unapproved"
+        ),
+        # A pre-run manifest is provenance, not a completed official result.
+        "official_result": False,
         "branch": branch,
         "commit_sha": commit_sha,
+        "git": {"branch": branch, "commit": commit_sha},
         "revisions": {
             "engine_rule": ENGINE_RULE_REVISION,
             "skill_hooks": signature.skill_hook_revision,
@@ -338,6 +385,20 @@ def build_official_manifest(
             ],
             "catalog_source": STANDARD_CHARACTER_CATALOG.scope.source_revision,
         },
+        "mechanics": {
+            "engine_rule_revision": ENGINE_RULE_REVISION,
+            "skill_hook_revision": signature.skill_hook_revision,
+            "skill_hook_factories": [
+                {"actor": actor, "factory": factory}
+                for actor, factory in signature.skill_hook_factories
+            ],
+        },
+        "catalog": {
+            "catalog_source_revision": STANDARD_CHARACTER_CATALOG.scope.source_revision,
+            "catalog_sha256": _catalog_sha256(),
+            "skill_overrides": [],
+        },
+        "study_definition": definition,
         "timeline": _timeline_manifest(),
         "baseline_rotation": OPENING_MAST_CROWN_MAST.name,
         "candidates": {
@@ -357,16 +418,110 @@ def build_official_manifest(
             "completed_scenarios": len(completed) * definition["scenarios_per_roster"],
         },
         "sharding": {
-            "policy": definition["sharding"],
+            "policy": "one valid roster per shard, 324 scenarios per shard",
             "completed_shard_ids": list(completed),
         },
         "output_layout": {
-            "raw": "machine/raw/<roster_id>.jsonl",
-            "scenario_table": "machine/tables/scenarios.csv",
-            "roster_table": "machine/tables/rosters.csv",
-            "human": "human/",
+            "scenarios": "scenarios/<roster_id>.jsonl",
+            "raw": "raw/<roster_id>.jsonl",
+            "aggregate": "aggregate/",
+            "provenance": "provenance/",
         },
+        "schemas": {
+            "scenario": RESEARCH_SCENARIO_SCHEMA_VERSION,
+            "raw_result": OFFICIAL_RAW_ROW_SCHEMA_VERSION,
+            "comparison_report": COMPARISON_REPORT_SCHEMA_VERSION,
+        },
+        "output_shards": [],
     }
+
+
+def _catalog_sha256() -> str:
+    marker = "catalog-sha256:"
+    source_revision = STANDARD_CHARACTER_CATALOG.scope.source_revision
+    if marker not in source_revision:
+        raise AssertionError("standard catalog revision is missing its SHA-256 digest")
+    digest = source_revision.rsplit(marker, 1)[1]
+    if len(digest) != 64 or any(character not in hexdigits for character in digest):
+        raise AssertionError("standard catalog revision has an invalid SHA-256 digest")
+    return digest.lower()
+
+
+def compact_official_scenario_row(case: SampleCase) -> dict[str, Any]:
+    """Return a self-contained, replayable Study 1 scenario input row."""
+    study_id = case.labels.get("study_id")
+    if study_id != OFFICIAL_STUDY_ID:
+        raise ValueError(f"scenario is outside the official study: {study_id}")
+    expected_roster_id = official_roster_id(case.scenario.roster)
+    if case.labels.get("roster_id") != expected_roster_id:
+        raise ValueError("scenario roster_id does not match the scenario roster")
+    if case.scenario.timeline != RAID14_TIMELINE:
+        raise ValueError("official Study 1 scenarios must use RAID14_TIMELINE")
+    return {
+        "schema_version": OFFICIAL_SCENARIO_ROW_SCHEMA_VERSION,
+        "case_id": case.case_id,
+        "study_id": OFFICIAL_STUDY_ID,
+        "roster_id": expected_roster_id,
+        "labels": dict(case.labels),
+        "scenario": case.scenario.to_dict(),
+    }
+
+
+def write_official_scenario_jsonl(
+    run_dir: str | Path,
+    cases: Iterable[SampleCase],
+) -> Path:
+    """Write one complete 324-case input shard without running simulations."""
+    prepared = tuple(cases)
+    if len(prepared) != OFFICIAL_SCENARIOS_PER_ROSTER:
+        raise ValueError(
+            "official scenario writer requires exactly "
+            f"{OFFICIAL_SCENARIOS_PER_ROSTER} cases"
+        )
+    rows = tuple(compact_official_scenario_row(case) for case in prepared)
+    roster_ids = {row["roster_id"] for row in rows}
+    if len(roster_ids) != 1:
+        raise ValueError("official scenario writer requires exactly one roster")
+    if len({row["case_id"] for row in rows}) != OFFICIAL_SCENARIOS_PER_ROSTER:
+        raise ValueError("official scenario writer requires unique case ids")
+
+    profile_ids = {profile.profile_id for profile in WAVE_A_GROWTH_PROFILES}
+    coverage = set()
+    for case in prepared:
+        growth = (
+            case.labels.get("b1_profile"),
+            case.labels.get("main_profile"),
+            case.labels.get("secondary_profile"),
+        )
+        if any(profile not in profile_ids for profile in growth):
+            raise ValueError("official scenario writer received an unknown growth profile")
+        environment = (
+            case.labels.get("def_condition"),
+            case.labels.get("core_condition"),
+            case.labels.get("main_advantage"),
+        )
+        if environment[0] not in WAVE_A_DEFENSE_ANCHORS:
+            raise ValueError("official scenario writer received an unknown defense anchor")
+        if environment[1] not in WAVE_A_CORE_HIT_RATE_PCT:
+            raise ValueError("official scenario writer received an unknown core condition")
+        if environment[2] not in WAVE_A_MAIN_ADVANTAGE_LEVELS:
+            raise ValueError("official scenario writer received an unknown advantage condition")
+        if case.labels.get("hit_model") != "ideal-hit":
+            raise ValueError("official scenario writer requires the ideal-hit model")
+        coverage.add((*growth, *environment))
+    if len(coverage) != OFFICIAL_SCENARIOS_PER_ROSTER:
+        raise ValueError("official scenario writer requires the full Study 1 grid")
+
+    roster_id = next(iter(roster_ids))
+    scenarios_dir = Path(run_dir) / "scenarios"
+    scenarios_dir.mkdir(parents=True, exist_ok=True)
+    path = scenarios_dir / f"{roster_id}.jsonl"
+    payload = "".join(
+        json.dumps(row, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n"
+        for row in rows
+    )
+    _write_text_atomic(path, payload)
+    return path
 
 
 def write_official_manifest(
